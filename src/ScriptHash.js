@@ -4,9 +4,9 @@
  * @typedef {import("./Hash.js").Hash} Hash
  */
 
-import { encodeBytes } from "@helios-lang/cbor";
-import { bytesToHex, toBytes } from "@helios-lang/codec-utils";
-import { ByteArrayData } from "@helios-lang/uplc";
+import { encodeBytes } from "@helios-lang/cbor"
+import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
+import { ByteArrayData } from "@helios-lang/uplc"
 
 /**
  * @implements {Hash}
@@ -19,38 +19,38 @@ export class ScriptHash {
     bytes
 
     /**
-     * 
-     * @param {ByteArrayLike} bytes 
+     *
+     * @param {ByteArrayLike} bytes
      */
     constructor(bytes) {
         this.bytes = toBytes(bytes)
     }
 
     /**
-	 * @returns {number[]}
-	 */
-	toCbor() {
-		return encodeBytes(this.bytes)
-	}
+     * @returns {number[]}
+     */
+    toCbor() {
+        return encodeBytes(this.bytes)
+    }
 
-	/**
-	 * @returns {string}
-	 */
-	toHex() {
-		return bytesToHex(this.bytes)
-	}
+    /**
+     * @returns {string}
+     */
+    toHex() {
+        return bytesToHex(this.bytes)
+    }
 
-	/**
-	 * @returns {string}
-	 */
-	toString() {
-		return this.toHex()
-	}
+    /**
+     * @returns {string}
+     */
+    toString() {
+        return this.toHex()
+    }
 
     /**
      * @returns {UplcData}
      */
     toUplcData() {
-        return new ByteArrayData(this.bytes);
+        return new ByteArrayData(this.bytes)
     }
 }
