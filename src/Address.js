@@ -32,17 +32,17 @@ export class Address {
      */
     bytes
 
-	/**
-	 * @readonly
-	 * @type {Credential}
-	 */
-	credential
+    /**
+     * @readonly
+     * @type {Credential}
+     */
+    credential
 
-	/**
-	 * @readonly
-	 * @type {Option<StakingCredential>}
-	 */
-	stakingCredential
+    /**
+     * @readonly
+     * @type {Option<StakingCredential>}
+     */
+    stakingCredential
 
     /**
      * @private
@@ -79,8 +79,8 @@ export class Address {
             )
         }
 
-		this.credential = Credential.fromAddressBytes(this.bytes)
-		this.stakingCredential = StakingCredential.fromAddressBytes(this.bytes)
+        this.credential = Credential.fromAddressBytes(this.bytes)
+        this.stakingCredential = StakingCredential.fromAddressBytes(this.bytes)
     }
 
     /**
@@ -127,15 +127,23 @@ export class Address {
         return new Address(decodeBytes(bytes))
     }
 
-	/**
-	 * @param {Credential} credential 
-	 * @param {Option<StakingCredential>} stakingCredential 
-	 * @param {boolean} isTestnet 
-	 * @return {Address}
-	 */
-	static fromCredentials(credential, stakingCredential, isTestnet = config.isTestnet) {
-		return this.fromHashes(credential.hash, stakingCredential?.hash?.hash ?? None, isTestnet)
-	}
+    /**
+     * @param {Credential} credential
+     * @param {Option<StakingCredential>} stakingCredential
+     * @param {boolean} isTestnet
+     * @return {Address}
+     */
+    static fromCredentials(
+        credential,
+        stakingCredential,
+        isTestnet = config.isTestnet
+    ) {
+        return this.fromHashes(
+            credential.hash,
+            stakingCredential?.hash?.hash ?? None,
+            isTestnet
+        )
+    }
 
     /**
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
@@ -223,7 +231,7 @@ export class Address {
     static fromUplcData(data, isTestnet = config.isTestnet) {
         ConstrData.assert(data, 0, 2)
 
-		const credential = Credential.fromUplcData(data.fields[0])
+        const credential = Credential.fromUplcData(data.fields[0])
         const stakingCredentialData = ConstrData.expect(
             data.fields[1],
             "invalid StakingCredential option within Address"
@@ -243,12 +251,14 @@ export class Address {
                 "invalid StakingCredential option content within Address"
             )
 
-			stakingCredential = StakingCredential.fromUplcData(stakingCredentialData.fields[0])
+            stakingCredential = StakingCredential.fromUplcData(
+                stakingCredentialData.fields[0]
+            )
         } else {
             throw new Error("unexpected")
         }
 
-		return Address.fromCredentials(credential, stakingCredential, isTestnet)
+        return Address.fromCredentials(credential, stakingCredential, isTestnet)
     }
 
     /**
@@ -284,22 +294,22 @@ export class Address {
      * @type {Option<PubKeyHash>}
      */
     get pubKeyHash() {
-		return this.credential.pubKeyHash
+        return this.credential.pubKeyHash
     }
-	
-   	/**
+
+    /**
      * @type {Option<StakingHash>}
      */
-	get stakingHash() {
-		return this.stakingCredential ? this.stakingCredential.hash : None
-	}
+    get stakingHash() {
+        return this.stakingCredential ? this.stakingCredential.hash : None
+    }
 
     /**
      * Returns the underlying `ValidatorHash` of a script address, or `null` for a regular payment address.
      * @type {Option<ValidatorHash>}
      */
     get validatorHash() {
-		return this.credential.validatorHash
+        return this.credential.validatorHash
     }
 
     /**
@@ -335,7 +345,9 @@ export class Address {
     toUplcData() {
         return new ConstrData(0, [
             this.credential.toUplcData(),
-            this.stakingCredential ? new ConstrData(0, [this.stakingCredential.toUplcData()]) : new ConstrData(1, [])
+            this.stakingCredential
+                ? new ConstrData(0, [this.stakingCredential.toUplcData()])
+                : new ConstrData(1, [])
         ])
     }
 
@@ -366,7 +378,7 @@ export class Address {
 
         return type == 0
     }
-	
+
     /**
      * Used to sort txbody withdrawals.
      * @param {Address} a

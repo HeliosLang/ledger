@@ -1,8 +1,8 @@
-import { ConstrData } from "@helios-lang/uplc";
+import { ConstrData } from "@helios-lang/uplc"
 import { config } from "./config.js"
-import { PubKeyHash } from "./PubKeyHash.js";
-import { ValidatorHash } from "./ValidatorHash.js";
-import { None } from "@helios-lang/codec-utils";
+import { PubKeyHash } from "./PubKeyHash.js"
+import { ValidatorHash } from "./ValidatorHash.js"
+import { None } from "@helios-lang/codec-utils"
 
 /**
  * @template T
@@ -21,19 +21,21 @@ export class Credential {
     hash
 
     /**
-     * @param {PubKeyHash | ValidatorHash} hash 
+     * @param {PubKeyHash | ValidatorHash} hash
      */
     constructor(hash) {
         this.hash = hash
     }
 
     /**
-     * @param {number[]} bytes 
+     * @param {number[]} bytes
      * @returns {Credential}
      */
     static fromAddressBytes(bytes) {
         if (bytes.length < 29) {
-            throw new Error(`expected at least 29 bytes, got ${bytes.length} bytes`)
+            throw new Error(
+                `expected at least 29 bytes, got ${bytes.length} bytes`
+            )
         }
 
         const head = bytes[0]
@@ -49,8 +51,8 @@ export class Credential {
     }
 
     /**
-     * 
-     * @param {UplcData} data 
+     *
+     * @param {UplcData} data
      * @returns {Credential}
      */
     static fromUplcData(data) {
@@ -60,9 +62,13 @@ export class Credential {
             case 0:
                 return new Credential(PubKeyHash.fromUplcData(data.fields[0]))
             case 1:
-                return new Credential(ValidatorHash.fromUplcData(data.fields[0]))
+                return new Credential(
+                    ValidatorHash.fromUplcData(data.fields[0])
+                )
             default:
-                throw new Error(`unexpected Credential ConstrData tag ${data.tag}`)
+                throw new Error(
+                    `unexpected Credential ConstrData tag ${data.tag}`
+                )
         }
     }
 
@@ -105,6 +111,8 @@ export class Credential {
      * @returns {UplcData}
      */
     toUplcData() {
-        return new ConstrData(this.isValidator() ? 1 : 0, [this.hash.toUplcData()])
+        return new ConstrData(this.isValidator() ? 1 : 0, [
+            this.hash.toUplcData()
+        ])
     }
 }

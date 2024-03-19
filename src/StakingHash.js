@@ -1,7 +1,7 @@
-import { None } from "@helios-lang/codec-utils";
-import { ConstrData } from "@helios-lang/uplc";
-import { PubKeyHash } from "./PubKeyHash.js";
-import { StakingValidatorHash } from "./StakingValidatorHash.js";
+import { None } from "@helios-lang/codec-utils"
+import { ConstrData } from "@helios-lang/uplc"
+import { PubKeyHash } from "./PubKeyHash.js"
+import { StakingValidatorHash } from "./StakingValidatorHash.js"
 
 /**
  * @template T
@@ -23,15 +23,15 @@ export class StakingHash {
     hash
 
     /**
-     * @param {PubKeyHash | StakingValidatorHash} hash 
+     * @param {PubKeyHash | StakingValidatorHash} hash
      */
     constructor(hash) {
         this.hash = hash
     }
 
     /**
-     * 
-     * @param {UplcData} data 
+     *
+     * @param {UplcData} data
      */
     static fromUplcData(data) {
         ConstrData.assert(data, None, 1)
@@ -40,9 +40,13 @@ export class StakingHash {
             case 0:
                 return new StakingHash(PubKeyHash.fromUplcData(data.fields[0]))
             case 1:
-                return new StakingHash(StakingValidatorHash.fromUplcData(data.fields[0]))
+                return new StakingHash(
+                    StakingValidatorHash.fromUplcData(data.fields[0])
+                )
             default:
-                throw new Error(`expected 0 or 1 StakingHash ConstrData tag, got ${data.tag}`)
+                throw new Error(
+                    `expected 0 or 1 StakingHash ConstrData tag, got ${data.tag}`
+                )
         }
     }
 

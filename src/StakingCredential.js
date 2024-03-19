@@ -21,18 +21,20 @@ export class StakingCredential {
     hash
 
     /**
-     * @param {StakingHash} hash 
+     * @param {StakingHash} hash
      */
     constructor(hash) {
         if (!(hash instanceof StakingHash)) {
-            throw new Error("only StakingHash is currently supported (not StakingPtr)")
+            throw new Error(
+                "only StakingHash is currently supported (not StakingPtr)"
+            )
         }
 
         this.hash = hash
     }
 
     /**
-     * @param {number[]} bytes 
+     * @param {number[]} bytes
      * @returns {Option<StakingCredential>}
      */
     static fromAddressBytes(bytes) {
@@ -44,10 +46,14 @@ export class StakingCredential {
             switch (type) {
                 case 0:
                 case 1:
-                    return new StakingCredential(new StakingHash(new PubKeyHash(body)))
+                    return new StakingCredential(
+                        new StakingHash(new PubKeyHash(body))
+                    )
                 case 2:
                 case 3:
-                    return new StakingCredential(new StakingHash(new StakingValidatorHash(body)))
+                    return new StakingCredential(
+                        new StakingHash(new StakingValidatorHash(body))
+                    )
                 default:
                     throw new Error(`unhandled StakingCredential type ${type}`)
             }
@@ -57,7 +63,7 @@ export class StakingCredential {
     }
 
     /**
-     * @param {UplcData} data 
+     * @param {UplcData} data
      */
     static fromUplcData(data) {
         ConstrData.assert(data, 0, 1)
