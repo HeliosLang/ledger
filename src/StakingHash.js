@@ -30,6 +30,18 @@ export class StakingHash {
     }
 
     /**
+     * @param {StakingHash | PubKeyHash | StakingValidatorHash} arg
+     * @returns {StakingHash}
+     */
+    static from(arg) {
+        if (arg instanceof StakingHash) {
+            return arg
+        } else {
+            return new StakingHash(arg)
+        }
+    }
+
+    /**
      *
      * @param {UplcData} data
      */

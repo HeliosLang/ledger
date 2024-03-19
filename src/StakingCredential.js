@@ -34,6 +34,18 @@ export class StakingCredential {
     }
 
     /**
+     * @param {StakingCredential | StakingHash | PubKeyHash | StakingValidatorHash} arg
+     * @returns {StakingCredential}
+     */
+    static from(arg) {
+        if (arg instanceof StakingCredential) {
+            return arg
+        } else {
+            return new StakingCredential(StakingHash.from(arg))
+        }
+    }
+
+    /**
      * @param {number[]} bytes
      * @returns {Option<StakingCredential>}
      */
