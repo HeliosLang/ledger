@@ -51,6 +51,18 @@ export class Credential {
     }
 
     /**
+     * @param {Credential | PubKeyHash | ValidatorHash} x
+     * @returns {Credential}
+     */
+    static from(x) {
+        if (x instanceof Credential) {
+            return x
+        } else {
+            return new Credential(x)
+        }
+    }
+
+    /**
      *
      * @param {UplcData} data
      * @returns {Credential}
