@@ -1,3 +1,5 @@
+import { ByteArrayData } from "@helios-lang/uplc"
+
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  */
@@ -7,8 +9,6 @@
  *   toCbor: () => number[]
  *   toHex: () => string
  *   toString: () => string
- *   toUplcData: () => UplcData
+ *   toUplcData: () => ByteArrayData
  * }} Hash
  */
-
-export const _ = {}

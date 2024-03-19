@@ -98,7 +98,7 @@ export class PubKeyHash {
     }
 
     /**
-     * @returns {UplcData}
+     * @returns {ByteArrayData}
      */
     toUplcData() {
         return new ByteArrayData(this.bytes)

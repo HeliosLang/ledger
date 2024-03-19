@@ -3,9 +3,12 @@ import { None, bytesToHex, hexToBytes, isSome } from "@helios-lang/codec-utils"
 import { decodeBech32, encodeBech32 } from "@helios-lang/crypto"
 import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
 import { config } from "./config.js"
+import { Credential } from "./Credential.js"
 import { PubKeyHash } from "./PubKeyHash.js"
 import { StakingValidatorHash } from "./StakingValidatorHash.js"
+import { StakingCredential } from "./StakingCredential.js"
 import { ValidatorHash } from "./ValidatorHash.js"
+import { StakingHash } from "./StakingHash.js"
 
 /**
  * @template T
@@ -28,6 +31,18 @@ export class Address {
      * @type {number[]}
      */
     bytes
+
+	/**
+	 * @readonly
+	 * @type {Credential}
+	 */
+	credential
+
+	/**
+	 * @readonly
+	 * @type {Option<StakingCredential>}
+	 */
+	stakingCredential
 
     /**
      * @private
@@ -53,16 +68,19 @@ export class Address {
     }
 
     /**
-     * @param {number[] | string | {bytes: number[]}} bytesOrBech32String
+     * @param {number[] | string | {bytes: number[]}} arg
      */
-    constructor(bytesOrBech32String) {
-        this.bytes = Address.cleanConstructorArg(bytesOrBech32String)
+    constructor(arg) {
+        this.bytes = Address.cleanConstructorArg(arg)
 
         if (!(this.bytes.length == 29 || this.bytes.length == 57)) {
             throw new Error(
                 `expected 29 or 57 bytes for Address, got ${this.bytes.length}`
             )
         }
+
+		this.credential = Credential.fromAddressBytes(this.bytes)
+		this.stakingCredential = StakingCredential.fromAddressBytes(this.bytes)
     }
 
     /**
@@ -108,6 +126,16 @@ export class Address {
     static fromCbor(bytes) {
         return new Address(decodeBytes(bytes))
     }
+
+	/**
+	 * @param {Credential} credential 
+	 * @param {Option<StakingCredential>} stakingCredential 
+	 * @param {boolean} isTestnet 
+	 * @return {Address}
+	 */
+	static fromCredentials(credential, stakingCredential, isTestnet = config.isTestnet) {
+		return this.fromHashes(credential.hash, stakingCredential?.hash?.hash ?? None, isTestnet)
+	}
 
     /**
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
@@ -195,72 +223,32 @@ export class Address {
     static fromUplcData(data, isTestnet = config.isTestnet) {
         ConstrData.assert(data, 0, 2)
 
-        const credData = ConstrData.expect(
-            data.fields[0],
-            "invalid Crendetial UplcData within Address"
-        ).expectFields(1, "invalid Crendetial UplcData within Address")
-        const stakData = ConstrData.expect(
+		const credential = Credential.fromUplcData(data.fields[0])
+        const stakingCredentialData = ConstrData.expect(
             data.fields[1],
-            "invalid StakingCredential UplcData within Address"
+            "invalid StakingCredential option within Address"
         )
 
         /**
-         * @type {Option<PubKeyHash | StakingValidatorHash>}
+         * @type {Option<StakingCredential>}
          */
-        let sh = None
+        let stakingCredential = None
 
         // for some weird reason Option::None has index 1
-        if (stakData.tag == 1) {
-            sh = None
-        } else if (stakData.tag == 0) {
-            stakData.expectFields(
+        if (stakingCredentialData.tag == 1) {
+            stakingCredential = None
+        } else if (stakingCredentialData.tag == 0) {
+            stakingCredentialData.expectFields(
                 1,
-                "invalid StakingCredential UplcData content within Address"
+                "invalid StakingCredential option content within Address"
             )
 
-            const inner = ConstrData.expect(stakData.fields[0]).expectFields(1)
-
-            if (inner.tag == 0) {
-                const innerInner = ConstrData.expect(
-                    inner.fields[0]
-                ).expectFields(1)
-                const innerInnerBytes = ByteArrayData.expect(
-                    innerInner.fields[0]
-                ).bytes
-
-                if (innerInner.tag == 0) {
-                    sh = new PubKeyHash(innerInnerBytes)
-                } else if (innerInner.tag == 1) {
-                    sh = new StakingValidatorHash(innerInnerBytes)
-                } else {
-                    throw new Error("unexpected")
-                }
-            } else if (inner.tag == 1) {
-                throw new Error("staking pointer not yet handled")
-            } else {
-                throw new Error("unexpected")
-            }
+			stakingCredential = StakingCredential.fromUplcData(stakingCredentialData.fields[0])
         } else {
             throw new Error("unexpected")
         }
 
-        const credBytes = ByteArrayData.expect(credData.fields[0]).bytes
-
-        if (credData.tag == 0) {
-            return Address.fromPubKeyHash(
-                new PubKeyHash(credBytes),
-                sh,
-                isTestnet
-            )
-        } else if (credData.tag == 1) {
-            return Address.fromValidatorHash(
-                new ValidatorHash(credBytes),
-                sh,
-                isTestnet
-            )
-        } else {
-            throw new Error("unexpected")
-        }
+		return Address.fromCredentials(credential, stakingCredential, isTestnet)
     }
 
     /**
@@ -292,6 +280,29 @@ export class Address {
     }
 
     /**
+     * Returns the underlying `PubKeyHash` of a simple payment address, or `null` for a script address.
+     * @type {Option<PubKeyHash>}
+     */
+    get pubKeyHash() {
+		return this.credential.pubKeyHash
+    }
+	
+   	/**
+     * @type {Option<StakingHash>}
+     */
+	get stakingHash() {
+		return this.stakingCredential ? this.stakingCredential.hash : None
+	}
+
+    /**
+     * Returns the underlying `ValidatorHash` of a script address, or `null` for a regular payment address.
+     * @type {Option<ValidatorHash>}
+     */
+    get validatorHash() {
+		return this.credential.validatorHash
+    }
+
+    /**
      * Converts an `Address` into its Bech32 representation.
      * @returns {string}
      */
@@ -311,26 +322,6 @@ export class Address {
     }
 
     /**
-     * @private
-     * @returns {ConstrData}
-     */
-    toCredentialData() {
-        const vh = this.validatorHash
-
-        if (isSome(vh)) {
-            return new ConstrData(1, [new ByteArrayData(vh.bytes)])
-        } else {
-            const pkh = this.pubKeyHash
-
-            if (isSome(pkh)) {
-                return new ConstrData(0, [new ByteArrayData(pkh.bytes)])
-            } else {
-                throw new Error("unexpected")
-            }
-        }
-    }
-
-    /**
      * Converts a `Address` into its hexadecimal representation.
      * @returns {string}
      */
@@ -339,58 +330,13 @@ export class Address {
     }
 
     /**
-     * @private
-     * @returns {ConstrData}
-     */
-    toStakingData() {
-        const type = this.bytes[0] >> 4
-        const sh = this.stakingHash
-
-        if (sh == null) {
-            return new ConstrData(1, []) // none
-        } else {
-            if (type == 4 || type == 5) {
-                throw new Error("not yet implemented")
-            } else if (type == 3 || type == 2) {
-                // some
-                return new ConstrData(0, [
-                    // staking credential -> 0, 1 -> pointer
-                    new ConstrData(0, [
-                        // StakingValidator credential
-                        new ConstrData(1, [new ByteArrayData(sh.bytes)])
-                    ])
-                ])
-            } else if (type == 0 || type == 1) {
-                // some
-                return new ConstrData(0, [
-                    // staking credential -> 0, 1 -> pointer
-                    new ConstrData(0, [
-                        // PubKeyHash credential
-                        new ConstrData(0, [new ByteArrayData(sh.bytes)])
-                    ])
-                ])
-            } else {
-                throw new Error("unexpected")
-            }
-        }
-    }
-
-    /**
      * @returns {UplcData}
      */
     toUplcData() {
         return new ConstrData(0, [
-            this.toCredentialData(),
-            this.toStakingData()
+            this.credential.toUplcData(),
+            this.stakingCredential ? new ConstrData(0, [this.stakingCredential.toUplcData()]) : new ConstrData(1, [])
         ])
-    }
-
-    /**
-     * Converts a `Address` into its hexadecimal representation.
-     * @returns {string}
-     */
-    get hex() {
-        return this.toHex()
     }
 
     /**
@@ -420,63 +366,7 @@ export class Address {
 
         return type == 0
     }
-
-    /**
-     * Returns the underlying `PubKeyHash` of a simple payment address, or `null` for a script address.
-     * @type {Option<PubKeyHash>}
-     */
-    get pubKeyHash() {
-        let type = this.bytes[0] >> 4
-
-        if (type % 2 == 0) {
-            return new PubKeyHash(this.bytes.slice(1, 29))
-        } else {
-            return None
-        }
-    }
-
-    /**
-     * Returns the underlying `ValidatorHash` of a script address, or `null` for a regular payment address.
-     * @type {Option<ValidatorHash>}
-     */
-    get validatorHash() {
-        let type = this.bytes[0] >> 4
-
-        if (type % 2 == 1) {
-            return new ValidatorHash(this.bytes.slice(1, 29))
-        } else {
-            return None
-        }
-    }
-
-    /**
-     * Returns the underlying `PubKeyHash` or `StakingValidatorHash`, or `null` for non-staked addresses.
-     * @type {Option<PubKeyHash | StakingValidatorHash>}
-     */
-    get stakingHash() {
-        let type = this.bytes[0] >> 4
-
-        let bytes = this.bytes.slice(29)
-
-        if (type == 0 || type == 1) {
-            if (bytes.length != 28) {
-                throw new Error(`expected 28 bytes, got ${bytes.length} bytes`)
-            }
-
-            return new PubKeyHash(bytes)
-        } else if (type == 2 || type == 3) {
-            if (bytes.length != 28) {
-                throw new Error(`expected 28 bytes, got ${bytes.length} bytes`)
-            }
-
-            return new StakingValidatorHash(bytes)
-        } else if (type == 4 || type == 5) {
-            throw new Error("staking pointer not yet supported")
-        } else {
-            return null
-        }
-    }
-
+	
     /**
      * Used to sort txbody withdrawals.
      * @param {Address} a

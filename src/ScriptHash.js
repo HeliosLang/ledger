@@ -1,6 +1,5 @@
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
- * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Hash.js").Hash} Hash
  */
 
@@ -48,7 +47,7 @@ export class ScriptHash {
     }
 
     /**
-     * @returns {UplcData}
+     * @returns {ByteArrayData}
      */
     toUplcData() {
         return new ByteArrayData(this.bytes)
