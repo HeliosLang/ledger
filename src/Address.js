@@ -1,7 +1,12 @@
 import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
 import { None, bytesToHex, hexToBytes, isSome } from "@helios-lang/codec-utils"
 import { decodeBech32, encodeBech32 } from "@helios-lang/crypto"
-import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
+import {
+    ByteArrayData,
+    ConstrData,
+    decodeUplcData,
+    encodeOptionData
+} from "@helios-lang/uplc"
 import { config } from "./config.js"
 import { Credential } from "./Credential.js"
 import { PubKeyHash } from "./PubKeyHash.js"
@@ -345,9 +350,7 @@ export class Address {
     toUplcData() {
         return new ConstrData(0, [
             this.credential.toUplcData(),
-            this.stakingCredential
-                ? new ConstrData(0, [this.stakingCredential.toUplcData()])
-                : new ConstrData(1, [])
+            encodeOptionData(this.stakingCredential?.toUplcData())
         ])
     }
 

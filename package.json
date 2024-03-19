@@ -27,7 +27,7 @@
         "@helios-lang/cbor": "^0.1.4",
         "@helios-lang/codec-utils": "^0.1.19",
         "@helios-lang/crypto": "^0.1.1",
-        "@helios-lang/uplc": "^0.1.3"
+        "@helios-lang/uplc": "^0.1.5"
     },
     "prettier": {
         "trailingComma": "none",
