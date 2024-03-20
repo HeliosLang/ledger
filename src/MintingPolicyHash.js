@@ -1,22 +1,28 @@
-import { blake2b, encodeBech32 } from "@helios-lang/crypto"
-import { ScriptHash } from "./ScriptHash.js"
 import { decodeBytes } from "@helios-lang/cbor"
+import { blake2b, encodeBech32 } from "@helios-lang/crypto"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
+import { ScriptHash } from "./ScriptHash.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ * @typedef {import("./Hash.js").Hash} Hash
+ */
+
+/**
+ * @typedef {MintingPolicyHash | ByteArrayLike} MintingPolicyHashLike
  */
 
 /**
  * Represents a blake2b-224 hash of a minting policy script
  *
  * **Note**: to calculate this hash the script is first encoded as a CBOR byte-array and then prepended by a script version byte.
+ * @implements {Hash}
  */
 export class MintingPolicyHash extends ScriptHash {
     /**
      * Can be 0 bytes in case of Ada
-     * @param {ByteArrayLike} bytes
+     * @param {Exclude<MintingPolicyHashLike, MintingPolicyHash>} bytes
      */
     constructor(bytes) {
         super(bytes)
@@ -29,17 +35,17 @@ export class MintingPolicyHash extends ScriptHash {
     }
 
     /**
-     * @param {MintingPolicyHash | ByteArrayLike} arg
+     * @param {MintingPolicyHashLike} arg
      * @returns {MintingPolicyHash}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         return arg instanceof MintingPolicyHash
             ? arg
             : new MintingPolicyHash(arg)
     }
 
     /**
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {MintingPolicyHash}
      */
     static fromCbor(bytes) {
@@ -55,11 +61,19 @@ export class MintingPolicyHash extends ScriptHash {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {MintingPolicyHash}
      */
     static fromUplcCbor(bytes) {
         return MintingPolicyHash.fromUplcData(decodeUplcData(bytes))
+    }
+
+    /**
+     * @param {MintingPolicyHash} other
+     * @returns {boolean}
+     */
+    isEqual(other) {
+        return ByteArrayData.compare(this.bytes, other.bytes) == 0
     }
 
     /**

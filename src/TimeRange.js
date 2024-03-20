@@ -5,6 +5,7 @@ import {
     decodeBoolData,
     encodeBoolData
 } from "@helios-lang/uplc"
+import { timeToNumber } from "./Time.js"
 
 /**
  * @template T
@@ -13,6 +14,7 @@ import {
 
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ * @typedef {import("./Time.js").TimeLike} TimeLike
  */
 
 /**
@@ -21,6 +23,15 @@ import {
  *   excludeStart?: boolean
  *   excludeEnd?: boolean
  * }} TimeRangeOptions
+ */
+
+/**
+ * @typedef {TimeRange | [TimeLike, TimeLike] | {
+ *     start?: TimeLike
+ *     excludeStart?: boolean
+ *     end?: TimeLike
+ *     excludeEnd?: boolean
+ *   }} TimeRangeLike
  */
 
 /**
@@ -52,13 +63,13 @@ export class TimeRange {
     includeEnd
 
     /**
-     * @param {Date | number | bigint} start - milliseconds since 1970
-     * @param {Date | number | bigint} end - milliseconds since 1970
+     * @param {TimeLike} start - milliseconds since 1970
+     * @param {TimeLike} end - milliseconds since 1970
      * @param {TimeRangeOptions} options
      */
     constructor(start, end, options = {}) {
-        this.start = start instanceof Date ? start.getTime() : Number(start)
-        this.end = end instanceof Date ? end.getTime() : Number(end)
+        this.start = timeToNumber(start)
+        this.end = timeToNumber(end)
         this.includeStart = !(options.excludeStart ?? false)
         this.includeEnd = !(options.excludeEnd ?? false)
     }
@@ -68,17 +79,10 @@ export class TimeRange {
     }
 
     /**
-     * @param {TimeRange |
-     *   [Date | number | bigint, Date | number | bigint] |
-     *   {
-     *     start?: Date | number | bigint
-     *     excludeStart?: boolean
-     *     end?: Date | number | bigint
-     *     excludeEnd?: boolean
-     *   }
-     * } arg
+     * @param {TimeRangeLike} arg
+     * @returns {TimeRange}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         if (arg instanceof TimeRange) {
             return arg
         } else if (Array.isArray(arg)) {
@@ -93,6 +97,32 @@ export class TimeRange {
                 }
             )
         }
+    }
+
+    /**
+     * @param {UplcData} data
+     * @returns {TimeRange}
+     */
+    static fromUplcData(data) {
+        ConstrData.assert(data, 0, 2)
+
+        const [startData, endData] = data.fields
+
+        ConstrData.assert(startData, 0, 2)
+        ConstrData.assert(endData, 0, 2)
+
+        const [startTimeData, includeStartData] = startData.fields
+        const [endTimeData, includeEndData] = endData.fields
+
+        const startTime = decodeTimeRangeTimeData(startTimeData, true)
+        const endTime = decodeTimeRangeTimeData(endTimeData, true)
+        const includeStart = decodeBoolData(includeStartData, true)
+        const includeEnd = decodeBoolData(includeEndData, true)
+
+        return new TimeRange(startTime, endTime, {
+            excludeStart: !includeStart,
+            excludeEnd: !includeEnd
+        })
     }
 
     static never() {
@@ -125,32 +155,6 @@ export class TimeRange {
         } else {
             return None
         }
-    }
-
-    /**
-     * @param {UplcData} data
-     * @returns {TimeRange}
-     */
-    static fromUplcData(data) {
-        ConstrData.assert(data, 0, 2)
-
-        const [startData, endData] = data.fields
-
-        ConstrData.assert(startData, 0, 2)
-        ConstrData.assert(endData, 0, 2)
-
-        const [startTimeData, includeStartData] = startData.fields
-        const [endTimeData, includeEndData] = endData.fields
-
-        const startTime = decodeTimeRangeTimeData(startTimeData, true)
-        const endTime = decodeTimeRangeTimeData(endTimeData, true)
-        const includeStart = decodeBoolData(includeStartData, true)
-        const includeEnd = decodeBoolData(includeEndData, true)
-
-        return new TimeRange(startTime, endTime, {
-            excludeStart: !includeStart,
-            excludeEnd: !includeEnd
-        })
     }
 
     /**

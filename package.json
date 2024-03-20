@@ -24,10 +24,10 @@
         "typescript": "^5.3.2"
     },
     "dependencies": {
-        "@helios-lang/cbor": "^0.1.4",
-        "@helios-lang/codec-utils": "^0.1.19",
+        "@helios-lang/cbor": "^0.1.6",
+        "@helios-lang/codec-utils": "^0.1.22",
         "@helios-lang/crypto": "^0.1.1",
-        "@helios-lang/uplc": "^0.1.5"
+        "@helios-lang/uplc": "^0.1.7"
     },
     "prettier": {
         "trailingComma": "none",

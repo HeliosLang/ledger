@@ -13,6 +13,10 @@ import { None } from "@helios-lang/codec-utils"
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  */
 
+/**
+ * @typedef {Credential | PubKeyHash | ValidatorHash} CredentialLike
+ */
+
 export class Credential {
     /**
      * @readonly
@@ -21,7 +25,7 @@ export class Credential {
     hash
 
     /**
-     * @param {PubKeyHash | ValidatorHash} hash
+     * @param {Exclude<CredentialLike, Credential>} hash
      */
     constructor(hash) {
         this.hash = hash
@@ -51,15 +55,11 @@ export class Credential {
     }
 
     /**
-     * @param {Credential | PubKeyHash | ValidatorHash} x
+     * @param {CredentialLike} arg
      * @returns {Credential}
      */
-    static from(x) {
-        if (x instanceof Credential) {
-            return x
-        } else {
-            return new Credential(x)
-        }
+    static fromAlike(arg) {
+        return arg instanceof Credential ? arg : new Credential(arg)
     }
 
     /**

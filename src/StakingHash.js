@@ -13,6 +13,10 @@ import { StakingValidatorHash } from "./StakingValidatorHash.js"
  */
 
 /**
+ * @typedef {StakingHash | PubKeyHash | StakingValidatorHash} StakingHashLike
+ */
+
+/**
  * Similar to Credential, wrapper for StakingValidatorHash | PubKeyHash
  */
 export class StakingHash {
@@ -23,22 +27,18 @@ export class StakingHash {
     hash
 
     /**
-     * @param {PubKeyHash | StakingValidatorHash} hash
+     * @param {Exclude<StakingHashLike, StakingHash>} hash
      */
     constructor(hash) {
         this.hash = hash
     }
 
     /**
-     * @param {StakingHash | PubKeyHash | StakingValidatorHash} arg
+     * @param {StakingHashLike} arg
      * @returns {StakingHash}
      */
-    static from(arg) {
-        if (arg instanceof StakingHash) {
-            return arg
-        } else {
-            return new StakingHash(arg)
-        }
+    static fromAlike(arg) {
+        return arg instanceof StakingHash ? arg : new StakingHash(arg)
     }
 
     /**

@@ -1,5 +1,11 @@
 import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
-import { None, bytesToHex, hexToBytes, isSome } from "@helios-lang/codec-utils"
+import {
+    None,
+    bytesToHex,
+    hexToBytes,
+    isSome,
+    toBytes
+} from "@helios-lang/codec-utils"
 import { decodeBech32, encodeBech32 } from "@helios-lang/crypto"
 import {
     ByteArrayData,
@@ -21,7 +27,12 @@ import { StakingHash } from "./StakingHash.js"
  */
 
 /**
+ * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ */
+
+/**
+ * @typedef {Address | ByteArrayLike} AddressLike
  */
 
 /**
@@ -50,33 +61,10 @@ export class Address {
     stakingCredential
 
     /**
-     * @private
-     * @param {string | number[] | {bytes: number[]}} arg
-     * @returns {number[]}
+     * @param {Exclude<AddressLike, Address>} bytes
      */
-    static cleanConstructorArg(arg) {
-        if (typeof arg == "object" && "bytes" in arg) {
-            return arg.bytes
-        } else if (typeof arg == "string") {
-            if (arg.startsWith("addr")) {
-                return Address.fromBech32(arg).bytes
-            } else {
-                if (arg.startsWith("#")) {
-                    arg = arg.slice(1)
-                }
-
-                return hexToBytes(arg)
-            }
-        } else {
-            return arg
-        }
-    }
-
-    /**
-     * @param {number[] | string | {bytes: number[]}} arg
-     */
-    constructor(arg) {
-        this.bytes = Address.cleanConstructorArg(arg)
+    constructor(bytes) {
+        this.bytes = toBytes(bytes)
 
         if (!(this.bytes.length == 29 || this.bytes.length == 57)) {
             throw new Error(
@@ -98,11 +86,15 @@ export class Address {
     }
 
     /**
-     * @param {Address | number[] | string | {bytes: number[]}} arg
+     * @param {AddressLike} arg
      * @returns {Address}
      */
-    static from(arg) {
-        return arg instanceof Address ? arg : new Address(arg)
+    static fromAlike(arg) {
+        return arg instanceof Address
+            ? arg
+            : typeof arg == "string" && arg.startsWith("addr")
+              ? Address.fromBech32(arg)
+              : new Address(arg)
     }
 
     /**
@@ -125,7 +117,7 @@ export class Address {
 
     /**
      * Deserializes bytes into an `Address`.
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {Address}
      */
     static fromCbor(bytes) {
@@ -182,16 +174,6 @@ export class Address {
     }
 
     /**
-     * Constructs an `Address` using a hexadecimal string representation of the address bytes.
-     * Doesn't check validity.
-     * @param {string} hex
-     * @returns {Address}
-     */
-    static fromHex(hex) {
-        return new Address(hexToBytes(hex))
-    }
-
-    /**
      * Simple payment address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
      * @param {PubKeyHash} hash
@@ -220,7 +202,7 @@ export class Address {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @param {boolean} isTestnet
      * @returns {Address}
      */
@@ -295,6 +277,28 @@ export class Address {
     }
 
     /**
+     * Used to sort txbody withdrawals.
+     * @param {Address} a
+     * @param {Address} b
+     * @param {boolean} stakingHashesOnly
+     * @return {number}
+     */
+    static compare(a, b, stakingHashesOnly = false) {
+        if (stakingHashesOnly) {
+            if (isSome(a.stakingHash) && isSome(b.stakingHash)) {
+                return ByteArrayData.compare(
+                    a.stakingHash.bytes,
+                    b.stakingHash.bytes
+                )
+            } else {
+                throw new Error("can't compare undefined stakingHashes")
+            }
+        } else {
+            throw new Error("not yet implemented")
+        }
+    }
+
+    /**
      * Returns the underlying `PubKeyHash` of a simple payment address, or `null` for a script address.
      * @type {Option<PubKeyHash>}
      */
@@ -315,6 +319,34 @@ export class Address {
      */
     get validatorHash() {
         return this.credential.validatorHash
+    }
+
+    /**
+     * @returns {Object}
+     */
+    dump() {
+        return {
+            hex: this.toHex(),
+            bech32: this.toBech32()
+        }
+    }
+
+    /**
+     * @param {Address} other
+     * @returns {boolean}
+     */
+    equals(other) {
+        return ByteArrayData.compare(this.bytes, other.bytes) == 0
+    }
+
+    /**
+     * Returns `true` if the given `Address` is a testnet address.
+     * @returns {boolean}
+     */
+    isForTestnet() {
+        let type = this.bytes[0] & 0b00001111
+
+        return type == 0
     }
 
     /**
@@ -352,55 +384,5 @@ export class Address {
             this.credential.toUplcData(),
             encodeOptionData(this.stakingCredential?.toUplcData())
         ])
-    }
-
-    /**
-     * @param {Address} other
-     * @returns {boolean}
-     */
-    equals(other) {
-        return ByteArrayData.compare(this.bytes, other.bytes) == 0
-    }
-
-    /**
-     * @returns {Object}
-     */
-    dump() {
-        return {
-            hex: bytesToHex(this.bytes),
-            bech32: this.toBech32()
-        }
-    }
-
-    /**
-     * Returns `true` if the given `Address` is a testnet address.
-     * @returns {boolean}
-     */
-    isForTestnet() {
-        let type = this.bytes[0] & 0b00001111
-
-        return type == 0
-    }
-
-    /**
-     * Used to sort txbody withdrawals.
-     * @param {Address} a
-     * @param {Address} b
-     * @param {boolean} stakingHashesOnly
-     * @return {number}
-     */
-    static compare(a, b, stakingHashesOnly = false) {
-        if (stakingHashesOnly) {
-            if (isSome(a.stakingHash) && isSome(b.stakingHash)) {
-                return ByteArrayData.compare(
-                    a.stakingHash.bytes,
-                    b.stakingHash.bytes
-                )
-            } else {
-                throw new Error("can't compare undefined stakingHashes")
-            }
-        } else {
-            throw new Error("not yet implemented")
-        }
     }
 }

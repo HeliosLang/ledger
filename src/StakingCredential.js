@@ -13,6 +13,10 @@ import { StakingValidatorHash } from "./StakingValidatorHash.js"
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  */
 
+/**
+ * @typedef {StakingCredential | StakingHash | PubKeyHash | StakingValidatorHash} StakingCredentialLike
+ */
+
 export class StakingCredential {
     /**
      * @readonly
@@ -21,28 +25,10 @@ export class StakingCredential {
     hash
 
     /**
-     * @param {StakingHash} hash
+     * @param {Exclude<StakingCredentialLike, StakingCredential>} hash
      */
     constructor(hash) {
-        if (!(hash instanceof StakingHash)) {
-            throw new Error(
-                "only StakingHash is currently supported (not StakingPtr)"
-            )
-        }
-
-        this.hash = hash
-    }
-
-    /**
-     * @param {StakingCredential | StakingHash | PubKeyHash | StakingValidatorHash} arg
-     * @returns {StakingCredential}
-     */
-    static from(arg) {
-        if (arg instanceof StakingCredential) {
-            return arg
-        } else {
-            return new StakingCredential(StakingHash.from(arg))
-        }
+        this.hash = StakingHash.fromAlike(hash)
     }
 
     /**
@@ -72,6 +58,16 @@ export class StakingCredential {
         } else {
             return None
         }
+    }
+
+    /**
+     * @param {StakingCredentialLike} arg
+     * @returns {StakingCredential}
+     */
+    static fromAlike(arg) {
+        return arg instanceof StakingCredential
+            ? arg
+            : new StakingCredential(arg)
     }
 
     /**

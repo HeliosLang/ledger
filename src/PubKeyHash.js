@@ -1,11 +1,15 @@
 import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
-import { bytesToHex, hexToBytes, toBytes } from "@helios-lang/codec-utils"
+import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Hash.js").Hash} Hash
+ */
+
+/**
+ * @typedef {PubKeyHash | ByteArrayLike} PubKeyHashLike
  */
 
 /**
@@ -22,7 +26,7 @@ export class PubKeyHash {
     bytes
 
     /**
-     * @param {ByteArrayLike} bytes
+     * @param {Exclude<PubKeyHashLike, PubKeyHash>} bytes
      */
     constructor(bytes) {
         this.bytes = toBytes(bytes)
@@ -44,15 +48,15 @@ export class PubKeyHash {
     }
 
     /**
-     * @param {PubKeyHash | ByteArrayLike} arg
+     * @param {PubKeyHashLike} arg
      * @returns {PubKeyHash}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         return arg instanceof PubKeyHash ? arg : new PubKeyHash(arg)
     }
 
     /**
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {PubKeyHash}
      */
     static fromCbor(bytes) {
@@ -68,7 +72,7 @@ export class PubKeyHash {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {PubKeyHash}
      */
     static fromUplcCbor(bytes) {

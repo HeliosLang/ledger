@@ -1,12 +1,16 @@
+import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
+import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
+import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
+
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Hash.js").Hash} Hash
  */
 
-import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
-import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
-import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
+/**
+ * @typedef {ScriptHash | ByteArrayLike} ScriptHashLike
+ */
 
 /**
  * @implements {Hash}
@@ -20,22 +24,22 @@ export class ScriptHash {
 
     /**
      *
-     * @param {ByteArrayLike} bytes
+     * @param {Exclude<ScriptHashLike, ScriptHash>} arg
      */
-    constructor(bytes) {
-        this.bytes = toBytes(bytes)
+    constructor(arg) {
+        this.bytes = toBytes(arg)
     }
 
     /**
-     * @param {ScriptHash | ByteArrayLike} arg
+     * @param {ScriptHashLike} arg
      * @returns {ScriptHash}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         return arg instanceof ScriptHash ? arg : new ScriptHash(arg)
     }
 
     /**
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {ScriptHash}
      */
     static fromCbor(bytes) {
@@ -51,11 +55,28 @@ export class ScriptHash {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {ScriptHash}
      */
     static fromUplcCbor(bytes) {
         return ScriptHash.fromUplcData(decodeUplcData(bytes))
+    }
+
+    /**
+     * @param {ScriptHash} a
+     * @param {ScriptHash} b
+     * @returns {number}
+     */
+    static compare(a, b) {
+        return ByteArrayData.compare(a.bytes, b.bytes)
+    }
+
+    /**
+     * @param {ScriptHash} other
+     * @returns {boolean}
+     */
+    isEqual(other) {
+        return ScriptHash.compare(this, other) == 0
     }
 
     /**

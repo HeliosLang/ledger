@@ -1,5 +1,5 @@
 import { decodeBytes } from "@helios-lang/cbor"
-import { toBytes } from "@helios-lang/codec-utils"
+import { ByteStream } from "@helios-lang/codec-utils"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 
@@ -10,6 +10,10 @@ import { ScriptHash } from "./ScriptHash.js"
  */
 
 /**
+ * @typedef {StakingValidatorHash | ByteArrayLike} StakingValidatorHashLike
+ */
+
+/**
  * Represents a blake2b-224 hash of a staking script.
  *
  * **Note**: before hashing, the staking script is first encoded as a CBOR byte-array and then prepended by a script version byte.
@@ -17,7 +21,7 @@ import { ScriptHash } from "./ScriptHash.js"
  */
 export class StakingValidatorHash extends ScriptHash {
     /**
-     * @param {ByteArrayLike} bytes
+     * @param {Exclude<StakingValidatorHashLike, StakingValidatorHash>} bytes
      */
     constructor(bytes) {
         super(bytes)
@@ -30,17 +34,17 @@ export class StakingValidatorHash extends ScriptHash {
     }
 
     /**
-     * @param {StakingValidatorHash | ByteArrayLike} arg
+     * @param {StakingValidatorHashLike} arg
      * @returns {StakingValidatorHash}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         return arg instanceof StakingValidatorHash
             ? arg
             : new StakingValidatorHash(arg)
     }
 
     /**
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {StakingValidatorHash}
      */
     static fromCbor(bytes) {
@@ -56,7 +60,7 @@ export class StakingValidatorHash extends ScriptHash {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {StakingValidatorHash}
      */
     static fromUplcCbor(bytes) {

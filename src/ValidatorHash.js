@@ -1,5 +1,4 @@
-import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
-import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
+import { decodeBytes } from "@helios-lang/cbor"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 
@@ -10,12 +9,16 @@ import { ScriptHash } from "./ScriptHash.js"
  */
 
 /**
+ * @typedef {ValidatorHash | ByteArrayLike} ValidatorHashLike
+ */
+
+/**
  * Represents a blake2b-224 hash of a spending validator script (first encoded as a CBOR byte-array and prepended by a script version byte).
  * @implements {Hash}
  */
 export class ValidatorHash extends ScriptHash {
     /**
-     * @param {ByteArrayLike} bytes
+     * @param {Exclude<ValidatorHashLike, ValidatorHash>} bytes
      */
     constructor(bytes) {
         super(bytes)
@@ -28,15 +31,15 @@ export class ValidatorHash extends ScriptHash {
     }
 
     /**
-     * @param {ValidatorHash | ByteArrayLike} arg
+     * @param {ValidatorHashLike} arg
      * @returns {ValidatorHash}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         return arg instanceof ValidatorHash ? arg : new ValidatorHash(arg)
     }
 
     /**
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {ValidatorHash}
      */
     static fromCbor(bytes) {
@@ -52,7 +55,7 @@ export class ValidatorHash extends ScriptHash {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {ValidatorHash}
      */
     static fromUplcCbor(bytes) {

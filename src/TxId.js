@@ -9,6 +9,9 @@ import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
  */
 
 /**
+ * @typedef {TxId | ByteArrayLike} TxIdLike
+ */
+/**
  * Represents the hash of a transaction.
  *
  * This is also used to identify an UTxO (along with the index of the UTxO in the list of UTxOs created by the transaction).
@@ -16,7 +19,13 @@ import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
  */
 export class TxId {
     /**
-     * @param {ByteArrayLike} bytes
+     * @readonly
+     * @type {number[]}
+     */
+    bytes
+
+    /**
+     * @param {Exclude<TxIdLike, TxId>} bytes
      */
     constructor(bytes) {
         this.bytes = toBytes(bytes)
@@ -38,15 +47,15 @@ export class TxId {
     }
 
     /**
-     * @param {TxId | ByteArrayLike} arg
+     * @param {TxIdLike} arg
      * @returns {TxId}
      */
-    static from(arg) {
+    static fromAlike(arg) {
         return arg instanceof TxId ? arg : new TxId(arg)
     }
 
     /**
-     * @param {number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {TxId}
      */
     static fromCbor(bytes) {
@@ -54,7 +63,7 @@ export class TxId {
     }
 
     /**
-     * @param {string | number[]} bytes
+     * @param {ByteArrayLike} bytes
      * @returns {TxId}
      */
     static fromUplcCbor(bytes) {
@@ -69,6 +78,13 @@ export class TxId {
         ConstrData.assert(data, 0, 1)
 
         return new TxId(ByteArrayData.expect(data.fields[0]).bytes)
+    }
+
+    /**
+     * @param {TxId} other
+     */
+    equals(other) {
+        return ByteArrayData.compare(this.bytes, other.bytes) == 0
     }
 
     toHex() {
