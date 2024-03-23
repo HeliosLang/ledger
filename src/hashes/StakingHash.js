@@ -1,14 +1,13 @@
-import { None } from "@helios-lang/codec-utils"
+import { decodeTagged, encodeInt, encodeTuple } from "@helios-lang/cbor"
+import { ByteStream } from "@helios-lang/codec-utils"
+import { None } from "@helios-lang/type-utils"
 import { ConstrData } from "@helios-lang/uplc"
 import { PubKeyHash } from "./PubKeyHash.js"
 import { StakingValidatorHash } from "./StakingValidatorHash.js"
+import { ValidatorHash } from "./ValidatorHash.js"
 
 /**
- * @template T
- * @typedef {import("@helios-lang/codec-utils").Option<T>} Option
- */
-
-/**
+ * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  */
 
@@ -39,6 +38,27 @@ export class StakingHash {
      */
     static fromAlike(arg) {
         return arg instanceof StakingHash ? arg : new StakingHash(arg)
+    }
+
+    /**
+     * @param {ByteArrayLike} bytes
+     * @returns {StakingHash}
+     */
+    static fromCbor(bytes) {
+        const stream = ByteStream.from(bytes)
+
+        const [tag, decodeItem] = decodeTagged(stream)
+
+        switch (tag) {
+            case 0:
+                return new StakingHash(decodeItem(PubKeyHash))
+            case 1:
+                return new StakingHash(decodeItem(ValidatorHash))
+            default:
+                throw new Error(
+                    `expected 0 or 1 StakingHash cbor tag, got ${tag}`
+                )
+        }
     }
 
     /**
@@ -84,6 +104,13 @@ export class StakingHash {
     }
 
     /**
+     * @type {number}
+     */
+    get tag() {
+        return this.isPubKey() ? 0 : 1
+    }
+
+    /**
      * @returns {boolean}
      */
     isPubKey() {
@@ -98,9 +125,16 @@ export class StakingHash {
     }
 
     /**
+     * @returns {number[]}
+     */
+    toCbor() {
+        return encodeTuple([encodeInt(this.tag), this.hash.toCbor()])
+    }
+
+    /**
      * @returns {ConstrData}
      */
     toUplcData() {
-        return new ConstrData(this.isPubKey() ? 0 : 1, [this.hash.toUplcData()])
+        return new ConstrData(this.tag, [this.hash.toUplcData()])
     }
 }

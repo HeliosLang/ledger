@@ -14,14 +14,14 @@ import {
     MapData,
     decodeUplcData
 } from "@helios-lang/uplc"
-import { MintingPolicyHash } from "./MintingPolicyHash.js"
+import { MintingPolicyHash } from "../hashes/MintingPolicyHash.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Assets.js").AssetsLike} AssetsLike
  * @typedef {import("./AssetClass.js").AssetClassLike} AssetClassLike
- * @typedef {import("./MintingPolicyHash.js").MintingPolicyHashLike} MintingPolicyHashLike
+ * @typedef {import("../hashes/MintingPolicyHash.js").MintingPolicyHashLike} MintingPolicyHashLike
  */
 
 /**

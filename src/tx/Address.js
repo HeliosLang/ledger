@@ -1,30 +1,22 @@
 import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
-import {
-    None,
-    bytesToHex,
-    hexToBytes,
-    isSome,
-    toBytes
-} from "@helios-lang/codec-utils"
+import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
 import { decodeBech32, encodeBech32 } from "@helios-lang/crypto"
+import { isSome, None } from "@helios-lang/type-utils"
 import {
     ByteArrayData,
     ConstrData,
     decodeUplcData,
     encodeOptionData
 } from "@helios-lang/uplc"
+import {
+    PubKeyHash,
+    StakingHash,
+    StakingValidatorHash,
+    ValidatorHash
+} from "../hashes/index.js"
 import { config } from "./config.js"
 import { Credential } from "./Credential.js"
-import { PubKeyHash } from "./PubKeyHash.js"
-import { StakingValidatorHash } from "./StakingValidatorHash.js"
 import { StakingCredential } from "./StakingCredential.js"
-import { ValidatorHash } from "./ValidatorHash.js"
-import { StakingHash } from "./StakingHash.js"
-
-/**
- * @template T
- * @typedef {import("@helios-lang/codec-utils").Option<T>} Option
- */
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -81,7 +73,7 @@ export class Address {
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static dummy(isTestnet = config.isTestnet) {
+    static dummy(isTestnet = config.IS_TESTNET) {
         return Address.fromPubKeyHash(PubKeyHash.dummy(), None, isTestnet)
     }
 
@@ -133,7 +125,7 @@ export class Address {
     static fromCredentials(
         credential,
         stakingCredential,
-        isTestnet = config.isTestnet
+        isTestnet = config.IS_TESTNET
     ) {
         return this.fromHashes(
             credential.hash,
@@ -150,7 +142,7 @@ export class Address {
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromHash(hash, isTestnet = config.isTestnet) {
+    static fromHash(hash, isTestnet = config.IS_TESTNET) {
         return Address.fromHashes(hash, null, isTestnet)
     }
 
@@ -163,7 +155,7 @@ export class Address {
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromHashes(hash, stakingHash, isTestnet = config.isTestnet) {
+    static fromHashes(hash, stakingHash, isTestnet = config.IS_TESTNET) {
         if (hash instanceof PubKeyHash) {
             return Address.fromPubKeyHash(hash, stakingHash, isTestnet)
         } else if (hash instanceof ValidatorHash) {
@@ -206,7 +198,7 @@ export class Address {
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromUplcCbor(bytes, isTestnet = config.isTestnet) {
+    static fromUplcCbor(bytes, isTestnet = config.IS_TESTNET) {
         return Address.fromUplcData(decodeUplcData(bytes), isTestnet)
     }
 
@@ -215,7 +207,7 @@ export class Address {
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromUplcData(data, isTestnet = config.isTestnet) {
+    static fromUplcData(data, isTestnet = config.IS_TESTNET) {
         ConstrData.assert(data, 0, 2)
 
         const credential = Credential.fromUplcData(data.fields[0])

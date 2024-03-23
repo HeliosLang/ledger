@@ -8,8 +8,9 @@
         "strictNullChecks": true,
         "moduleResolution": "nodenext",
         "module": "nodenext",
-        "target": "esnext"
+        "target": "esnext",
+        "lib": ["es6"]
     },
     "exclude": ["node_modules", "**/*.d.ts"],
-    "include": ["src/**/*.js"]
+    "include": ["src/**/*.js", "node_modules/@helios-lang/type-utils"]
 }

@@ -4,7 +4,6 @@ import {
     IntData,
     decodeUplcData
 } from "@helios-lang/uplc"
-import { TxId } from "./TxId.js"
 import {
     decodeInt,
     decodeTuple,
@@ -12,6 +11,7 @@ import {
     encodeTuple
 } from "@helios-lang/cbor"
 import { ByteStream } from "@helios-lang/codec-utils"
+import { TxId } from "./TxId.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -157,8 +157,8 @@ export class TxOutputId {
      * @param {TxOutputId} other
      * @returns {boolean}
      */
-    equals(other) {
-        return this.txId.equals(other.txId) && this.utxoIdx == other.utxoIdx
+    isEqual(other) {
+        return this.txId.isEqual(other.txId) && this.utxoIdx == other.utxoIdx
     }
 
     /**

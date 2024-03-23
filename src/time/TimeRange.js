@@ -1,4 +1,4 @@
-import { None } from "@helios-lang/codec-utils"
+import { None } from "@helios-lang/type-utils"
 import {
     ConstrData,
     IntData,
@@ -6,11 +6,6 @@ import {
     encodeBoolData
 } from "@helios-lang/uplc"
 import { timeToNumber } from "./Time.js"
-
-/**
- * @template T
- * @typedef {import("@helios-lang/codec-utils").Option<T>} Option
- */
 
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData

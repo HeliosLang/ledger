@@ -1,13 +1,6 @@
+import { None } from "@helios-lang/type-utils"
 import { ConstrData } from "@helios-lang/uplc"
-import { config } from "./config.js"
-import { PubKeyHash } from "./PubKeyHash.js"
-import { ValidatorHash } from "./ValidatorHash.js"
-import { None } from "@helios-lang/codec-utils"
-
-/**
- * @template T
- * @typedef {import("@helios-lang/codec-utils").Option<T>} Option
- */
+import { PubKeyHash, ValidatorHash } from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData

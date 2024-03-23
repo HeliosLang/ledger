@@ -4,7 +4,7 @@ import {
     handleAssetClassArgs,
     handleAssetClassArgsWithQty
 } from "./AssetClass.js"
-import { MintingPolicyHash } from "./MintingPolicyHash.js"
+
 import {
     decodeBytes,
     decodeInt,
@@ -14,12 +14,12 @@ import {
     encodeMap
 } from "@helios-lang/cbor"
 import { ByteArrayData, IntData, MapData } from "@helios-lang/uplc"
-import { ScriptHash } from "./ScriptHash.js"
+import { MintingPolicyHash, ScriptHash } from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("./AssetClass.js").AssetClassLike} AssetClassLike
- * @typedef {import("./MintingPolicyHash.js").MintingPolicyHashLike} MintingPolicyHashLike
+ * @typedef {import("../hashes/MintingPolicyHash.js").MintingPolicyHashLike} MintingPolicyHashLike
  */
 
 /**

@@ -5,7 +5,7 @@ import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- * @typedef {import("./Hash.js").Hash} Hash
+ * @typedef {import("../hashes/index.js").Hash} Hash
  */
 
 /**
@@ -82,8 +82,9 @@ export class TxId {
 
     /**
      * @param {TxId} other
+     * @returns {boolean}
      */
-    equals(other) {
+    isEqual(other) {
         return ByteArrayData.compare(this.bytes, other.bytes) == 0
     }
 

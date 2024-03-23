@@ -1,13 +1,10 @@
+import { None } from "@helios-lang/type-utils"
 import { ConstrData } from "@helios-lang/uplc"
-import { StakingHash } from "./StakingHash.js"
-import { None } from "@helios-lang/codec-utils"
-import { PubKeyHash } from "./PubKeyHash.js"
-import { StakingValidatorHash } from "./StakingValidatorHash.js"
-
-/**
- * @template T
- * @typedef {import("@helios-lang/codec-utils").Option<T>} Option
- */
+import {
+    PubKeyHash,
+    StakingHash,
+    StakingValidatorHash
+} from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
@@ -17,6 +14,9 @@ import { StakingValidatorHash } from "./StakingValidatorHash.js"
  * @typedef {StakingCredential | StakingHash | PubKeyHash | StakingValidatorHash} StakingCredentialLike
  */
 
+/**
+ * TODO: implement support for staking pointers
+ */
 export class StakingCredential {
     /**
      * @readonly
@@ -84,6 +84,22 @@ export class StakingCredential {
      */
     get bytes() {
         return this.hash.bytes
+    }
+
+    /**
+     * @returns {StakingHash}
+     */
+    expectStakingHash() {
+        return this.hash
+    }
+
+    /**
+     * Only valid for Staking hashes
+     * XXX: this is quite confusing, if only staking hashes are serialized into transactions, how can staking pointers be available inside the scriptcontext in validators?
+     * @returns {number[]}
+     */
+    toCbor() {
+        return this.hash.toCbor()
     }
 
     /**

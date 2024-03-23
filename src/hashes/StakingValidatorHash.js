@@ -1,5 +1,4 @@
 import { decodeBytes } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 

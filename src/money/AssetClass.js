@@ -1,6 +1,5 @@
 import { ByteStream, bytesToHex, toBytes } from "@helios-lang/codec-utils"
 import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
-import { MintingPolicyHash } from "./MintingPolicyHash.js"
 import { blake2b, encodeBech32 } from "@helios-lang/crypto"
 import {
     decodeBytes,
@@ -8,11 +7,12 @@ import {
     encodeBytes,
     encodeConstr
 } from "@helios-lang/cbor"
+import { MintingPolicyHash } from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- * @typedef {import("./MintingPolicyHash.js").MintingPolicyHashLike} MintingPolicyHashLike
+ * @typedef {import("../hashes/index.js").MintingPolicyHashLike} MintingPolicyHashLike
  */
 /**
  * @typedef {string | [
