@@ -1,7 +1,7 @@
 import {
     decodeBytes,
     decodeInt,
-    decodeOption,
+    decodeNullOption,
     decodeString,
     decodeTagged,
     encodeBytes,
@@ -104,13 +104,13 @@ export class PoolRelay {
         switch (tag) {
             case 0: {
                 const port = decodeItem((stream) =>
-                    decodeOption(stream, decodeInt)
+                    decodeNullOption(stream, decodeInt)
                 )
                 const ipv4 = decodeItem((stream) =>
-                    decodeOption(stream, decodeBytes)
+                    decodeNullOption(stream, decodeBytes)
                 )
                 const ipv6 = decodeItem((stream) =>
-                    decodeOption(stream, decodeBytes)
+                    decodeNullOption(stream, decodeBytes)
                 )
 
                 return PoolRelay.SingleAddr({
@@ -121,7 +121,7 @@ export class PoolRelay {
             }
             case 1: {
                 const port = decodeItem((stream) =>
-                    decodeOption(stream, decodeInt)
+                    decodeNullOption(stream, decodeInt)
                 )
                 const record = decodeItem(decodeString)
 

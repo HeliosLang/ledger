@@ -5,12 +5,12 @@ import {
     encodeFloat32,
     encodeInt,
     encodeList,
-    encodeOption,
+    encodeNullOption,
     encodeTuple,
     decodeTuple,
     decodeBytes,
     decodeList,
-    decodeOption
+    decodeNullOption
 } from "@helios-lang/cbor"
 import { PubKeyHash } from "../hashes/index.js"
 import { PoolMetadata } from "./PoolMetadata.js"
@@ -140,7 +140,7 @@ export class PoolParameters {
             decodeBytes,
             (stream) => decodeList(stream, PubKeyHash),
             (stream) => decodeList(stream, PoolRelay),
-            (stream) => decodeOption(stream, PoolMetadata)
+            (stream) => decodeNullOption(stream, PoolMetadata)
         ])
 
         return new PoolParameters({
@@ -169,7 +169,7 @@ export class PoolParameters {
             encodeBytes(this.rewardAccount),
             encodeList(this.owners),
             encodeList(this.relays),
-            encodeOption(this.metadata, (some) => some.toCbor())
+            encodeNullOption(this.metadata)
         ])
     }
 }

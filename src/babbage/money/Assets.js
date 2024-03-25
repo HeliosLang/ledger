@@ -232,7 +232,7 @@ export class Assets {
      */
     countTokens() {
         return this.assets.reduce(
-            (prev, [mph, tokens]) => prev + tokens.length,
+            (prev, [_mph, tokens]) => prev + tokens.length,
             0
         )
     }
@@ -290,7 +290,7 @@ export class Assets {
      * @returns {MintingPolicyHash[]}
      */
     getPolicies() {
-        return this.assets.map(([mph, _]) => mph)
+        return this.assets.map(([mph, _tokens]) => mph)
     }
 
     /**
@@ -316,7 +316,7 @@ export class Assets {
 
         for (let [otherMph, tokens] of this.assets) {
             if (otherMph.isEqual(mph)) {
-                return tokens.map(([tokenName, _]) => tokenName)
+                return tokens.map(([tokenName, _qty]) => tokenName)
             }
         }
 
@@ -358,8 +358,8 @@ export class Assets {
      * @returns {boolean}
      */
     isAllPositive() {
-        for (let [mph, tokens] of this.assets) {
-            for (let [tokenName, qty] of tokens) {
+        for (let [_mph, tokens] of this.assets) {
+            for (let [_tokenName, qty] of tokens) {
                 if (qty < 0n) {
                     return false
                 } else if (qty == 0n) {
@@ -548,7 +548,7 @@ export class Assets {
             return ScriptHash.compare(a, b)
         })
 
-        this.assets.forEach(([_, tokens]) => {
+        this.assets.forEach(([_mph, tokens]) => {
             tokens.sort(([a], [b]) => {
                 return ByteArrayData.compare(a, b, true)
             })
