@@ -5,7 +5,6 @@ import {
     equalsBytes,
     toBytes
 } from "@helios-lang/codec-utils"
-import { blake2b } from "@helios-lang/crypto"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 
 /**
@@ -15,14 +14,13 @@ import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
  */
 
 /**
- * @typedef {DatumHash | ByteArrayLike} DatumHashLike
+ * @typedef {ScriptHash | ByteArrayLike} ScriptHashLike
  */
 
 /**
- * Represents a blake2b-256 hash of datum data.
  * @implements {Hash}
  */
-export class DatumHash {
+export class ScriptHash {
     /**
      * @readonly
      * @type {number[]}
@@ -30,61 +28,48 @@ export class DatumHash {
     bytes
 
     /**
-     * @param {Exclude<DatumHashLike, DatumHash>} bytes
+     *
+     * @param {Exclude<ScriptHashLike, ScriptHash>} arg
      */
-    constructor(bytes) {
-        this.bytes = toBytes(bytes)
-
-        if (this.bytes.length != 32) {
-            throw new Error(
-                `expected 32 bytes for DatumHash, got ${this.bytes.length} bytes`
-            )
-        }
+    constructor(arg) {
+        this.bytes = toBytes(arg)
     }
 
     /**
-     * @param {DatumHashLike} arg
-     * @returns {DatumHash}
+     * @param {ScriptHashLike} arg
+     * @returns {ScriptHash}
      */
     static fromAlike(arg) {
-        return arg instanceof DatumHash ? arg : new DatumHash(arg)
+        return arg instanceof ScriptHash ? arg : new ScriptHash(arg)
     }
 
     /**
      * @param {ByteArrayLike} bytes
-     * @returns {DatumHash}
+     * @returns {ScriptHash}
      */
     static fromCbor(bytes) {
-        return new DatumHash(decodeBytes(bytes))
+        return new ScriptHash(decodeBytes(bytes))
     }
 
     /**
      * @param {UplcData} data
-     * @returns {DatumHash}
+     * @returns {ScriptHash}
      */
     static fromUplcData(data) {
-        return new DatumHash(ByteArrayData.expect(data).bytes)
+        return new ScriptHash(ByteArrayData.expect(data).bytes)
     }
 
     /**
      * @param {ByteArrayLike} bytes
-     * @returns {DatumHash}
+     * @returns {ScriptHash}
      */
     static fromUplcCbor(bytes) {
-        return DatumHash.fromUplcData(decodeUplcData(bytes))
+        return ScriptHash.fromUplcData(decodeUplcData(bytes))
     }
 
     /**
-     * @param {UplcData} data
-     * @returns {DatumHash}
-     */
-    static hashUplcData(data) {
-        return new DatumHash(blake2b(data.toCbor()))
-    }
-
-    /**
-     * @param {DatumHash} a
-     * @param {DatumHash} b
+     * @param {ScriptHash} a
+     * @param {ScriptHash} b
      * @returns {number}
      */
     static compare(a, b) {
@@ -92,14 +77,8 @@ export class DatumHash {
     }
 
     /**
-     * @returns {string}
-     */
-    dump() {
-        return bytesToHex(this.bytes)
-    }
-
-    /**
-     * @param {DatumHash} other
+     * @param {ScriptHash} other
+     * @returns {boolean}
      */
     isEqual(other) {
         return equalsBytes(this.bytes, other.bytes)
@@ -120,7 +99,6 @@ export class DatumHash {
     }
 
     /**
-     * Hexadecimal representation.
      * @returns {string}
      */
     toString() {

@@ -13,6 +13,7 @@ import {
     decodeNullOption
 } from "@helios-lang/cbor"
 import { PubKeyHash } from "../hashes/index.js"
+import { StakingAddress } from "../tx/StakingAddress.js"
 import { PoolMetadata } from "./PoolMetadata.js"
 import { PoolRelay } from "./PoolRelay.js"
 import { ByteStream } from "@helios-lang/codec-utils"
@@ -28,7 +29,7 @@ import { ByteStream } from "@helios-lang/codec-utils"
  *   pledge: bigint
  *   cost: bigint
  *   margin: number
- *   rewardAccount: number[]
+ *   rewardAccount: StakingAddress
  *   owners: PubKeyHash[]
  *   relays: PoolRelay[]
  *   metadata?: PoolMetadata
@@ -68,7 +69,7 @@ export class PoolParameters {
 
     /**
      * @readonly
-     * @type {number[]}
+     * @type {StakingAddress}
      */
     rewardAccount
 
@@ -137,7 +138,7 @@ export class PoolParameters {
             decodeInt,
             decodeInt,
             decodeFloat32,
-            decodeBytes,
+            StakingAddress,
             (stream) => decodeList(stream, PubKeyHash),
             (stream) => decodeList(stream, PoolRelay),
             (stream) => decodeNullOption(stream, PoolMetadata)
@@ -166,7 +167,7 @@ export class PoolParameters {
             encodeInt(this.pledge),
             encodeInt(this.cost),
             encodeFloat32(this.margin), // TODO: test this,
-            encodeBytes(this.rewardAccount),
+            this.rewardAccount.toCbor(),
             encodeList(this.owners),
             encodeList(this.relays),
             encodeNullOption(this.metadata)

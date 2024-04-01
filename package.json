@@ -3,23 +3,13 @@
     "version": "0.1.9",
     "description": "Ledger types (eg. for building transactions)",
     "main": "src/index.js",
-    "exports": {
-        ".": "./src/index.js",
-        "./byron": "./src/byron/index.js",
-        "./shelley": "./src/shelley/index.js",
-        "./allegra": "./src/allegra/index.js",
-        "./mary": "./src/mary/index.js",
-        "./alonzo": "./src/alonzo/index.js",
-        "./babbage": "./src/babbage/index.js",
-        "./conway": "./src/conway/index.js"
-    },
+    "types": "types/index.d.ts",
     "type": "module",
     "scripts": {
         "build": "npm test",
         "clean": "find src/ -name *.d.ts* | xargs rm -f",
         "postpublish": "npm run clean",
         "prebuild": "npm run clean && npx tsc -p jsconfig.json --noEmit false --emitDeclarationOnly",
-        "prepare": "npm run build",
         "prettify": "npx prettier . --write",
         "test": "npm run test:pretty && npm run test:types && npm run test:suite",
         "test:pretty": "npx prettier . --check",
@@ -34,11 +24,11 @@
         "typescript": "^5.3.2"
     },
     "dependencies": {
-        "@helios-lang/cbor": "^0.1.14",
-        "@helios-lang/codec-utils": "^0.1.24",
+        "@helios-lang/cbor": "^0.1.15",
+        "@helios-lang/codec-utils": "^0.1.26",
         "@helios-lang/crypto": "^0.1.2",
-        "@helios-lang/type-utils": "^0.1.5",
-        "@helios-lang/uplc": "^0.1.12"
+        "@helios-lang/type-utils": "^0.1.6",
+        "@helios-lang/uplc": "^0.1.21"
     },
     "prettier": {
         "trailingComma": "none",

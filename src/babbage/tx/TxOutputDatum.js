@@ -23,39 +23,45 @@ import { DatumHash } from "../hashes/index.js"
  */
 
 /**
- * @typedef {"Hash" | "Inline"} TxOutputDatumKinds
+ * @typedef {"Hash" | "Inline"} TxOutputDatumKind
  */
 
 /**
- * @template {TxOutputDatumKinds} T
+ * @template {TxOutputDatumKind} T
  * @typedef {T extends "Inline" ? {
- *   "Inline": {
- *     data: UplcData
- *   }
+ *   data: UplcData
  * } : {
- *   "Hash": {
- *     hash: DatumHash
- *     data?: UplcData
- *   }
+ *   hash: DatumHash
+ *   data?: UplcData
  * }} TxOutputDatumProps
  */
 
 /**
  * On-chain the TxOutputDatum has 3 variants (`none`, `hash` and `inline`), off-chain it is more convenient to treat it as an Option of two variants
- * @template {TxOutputDatumKinds} [T=TxOutputDatumKinds]
+ * @template {TxOutputDatumKind} [T=TxOutputDatumKind]
  */
 export class TxOutputDatum {
     /**
      * @private
+     * @readonly
+     * @type {T}
+     */
+    kind
+
+    /**
+     * @private
+     * @readonly
      * @type {TxOutputDatumProps<T>}
      */
     props
 
     /**
      * @private
+     * @param {T} kind
      * @param {TxOutputDatumProps<T>} props
      */
-    constructor(props) {
+    constructor(kind, props) {
+        this.kind = kind
         this.props = props
     }
 
@@ -77,13 +83,11 @@ export class TxOutputDatum {
      */
     static Hash(arg) {
         if (arg instanceof DatumHash) {
-            return new TxOutputDatum({ Hash: { hash: arg } })
+            return new TxOutputDatum("Hash", { hash: arg })
         } else {
-            return new TxOutputDatum({
-                Hash: {
-                    data: arg,
-                    hash: new DatumHash(blake2b(arg.toCbor()))
-                }
+            return new TxOutputDatum("Hash", {
+                data: arg,
+                hash: new DatumHash(blake2b(arg.toCbor()))
             })
         }
     }
@@ -93,7 +97,7 @@ export class TxOutputDatum {
      * @returns {TxOutputDatum<"Inline">}
      */
     static Inline(data) {
-        return new TxOutputDatum({ Inline: { data: data } })
+        return new TxOutputDatum("Inline", { data: data })
     }
 
     /**
@@ -185,69 +189,76 @@ export class TxOutputDatum {
     }
 
     /**
-     * @returns {this is TxOutputDatum<"Hash">}
-     */
-    isHash() {
-        return "Hash" in this.props
-    }
-
-    /**
-     * @returns {this is TxOutputDatum<"Inline">}
-     */
-    isInline() {
-        return "Inline" in this.props
-    }
-
-    /**
-     * THis is ok for methods, this doesn't work for getters
-     * @this TxOutputDatum<"Inline">
-     * @returns {string}
-     */
-    //helloMethod() {
-    //  return this.props.Inline.hello
-    //}
-
-    /**
-     * @type {T extends "Inline" ? UplcData : Option<UplcData>}
+     * @type {UplcData}
      */
     get data() {
-        return /** @type {any} */ (
-            "Hash" in this.props
-                ? this.props.Hash?.data ?? None
-                : this.props.Inline.data
-        )
+        if (this.isHash()) {
+            const data = this.props.data
+
+            if (!data) {
+                throw new Error(
+                    "data not set for TxOutDatum.Hash (hint: recover)"
+                )
+            }
+
+            return data
+        } else if (this.isInline()) {
+            return this.props.data
+        } else {
+            throw new Error(`unhandled TxOutputDatum kind ${this.kind}`)
+        }
     }
 
     /**
      * @type {DatumHash}
      */
     get hash() {
-        if ("Hash" in this.props) {
-            return this.props.Hash.hash
+        if (this.isHash()) {
+            return this.props.hash
+        } else if (this.isInline()) {
+            return DatumHash.hashUplcData(this.props.data)
         } else {
-            return new DatumHash(blake2b(this.props.Inline.data.toCbor()))
+            throw new Error(`unhandled TxOutputDatum kind ${this.kind}`)
         }
+    }
+
+    /**
+     * @returns {this is TxOutputDatum<"Hash">}
+     */
+    isHash() {
+        return this.kind == "Hash"
+    }
+
+    /**
+     * @returns {this is TxOutputDatum<"Inline">}
+     */
+    isInline() {
+        return this.kind == "Inline"
     }
 
     /**
      * @returns {Object}
      */
     dump() {
-        if ("Hash" in this.props) {
+        if (this.isHash()) {
+            const props = this.props
+
             return {
-                hash: this.props.Hash.hash.dump(),
-                cbor: this.props.Hash?.data
-                    ? bytesToHex(this.props.Hash.data.toCbor())
-                    : null,
-                schema: this.props.Hash?.data
-                    ? JSON.parse(this.props.Hash.data.toSchemaJson())
+                hash: props.hash.dump(),
+                cbor: props?.data ? bytesToHex(props.data.toCbor()) : null,
+                schema: props?.data
+                    ? JSON.parse(props.data.toSchemaJson())
                     : null
             }
-        } else {
+        } else if (this.isInline()) {
+            const props = this.props
+
             return {
-                inlineCbor: bytesToHex(this.props.Inline.data.toCbor()),
-                inlineSchema: JSON.parse(this.props.Inline.data.toSchemaJson())
+                inlineCbor: bytesToHex(props.data.toCbor()),
+                inlineSchema: JSON.parse(props.data.toSchemaJson())
             }
+        } else {
+            throw new Error(`unhandled TxOutputDatum kind ${this.kind}`)
         }
     }
 
@@ -255,15 +266,15 @@ export class TxOutputDatum {
      * @returns {number[]}
      */
     toCbor() {
-        if ("Hash" in this.props) {
-            return encodeTuple([encodeInt(0n), this.props.Hash.hash.toCbor()])
-        } else {
+        if (this.isHash()) {
+            return encodeTuple([encodeInt(0n), this.props.hash.toCbor()])
+        } else if (this.isInline()) {
             return encodeTuple([
                 encodeInt(1n),
-                encodeTag(24n).concat(
-                    encodeBytes(this.props.Inline.data.toCbor())
-                )
+                encodeTag(24n).concat(encodeBytes(this.props.data.toCbor()))
             ])
+        } else {
+            throw new Error(`unhandled TxOutputDatum kind ${this.kind}`)
         }
     }
 
@@ -272,10 +283,12 @@ export class TxOutputDatum {
      * @returns {ConstrData}
      */
     toUplcData() {
-        if ("Hash" in this.props) {
-            return new ConstrData(1, [this.props.Hash.hash.toUplcData()])
+        if (this.isHash()) {
+            return new ConstrData(1, [this.props.hash.toUplcData()])
+        } else if (this.isInline()) {
+            return new ConstrData(2, [this.props.data])
         } else {
-            return new ConstrData(2, [this.props.Inline.data])
+            throw new Error(`unhandled TxOutputDatum kind ${this.kind}`)
         }
     }
 }

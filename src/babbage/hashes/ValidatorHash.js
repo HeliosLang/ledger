@@ -1,6 +1,7 @@
 import { decodeBytes } from "@helios-lang/cbor"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
+import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -60,5 +61,22 @@ export class ValidatorHash extends ScriptHash {
      */
     static fromUplcCbor(bytes) {
         return ValidatorHash.fromUplcData(decodeUplcData(bytes))
+    }
+
+    /**
+     * @param {ValidatorHash} a
+     * @param {ValidatorHash} b
+     * @returns {number}
+     */
+    static compare(a, b) {
+        return compareBytes(a.bytes, b.bytes)
+    }
+
+    /**
+     * @param {ValidatorHash} other
+     * @returns {boolean}
+     */
+    isEqual(other) {
+        return equalsBytes(this.bytes, other.bytes)
     }
 }

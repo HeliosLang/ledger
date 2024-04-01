@@ -3,10 +3,5 @@
  */
 
 /**
- * @typedef {{
- *   toCbor: () => number[]
- *   toHex: () => string
- *   toString: () => string
- *   toUplcData: () => UplcData
- * }} Hash
+ * @typedef {import("../../shelley/index.js").Hash} Hash
  */

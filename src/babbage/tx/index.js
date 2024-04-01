@@ -1,5 +1,5 @@
 export { Address } from "./Address.js"
-export { Credential } from "./Credential.js"
+export { PaymentCredential as Credential } from "./PaymentCredential.js"
 export { DCert } from "./DCert.js"
 export { StakingCredential } from "./StakingCredential.js"
 export { TxId } from "./TxId.js"
@@ -9,5 +9,5 @@ export { TxOutputDatum } from "./TxOutputDatum.js"
 export { TxOutputId } from "./TxOutputId.js"
 
 /**
- * @typedef {import("./TxOutputDatum.js").TxOutputDatumKinds} TxOutputDatumKinds
+ * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
  */

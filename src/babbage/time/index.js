@@ -1,4 +1,4 @@
-export { timeToNumber } from "./Time.js"
+export { timeToDate, timeToNumber } from "./Time.js"
 export { TimeRange } from "./TimeRange.js"
 
 /**

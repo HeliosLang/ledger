@@ -14,11 +14,16 @@ import {
 } from "@helios-lang/cbor"
 import { ByteStream, bytesToHex } from "@helios-lang/codec-utils"
 import { None } from "@helios-lang/type-utils"
-import { ByteArrayData, ConstrData, encodeOptionData } from "@helios-lang/uplc"
-import { UplcProgram as UplcProgramV1 } from "@helios-lang/uplc/v1"
-import { UplcProgram as UplcProgramV2 } from "@helios-lang/uplc/v2"
+import {
+    ByteArrayData,
+    ConstrData,
+    encodeOptionData,
+    UplcProgramV1,
+    UplcProgramV2
+} from "@helios-lang/uplc"
 import { DatumHash } from "../hashes/index.js"
 import { Value } from "../money/index.js"
+import { NetworkParamsHelper } from "../params/index.js"
 import { config } from "./config.js"
 import { Address } from "./Address.js"
 import { TxOutputDatum } from "./TxOutputDatum.js"
@@ -26,7 +31,9 @@ import { TxOutputDatum } from "./TxOutputDatum.js"
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- * @typedef {import("./TxOutputDatum.js").TxOutputDatumKinds} TxOutputDatumKinds
+ * @typedef {import("../money/index.js").ValueLike} ValueLike
+ * @typedef {import("./Address.js").AddressLike} AddressLike
+ * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
  */
 
 /**
@@ -47,7 +54,7 @@ export class TxOutput {
 
     /**
      * Mutation is handy when correctin the quantity of lovelace in a utxo
-     * @type {Option<TxOutputDatum<TxOutputDatumKinds>>}
+     * @type {Option<TxOutputDatum<TxOutputDatumKind>>}
      */
     datum
 
@@ -58,14 +65,14 @@ export class TxOutput {
 
     /**
      * Constructs a `TxOutput` instance using an `Address`, a `Value`, an optional `Datum`, and optional `UplcProgram` reference script.
-     * @param {Address} address
-     * @param {Value} value
-     * @param {Option<TxOutputDatum<TxOutputDatumKinds>>} datum
+     * @param {AddressLike} address
+     * @param {ValueLike} value
+     * @param {Option<TxOutputDatum>} datum
      * @param {Option<UplcProgramV1 | UplcProgramV2>} refScript - plutus v2 script for now
      */
     constructor(address, value, datum = None, refScript = None) {
-        this.address = address
-        this.value = value
+        this.address = Address.fromAlike(address)
+        this.value = Value.fromAlike(value)
         this.datum = datum
         this.refScript = refScript
     }
@@ -236,5 +243,40 @@ export class TxOutput {
                 this.refScript ? new ByteArrayData(this.refScript.hash()) : None
             )
         ])
+    }
+
+    /**
+     * Each UTxO must contain some minimum quantity of lovelace to avoid that the blockchain is used for data storage.
+     * @param {NetworkParamsHelper} networkParams
+     * @returns {bigint}
+     */
+    calcDeposit(networkParams) {
+        let lovelacePerByte = networkParams.lovelacePerUTXOByte
+
+        let correctedSize = this.toCbor().length + 160 // 160 accounts for some database overhead?
+
+        return BigInt(correctedSize) * BigInt(lovelacePerByte)
+    }
+
+    /**
+     * Makes sure the `TxOutput` contains the minimum quantity of lovelace.
+     * The network requires this to avoid the creation of unusable dust UTxOs.
+     *
+     * Optionally an update function can be specified that allows mutating the datum of the `TxOutput` to account for an increase of the lovelace quantity contained in the value.
+     * @param {NetworkParamsHelper} networkParams
+     * @param {Option<(output: TxOutput) => void>} updater
+     */
+    correctLovelace(networkParams, updater = null) {
+        let minLovelace = this.calcDeposit(networkParams)
+
+        while (this.value.lovelace < minLovelace) {
+            this.value.lovelace = minLovelace
+
+            if (updater != null) {
+                updater(this)
+            }
+
+            minLovelace = this.calcDeposit(networkParams)
+        }
     }
 }

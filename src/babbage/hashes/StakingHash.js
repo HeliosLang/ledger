@@ -9,6 +9,21 @@ import { ValidatorHash } from "./ValidatorHash.js"
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ * @typedef {import("../hashes/index.js").PubKeyHashLike} PubKeyHashLike
+ * @typedef {import("../hashes/index.js").StakingValidatorHashLike} StakingValidatorHashLike
+ */
+
+/**
+ * @typedef {"PubKey" | "Validator"} StakingHashKind
+ */
+
+/**
+ * @template {StakingHashKind} T
+ * @typedef {T extends "PubKey" ? {
+ *   hash: PubKeyHash
+ * } : {
+ *   hash: StakingValidatorHash
+ * }} StakingHashProps
  */
 
 /**
@@ -17,19 +32,49 @@ import { ValidatorHash } from "./ValidatorHash.js"
 
 /**
  * Similar to Credential, wrapper for StakingValidatorHash | PubKeyHash
+ * @template {StakingHashKind} [T=StakingHashKind]
  */
 export class StakingHash {
     /**
+     * @private
      * @readonly
-     * @type {PubKeyHash | StakingValidatorHash}
+     * @type {T}
      */
-    hash
+    kind
 
     /**
-     * @param {Exclude<StakingHashLike, StakingHash>} hash
+     * @private
+     * @readonly
+     * @type {StakingHashProps<T>}
      */
-    constructor(hash) {
-        this.hash = hash
+    props
+
+    /**
+     * @private
+     * @param {T} kind
+     * @param {StakingHashProps<T>} props
+     */
+    constructor(kind, props) {
+        this.kind = kind
+        this.props = props
+    }
+
+    /**
+     * @param {PubKeyHashLike} hash
+     * @returns {StakingHash<"PubKey">}
+     */
+    static PubKey(hash) {
+        return new StakingHash("PubKey", { hash: PubKeyHash.fromAlike(hash) })
+    }
+
+    /**
+     * @param {StakingValidatorHashLike} hash
+     * @returns {StakingHash<"Validator">}
+     */
+    static Validator(hash) {
+        return new StakingHash("Validator", {
+            hash: StakingValidatorHash.fromAlike(hash)
+        })
     }
 
     /**
@@ -37,7 +82,13 @@ export class StakingHash {
      * @returns {StakingHash}
      */
     static fromAlike(arg) {
-        return arg instanceof StakingHash ? arg : new StakingHash(arg)
+        if (arg instanceof StakingHash) {
+            return arg
+        } else if (arg instanceof PubKeyHash) {
+            return StakingHash.PubKey(arg)
+        } else {
+            return StakingHash.Validator(arg)
+        }
     }
 
     /**
@@ -51,9 +102,9 @@ export class StakingHash {
 
         switch (tag) {
             case 0:
-                return new StakingHash(decodeItem(PubKeyHash))
+                return StakingHash.PubKey(decodeItem(PubKeyHash))
             case 1:
-                return new StakingHash(decodeItem(ValidatorHash))
+                return StakingHash.Validator(decodeItem(ValidatorHash))
             default:
                 throw new Error(
                     `expected 0 or 1 StakingHash cbor tag, got ${tag}`
@@ -70,9 +121,11 @@ export class StakingHash {
 
         switch (data.tag) {
             case 0:
-                return new StakingHash(PubKeyHash.fromUplcData(data.fields[0]))
+                return StakingHash.PubKey(
+                    PubKeyHash.fromUplcData(data.fields[0])
+                )
             case 1:
-                return new StakingHash(
+                return StakingHash.Validator(
                     StakingValidatorHash.fromUplcData(data.fields[0])
                 )
             default:
@@ -90,51 +143,56 @@ export class StakingHash {
     }
 
     /**
-     * @type {Option<PubKeyHash>}
+     * @type {T extends "PubKey" ? PubKeyHash : T extends "Validator" ? StakingValidatorHash : (PubKeyHash | StakingValidatorHash)}
+     */
+    get hash() {
+        return /** @type {any} */ (this.props.hash)
+    }
+
+    /**
+     * @type {T extends "PubKey" ? PubKeyHash : T extends "Validator" ? typeof None : Option<PubKeyHash>}
      */
     get pubKeyHash() {
-        return this.hash instanceof PubKeyHash ? this.hash : None
+        return /** @type {any} */ (this.isPubKey() ? this.props.hash : None)
     }
 
     /**
-     * @type {Option<StakingValidatorHash>}
+     * @type {T extends "Validator" ? StakingValidatorHash : T extends "PubKey" ? typeof None : Option<StakingValidatorHash>}
      */
     get stakingValidatorHash() {
-        return this.hash instanceof StakingValidatorHash ? this.hash : None
+        return /** @type {any} */ (this.isValidator() ? this.props.hash : None)
     }
 
     /**
-     * @type {number}
-     */
-    get tag() {
-        return this.isPubKey() ? 0 : 1
-    }
-
-    /**
-     * @returns {boolean}
+     * @returns {this is StakingHash<"PubKey">}
      */
     isPubKey() {
-        return this.hash instanceof PubKeyHash
+        return "PubKey" == this.kind
     }
 
     /**
-     * @returns {boolean}
+     * @returns {this is StakingHash<"Validator">}
      */
-    isStakingValidator() {
-        return this.hash instanceof StakingValidatorHash
+    isValidator() {
+        return "Validator" == this.kind
     }
 
     /**
      * @returns {number[]}
      */
     toCbor() {
-        return encodeTuple([encodeInt(this.tag), this.hash.toCbor()])
+        return encodeTuple([
+            encodeInt(this.isPubKey() ? 0 : 1),
+            this.props.hash.toCbor()
+        ])
     }
 
     /**
      * @returns {ConstrData}
      */
     toUplcData() {
-        return new ConstrData(this.tag, [this.hash.toUplcData()])
+        return new ConstrData(this.isPubKey() ? 0 : 1, [
+            this.props.hash.toUplcData()
+        ])
     }
 }

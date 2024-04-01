@@ -17,7 +17,7 @@ import { ByteStream } from "@helios-lang/codec-utils"
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- * @typedef {import("./TxOutputDatum.js").TxOutputDatumKinds} TxOutputDatumKinds
+ * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
  */
 
 /**
@@ -31,18 +31,18 @@ export class TxInput {
     id
 
     /**
-     *
+     * Can be mutated in order to recover
      * @type {Option<TxOutput>}
      */
-    output
+    #output
 
     /**
      * @param {TxOutputId} outputId
-     * @param {Option<TxOutput>} output - used during building, not part of serialization
+     * @param {Option<TxOutput>} output - used during building/emulation, not part of serialization
      */
     constructor(outputId, output = None) {
         this.id = outputId
-        this.output = output
+        this.#output = output
     }
 
     /**
@@ -86,6 +86,34 @@ export class TxInput {
     }
 
     /**
+     * Used by TxBodyBuilder.addInput and TxBodyBuilder.addRefInput
+     * @param {TxInput[]} list
+     * @param {TxInput} input
+     * @param {boolean} checkUniqueness
+     */
+    static append(list, input, checkUniqueness = true) {
+        const output = input.#output
+
+        if (!output) {
+            throw new Error(
+                "TxInput.output must be set when building a transaction"
+            )
+        }
+
+        output.value.assertAllPositive()
+
+        if (
+            checkUniqueness &&
+            list.some((prevInput) => prevInput.isEqual(input))
+        ) {
+            throw new Error("input already added before")
+        }
+
+        list.push(input)
+        list.sort(TxInput.compare)
+    }
+
+    /**
      * Tx inputs must be ordered.
      * The following function can be used directly by a js array sort
      * @param {TxInput} a
@@ -112,15 +140,27 @@ export class TxInput {
      * @type {Address}
      */
     get address() {
-        return this.expectOutput().address
+        return this.output.address
     }
 
     /**
      * Shortcut
-     * @type {Option<TxOutputDatum<TxOutputDatumKinds>>}
+     * @type {Option<TxOutputDatum<TxOutputDatumKind>>}
      */
     get datum() {
-        return this.expectOutput().datum
+        return this.output.datum
+    }
+
+    /**
+     * Throws an error if the TxInput hasn't been recovered
+     * @returns {TxOutput}
+     */
+    get output() {
+        if (this.#output) {
+            return this.#output
+        } else {
+            throw new Error("TxInput original output not synced")
+        }
     }
 
     /**
@@ -128,7 +168,17 @@ export class TxInput {
      * @type {Value}
      */
     get value() {
-        return this.expectOutput().value
+        return this.output.value
+    }
+
+    /**
+     * The output itself isn't stored in the ledger, so must be recovered after deserializing blocks/transactions
+     * @param {(id: TxOutputId) => Promise<TxOutput>} fn
+     */
+    async recover(fn) {
+        if (!this.#output) {
+            this.#output = await fn(this.id)
+        }
     }
 
     /**
@@ -137,19 +187,7 @@ export class TxInput {
     dump() {
         return {
             outputId: this.id.toString(),
-            output: this.output ? this.output.dump() : null
-        }
-    }
-
-    /**
-     * @private
-     * @returns {TxOutput}
-     */
-    expectOutput() {
-        if (this.output) {
-            return this.output
-        } else {
-            throw new Error("TxInput original output not synced")
+            output: this.#output ? this.#output.dump() : null
         }
     }
 
@@ -169,7 +207,7 @@ export class TxInput {
      */
     toCbor(full = false) {
         if (full) {
-            return encodeTuple([this.id.toCbor(), this.expectOutput().toCbor()])
+            return encodeTuple([this.id.toCbor(), this.output.toCbor()])
         } else {
             return this.id.toCbor()
         }
@@ -180,10 +218,10 @@ export class TxInput {
      * @returns {ConstrData}
      */
     toUplcData() {
-        if (this.output) {
+        if (this.#output) {
             return new ConstrData(0, [
                 this.id.toUplcData(),
-                this.output.toUplcData()
+                this.#output.toUplcData()
             ])
         } else {
             throw new Error("TxInput original output not synced")

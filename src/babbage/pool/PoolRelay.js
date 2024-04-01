@@ -18,7 +18,7 @@ import { None } from "@helios-lang/type-utils"
  */
 
 /**
- * @typedef {"SingleAddr" | "SingleName" | "MultiName"} PoolRelayKinds
+ * @typedef {"SingleAddr" | "SingleName" | "MultiName"} PoolRelayKind
  */
 
 /**
@@ -29,36 +29,40 @@ import { None } from "@helios-lang/type-utils"
  * }} SingleAddrProps
  */
 /**
- * @template {PoolRelayKinds} T
- * @typedef {T extends "SingleAddr" ? {
- *   "SingleAddr": SingleAddrProps
- * } : T extends "SingleName" ? {
- *   "SingleName": {
- *     port?: number
- *     record: string
- *   }
+ * @template {PoolRelayKind} T
+ * @typedef {T extends "SingleAddr" ? SingleAddrProps : T extends "SingleName" ? {
+ *   port?: number
+ *   record: string
  * } : {
- *   "MultiName": {
- *     record: string
- *   }
+ *   record: string
  * }} PoolRelayProps
  */
 
 /**
- * @template {PoolRelayKinds} [T=PoolRelayKinds]
+ * @template {PoolRelayKind} [T=PoolRelayKind]
  */
 export class PoolRelay {
     /**
      * @private
+     * @readonly
+     * @type {T}
+     */
+    kind
+
+    /**
+     * @private
+     * @readonly
      * @type {PoolRelayProps<T>}
      */
     props
 
     /**
-     *
+     * @private
+     * @param {T} kind
      * @param {PoolRelayProps<T>} props
      */
-    constructor(props) {
+    constructor(kind, props) {
+        this.kind = kind
         this.props = props
     }
 
@@ -67,7 +71,7 @@ export class PoolRelay {
      * @returns {PoolRelay<"SingleAddr">}
      */
     static SingleAddr(props) {
-        return new PoolRelay({ SingleAddr: props })
+        return new PoolRelay("SingleAddr", props)
     }
 
     /**
@@ -76,11 +80,9 @@ export class PoolRelay {
      * @returns {PoolRelay<"SingleName">}
      */
     static SingleName(record, port = None) {
-        return new PoolRelay({
-            SingleName: {
-                record: record,
-                port: port ? port : undefined
-            }
+        return new PoolRelay("SingleName", {
+            record: record,
+            port: port ? port : undefined
         })
     }
 
@@ -89,7 +91,7 @@ export class PoolRelay {
      * @returns {PoolRelay<"MultiName">}
      */
     static MultiName(record) {
-        return new PoolRelay({ MultiName: { record: record } })
+        return new PoolRelay("MultiName", { record: record })
     }
 
     /**
@@ -143,64 +145,76 @@ export class PoolRelay {
      * @returns {this is PoolRelay<"SingleAddr">}
      */
     isSingleAddr() {
-        return "SingleAddr" in this.props
+        return this.kind == "SingleAddr"
     }
 
     /**
      * @returns {this is PoolRelay<"SingleName">}
      */
     isSingleName() {
-        return "SingleName" in this.props
+        return this.kind == "SingleName"
     }
 
     /**
      * @returns {this is PoolRelay<"MultiName">}
      */
     isMultiName() {
-        return "MultiName" in this.props
+        return this.kind == "MultiName"
     }
 
     /**
-     * @type {T extends "SingleAddr" ? Option<number[]> : never}
+     * @typedef {"SingleAddr"} PoolRelayKindWithIpv4
+     */
+
+    /**
+     * @type {T extends PoolRelayKindWithIpv4 ? Option<number[]> : T extends Exclude<PoolRelayKind, PoolRelayKindWithIpv4> ? never : Option<number[]>}
      */
     get ipv4() {
-        return /** @type {any} */ (
-            this.isSingleAddr() ? this.props.SingleAddr.ipv4 : undefined
-        )
+        return /** @type {any} */ (this.isSingleAddr() ? this.props.ipv4 : None)
     }
 
     /**
-     * @type {T extends "SingleAddr" ? Option<number[]> : never}
+     * @typedef {"SingleAddr"} PoolRelayKindWithIpv6
+     */
+
+    /**
+     * @type {T extends PoolRelayKindWithIpv6 ? Option<number[]> : T extends Exclude<PoolRelayKind, PoolRelayKindWithIpv6> ? never : Option<number[]>}
      */
     get ipv6() {
-        return /** @type {any} */ (
-            this.isSingleAddr() ? this.props.SingleAddr.ipv6 : undefined
-        )
+        return /** @type {any} */ (this.isSingleAddr() ? this.props.ipv6 : None)
     }
 
     /**
-     * @type {T extends ("SingleAddr" | "SingleName") ? Option<number> : never}
+     * @typedef {"SingleAddr" | "SingleName"} PoolRelayKindWithPort
+     */
+
+    /**
+     * @type {T extends PoolRelayKindWithPort ? Option<number> : T extends Exclude<PoolRelayKind, PoolRelayKindWithPort> ? never : Option<number>}
      */
     get port() {
         return /** @type {any} */ (
             this.isSingleAddr()
-                ? this.props.SingleAddr.port
+                ? this.props.port
                 : this.isSingleName()
-                  ? this.props.SingleName.port
-                  : undefined
+                  ? this.props.port
+                  : None
         )
     }
 
     /**
-     * @type {T extends ("SingleName" | "MultiName") ? string : never}
+     * @typedef {"SingleName" | "MultiName"} PoolRelayKindWithRecord
+     */
+
+    /**
+     * @type {T extends PoolRelayKindWithRecord ? string : T extends Exclude<PoolRelayKind, PoolRelayKindWithRecord> ? never : Option<string>}
      */
     get record() {
         return /** @type {any} */ (
             this.isSingleName()
-                ? this.props.SingleName.record
+                ? this.props.record
                 : this.isMultiName()
-                  ? this.props.MultiName.record
-                  : undefined
+                  ? this.props.record
+                  : None
         )
     }
 
@@ -209,31 +223,26 @@ export class PoolRelay {
      */
     toCbor() {
         if (this.isSingleAddr()) {
+            const props = this.props
+
             return encodeTuple([
                 encodeInt(0),
-                this.props.SingleAddr.port
-                    ? encodeInt(this.props.SingleAddr.port)
-                    : encodeNull(),
-                this.props.SingleAddr.ipv4
-                    ? encodeBytes(this.props.SingleAddr.ipv4)
-                    : encodeNull(),
-                this.props.SingleAddr.ipv6
-                    ? encodeBytes(this.props.SingleAddr.ipv6)
-                    : encodeNull()
+                props.port ? encodeInt(props.port) : encodeNull(),
+                props.ipv4 ? encodeBytes(props.ipv4) : encodeNull(),
+                props.ipv6 ? encodeBytes(props.ipv6) : encodeNull()
             ])
         } else if (this.isSingleName()) {
+            const props = this.props
+
             return encodeTuple([
                 encodeInt(1),
-                this.props.SingleName.port
-                    ? encodeInt(this.props.SingleName.port)
-                    : encodeNull(),
-                encodeString(this.props.SingleName.record)
+                props.port ? encodeInt(props.port) : encodeNull(),
+                encodeString(props.record)
             ])
         } else if (this.isMultiName()) {
-            return encodeTuple([
-                encodeInt(2),
-                encodeString(this.props.MultiName.record)
-            ])
+            const props = this.props
+
+            return encodeTuple([encodeInt(2), encodeString(props.record)])
         } else {
             throw new Error("unhandled variant")
         }

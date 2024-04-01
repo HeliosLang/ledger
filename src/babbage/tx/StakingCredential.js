@@ -45,12 +45,12 @@ export class StakingCredential {
                 case 0:
                 case 1:
                     return new StakingCredential(
-                        new StakingHash(new PubKeyHash(body))
+                        StakingHash.PubKey(new PubKeyHash(body))
                     )
                 case 2:
                 case 3:
                     return new StakingCredential(
-                        new StakingHash(new StakingValidatorHash(body))
+                        StakingHash.Validator(new StakingValidatorHash(body))
                     )
                 default:
                     throw new Error(`unhandled StakingCredential type ${type}`)

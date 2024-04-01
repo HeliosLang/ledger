@@ -9,6 +9,7 @@ import { ConstrData, IntData } from "@helios-lang/uplc"
 import { PubKeyHash, StakingHash } from "../hashes/index.js"
 import { PoolParameters } from "../pool/index.js"
 import { StakingCredential } from "./StakingCredential.js"
+import { None } from "@helios-lang/type-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -17,52 +18,52 @@ import { StakingCredential } from "./StakingCredential.js"
  */
 
 /**
- * @typedef {"Register" | "Deregister" | "Delegate" | "RegisterPool" | "RetirePool" } DCertKinds
+ * @typedef {"Register" | "Deregister" | "Delegate" | "RegisterPool" | "RetirePool" } DCertKind
  */
 
 /**
- * @template {DCertKinds} T
+ * @template {DCertKind} T
  * @typedef {T extends "Register" ? {
- *   "Register": {
- *     credential: StakingCredential
- *   }
+ *   credential: StakingCredential
  * } : T extends "Deregister" ? {
- *   "Deregister": {
- *     credential: StakingCredential
- *   }
+ *   credential: StakingCredential
  * } : T extends "Delegate" ? {
- *   "Delegate": {
- *     credential: StakingCredential
- *     poolId: PubKeyHash
- *   }
+ *   credential: StakingCredential
+ *   poolId: PubKeyHash
  * } : T extends "RegisterPool" ? {
- *   "RegisterPool": {
- *     parameters: PoolParameters
- *   }
- * } : {
- *   "RetirePool": {
- *     poolId: PubKeyHash
- *     epoch: number
- *   }
- * }} DCertProps
+ *   parameters: PoolParameters
+ * } : T extends "RetirePool" ? {
+ *   poolId: PubKeyHash
+ *   epoch: number
+ * } : never} DCertProps
  */
 
 /**
  * Confusingly the DCerts in the script context uses full StakingCredentials (which can be Staking Pointer), but the Cbor ledger format only encodes the StakingHash (presumably resolving Staking Ptrs to Staking Hashes)
- * @template {DCertKinds} [T=DCertKinds]
+ * @template {DCertKind} [T=DCertKind]
  */
 export class DCert {
     /**
      * @private
+     * @readonly
+     * @type {T}
+     */
+    kind
+
+    /**
+     * @private
+     * @readonly
      * @type {DCertProps<T>}
      */
     props
 
     /**
      * @private
+     * @param {T} kind
      * @param {DCertProps<T>} props
      */
-    constructor(props) {
+    constructor(kind, props) {
+        this.kind = kind
         this.props = props
     }
 
@@ -71,10 +72,8 @@ export class DCert {
      * @returns {DCert<"Register">}
      */
     static Register(credential) {
-        return new DCert({
-            Register: {
-                credential: StakingCredential.fromAlike(credential)
-            }
+        return new DCert("Register", {
+            credential: StakingCredential.fromAlike(credential)
         })
     }
 
@@ -83,10 +82,8 @@ export class DCert {
      * @returns {DCert<"Deregister">}
      */
     static Deregister(credential) {
-        return new DCert({
-            Deregister: {
-                credential: StakingCredential.fromAlike(credential)
-            }
+        return new DCert("Deregister", {
+            credential: StakingCredential.fromAlike(credential)
         })
     }
 
@@ -97,11 +94,9 @@ export class DCert {
      * @returns {DCert<"Delegate">}
      */
     static Delegate(credential, poolId) {
-        return new DCert({
-            Delegate: {
-                credential: StakingCredential.fromAlike(credential),
-                poolId: PubKeyHash.fromAlike(poolId)
-            }
+        return new DCert("Delegate", {
+            credential: StakingCredential.fromAlike(credential),
+            poolId: PubKeyHash.fromAlike(poolId)
         })
     }
 
@@ -110,10 +105,8 @@ export class DCert {
      * @return {DCert<"RegisterPool">}
      */
     static RegisterPool(parameters) {
-        return new DCert({
-            RegisterPool: {
-                parameters: parameters
-            }
+        return new DCert("RegisterPool", {
+            parameters: parameters
         })
     }
 
@@ -123,11 +116,9 @@ export class DCert {
      * @returns {DCert<"RetirePool">}
      */
     static RetirePool(poolId, epoch) {
-        return new DCert({
-            RetirePool: {
-                poolId: PubKeyHash.fromAlike(poolId),
-                epoch: Math.round(Number(epoch))
-            }
+        return new DCert("RetirePool", {
+            poolId: PubKeyHash.fromAlike(poolId),
+            epoch: Math.round(Number(epoch))
         })
     }
 
@@ -163,87 +154,61 @@ export class DCert {
     }
 
     /**
-     * @returns {this is DCert<"Register">}
+     * @typedef {("Register" | "Deregister" | "Delegate")} DCertKindWithCredential
      */
-    isRegister() {
-        return "Register" in this.props
-    }
 
     /**
-     * @returns {this is DCert<"Deregister">}
-     */
-    isDeregister() {
-        return "Deregister" in this.props
-    }
-
-    /**
-     * @returns {this is DCert<"Delegate">}
-     */
-    isDelegate() {
-        return "Delegate" in this.props
-    }
-
-    /**
-     * @returns {this is DCert<"RegisterPool">}
-     */
-    isRegisterPool() {
-        return "RegisterPool" in this.props
-    }
-
-    /**
-     * @returns {this is DCert<"RetirePool">}
-     */
-    isRetirePool() {
-        return "RetirePool" in this.props
-    }
-
-    /**
-     * @type {T extends ("Register" | "Deregister" | "Delegate") ? StakingCredential : never}
+     * @type {T extends DCertKindWithCredential ? StakingCredential : T extends Exclude<DCertKind, DCertKindWithCredential> ? never : Option<StakingCredential>}
      */
     get credential() {
         return /** @type {any} */ (
-            this.isRegister()
-                ? this.props.Register.credential
-                : this.isDeregister()
-                  ? this.props.Deregister.credential
-                  : this.isDelegate()
-                    ? this.props.Delegate.credential
-                    : undefined
+            this.isRegister() || this.isDeregister() || this.isDelegate()
+                ? this.props.credential
+                : None
         )
     }
 
     /**
-     * @type {T extends "RetirePool" ? number : never}
+     * @typedef {"RetirePool"} DCertKindWithEpoch
+     */
+    /**
+     * @type {T extends DCertKindWithEpoch ? number : T extends Exclude<DCertKind, DCertKindWithEpoch> ? never : Option<number>}
      */
     get epoch() {
         return /** @type {any} */ (
-            this.isRetirePool() ? this.props.RetirePool.epoch : undefined
+            this.isRetirePool() ? this.props.epoch : None
         )
     }
 
     /**
-     * @type {T extends ("Delegate" | "RegisterPool" | "RetirePool") ? PubKeyHash : never}
+     * @typedef {"Delegate" | "RegisterPool" | "RetirePool"} DCertKindWithPoolId
+     */
+
+    /**
+     * @type {T extends DCertKindWithPoolId ? PubKeyHash : T extends Exclude<DCertKind, DCertKindWithPoolId> ? never : Option<PubKeyHash>}
      */
     get poolId() {
         return /** @type {any} */ (
             this.isDelegate()
-                ? this.props.Delegate.poolId
-                : this.isRegisterPool()
-                  ? this.props.RegisterPool.parameters.id
-                  : this.isRetirePool()
-                    ? this.props.RetirePool.poolId
-                    : undefined
+                ? this.props.poolId
+                : this.isRetirePool()
+                  ? this.props.poolId
+                  : this.isRegisterPool()
+                    ? this.props.parameters.id
+                    : None
         )
     }
 
     /**
-     * @type {T extends "RegisterPool" ? PoolParameters : never}
+     * @typedef {"RegisterPool"} DCertKindWithPoolParameters
+     */
+
+    /**
+     * @type {T extends DCertKindWithPoolParameters ? PoolParameters : T extends Exclude<DCertKind, DCertKindWithPoolParameters> ? never : Option<PoolParameters>}
      */
     get poolParameters() {
         return /** @type {any} */ (
-            this.isRegisterPool()
-                ? this.props.RegisterPool.parameters
-                : undefined
+            this.isRegisterPool() ? this.props.parameters : None
         )
     }
 
@@ -263,35 +228,91 @@ export class DCert {
     }
 
     /**
+     * @returns {Object}
+     */
+    dump() {
+        if (this.isRegister()) {
+            return {
+                dcertType: "Register"
+            }
+        } else if (this.isDeregister()) {
+            return {
+                dcertType: "Deregister"
+            }
+        } else if (this.isDelegate()) {
+            return {
+                dcertType: "Delegate"
+            }
+        } else if (this.isRegisterPool()) {
+            return {
+                dcertType: "RegisterPool"
+            }
+        } else if (this.isRetirePool()) {
+            return {
+                dcertType: "RetirePool"
+            }
+        } else {
+            throw new Error("unhandled DCert kind")
+        }
+    }
+
+    /**
+     * @returns {this is DCert<"Register">}
+     */
+    isRegister() {
+        return this.kind == "Register"
+    }
+
+    /**
+     * @returns {this is DCert<"Deregister">}
+     */
+    isDeregister() {
+        return this.kind == "Deregister"
+    }
+
+    /**
+     * @this {DCert}
+     * @returns {this is DCert<"Delegate">}
+     */
+    isDelegate() {
+        return this.kind == "Delegate"
+    }
+
+    /**
+     * @returns {this is DCert<"RegisterPool">}
+     */
+    isRegisterPool() {
+        return this.kind == "RegisterPool"
+    }
+
+    /**
+     * @returns {this is DCert<"RetirePool">}
+     */
+    isRetirePool() {
+        return this.kind == "RetirePool"
+    }
+
+    /**
      * @returns {number[]}
      */
     toCbor() {
         if (this.isRegister()) {
-            return encodeTuple([
-                encodeInt(0),
-                this.props.Register.credential.toCbor()
-            ])
+            return encodeTuple([encodeInt(0), this.props.credential.toCbor()])
         } else if (this.isDeregister()) {
-            return encodeTuple([
-                encodeInt(1),
-                this.props.Deregister.credential.toCbor()
-            ])
+            return encodeTuple([encodeInt(1), this.props.credential.toCbor()])
         } else if (this.isDelegate()) {
             return encodeTuple([
                 encodeInt(2),
-                this.props.Delegate.credential.toCbor(),
-                this.props.Delegate.poolId.toCbor()
+                this.props.credential.toCbor(),
+                this.props.poolId.toCbor()
             ])
         } else if (this.isRegisterPool()) {
-            return encodeTuple([
-                encodeInt(3),
-                this.props.RegisterPool.parameters.toCbor()
-            ])
+            return encodeTuple([encodeInt(3), this.props.parameters.toCbor()])
         } else if (this.isRetirePool()) {
             return encodeTuple([
                 encodeInt(4),
-                this.props.RetirePool.poolId,
-                encodeInt(this.props.RetirePool.epoch)
+                this.props.poolId,
+                encodeInt(this.props.epoch)
             ])
         } else {
             throw new Error("unhandled DCert type")
@@ -303,27 +324,23 @@ export class DCert {
      */
     toUplcData() {
         if (this.isRegister()) {
-            return new ConstrData(0, [
-                this.props.Register.credential.toUplcData()
-            ])
+            return new ConstrData(0, [this.props.credential.toUplcData()])
         } else if (this.isDeregister()) {
-            return new ConstrData(1, [
-                this.props.Deregister.credential.toUplcData()
-            ])
+            return new ConstrData(1, [this.props.credential.toUplcData()])
         } else if (this.isDelegate()) {
             return new ConstrData(2, [
-                this.props.Delegate.credential.toUplcData(),
-                this.props.Delegate.poolId.toUplcData()
+                this.props.credential.toUplcData(),
+                this.props.poolId.toUplcData()
             ])
         } else if (this.isRegisterPool()) {
             return new ConstrData(3, [
-                this.props.RegisterPool.parameters.id.toUplcData(),
-                this.props.RegisterPool.parameters.vrf.toUplcData()
+                this.props.parameters.id.toUplcData(),
+                this.props.parameters.vrf.toUplcData()
             ])
         } else if (this.isRetirePool()) {
             return new ConstrData(4, [
-                this.props.RetirePool.poolId.toUplcData(),
-                new IntData(this.props.RetirePool.epoch)
+                this.props.poolId.toUplcData(),
+                new IntData(this.props.epoch)
             ])
         } else {
             throw new Error("unhandled DCert type")

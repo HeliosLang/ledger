@@ -5,7 +5,6 @@ import {
     equalsBytes,
     toBytes
 } from "@helios-lang/codec-utils"
-import { blake2b } from "@helios-lang/crypto"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 
 /**
@@ -15,14 +14,16 @@ import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
  */
 
 /**
- * @typedef {DatumHash | ByteArrayLike} DatumHashLike
+ * @typedef {PubKeyHash | ByteArrayLike} PubKeyHashLike
  */
 
 /**
- * Represents a blake2b-256 hash of datum data.
+ * Represents a blake2b-224 hash of a PubKey
+ *
+ * **Note**: A `PubKeyHash` can also be used as the second part of a payment `Address`, or to construct a `StakeAddress`.
  * @implements {Hash}
  */
-export class DatumHash {
+export class PubKeyHash {
     /**
      * @readonly
      * @type {number[]}
@@ -30,61 +31,62 @@ export class DatumHash {
     bytes
 
     /**
-     * @param {Exclude<DatumHashLike, DatumHash>} bytes
+     * @param {Exclude<PubKeyHashLike, PubKeyHash>} bytes
      */
     constructor(bytes) {
         this.bytes = toBytes(bytes)
 
-        if (this.bytes.length != 32) {
+        if (this.bytes.length != 28) {
             throw new Error(
-                `expected 32 bytes for DatumHash, got ${this.bytes.length} bytes`
+                `expected 28 bytes for PubKeyHash, got ${this.bytes.length}`
             )
         }
     }
 
     /**
-     * @param {DatumHashLike} arg
-     * @returns {DatumHash}
+     * @returns {PubKeyHash}
+     */
+    static dummy() {
+        const bytes = new Array(28).fill(0)
+
+        return new PubKeyHash(bytes)
+    }
+
+    /**
+     * @param {PubKeyHashLike} arg
+     * @returns {PubKeyHash}
      */
     static fromAlike(arg) {
-        return arg instanceof DatumHash ? arg : new DatumHash(arg)
+        return arg instanceof PubKeyHash ? arg : new PubKeyHash(arg)
     }
 
     /**
      * @param {ByteArrayLike} bytes
-     * @returns {DatumHash}
+     * @returns {PubKeyHash}
      */
     static fromCbor(bytes) {
-        return new DatumHash(decodeBytes(bytes))
+        return new PubKeyHash(decodeBytes(bytes))
     }
 
     /**
      * @param {UplcData} data
-     * @returns {DatumHash}
+     * @returns {PubKeyHash}
      */
     static fromUplcData(data) {
-        return new DatumHash(ByteArrayData.expect(data).bytes)
+        return new PubKeyHash(ByteArrayData.expect(data).bytes)
     }
 
     /**
      * @param {ByteArrayLike} bytes
-     * @returns {DatumHash}
+     * @returns {PubKeyHash}
      */
     static fromUplcCbor(bytes) {
-        return DatumHash.fromUplcData(decodeUplcData(bytes))
+        return PubKeyHash.fromUplcData(decodeUplcData(bytes))
     }
 
     /**
-     * @param {UplcData} data
-     * @returns {DatumHash}
-     */
-    static hashUplcData(data) {
-        return new DatumHash(blake2b(data.toCbor()))
-    }
-
-    /**
-     * @param {DatumHash} a
-     * @param {DatumHash} b
+     * @param {PubKeyHash} a
+     * @param {PubKeyHash} b
      * @returns {number}
      */
     static compare(a, b) {
@@ -92,14 +94,16 @@ export class DatumHash {
     }
 
     /**
+     * Diagnostic representation
      * @returns {string}
      */
     dump() {
-        return bytesToHex(this.bytes)
+        return this.toHex()
     }
 
     /**
-     * @param {DatumHash} other
+     * @param {PubKeyHash} other
+     * @returns {boolean}
      */
     isEqual(other) {
         return equalsBytes(this.bytes, other.bytes)

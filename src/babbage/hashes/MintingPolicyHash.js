@@ -2,6 +2,7 @@ import { decodeBytes } from "@helios-lang/cbor"
 import { blake2b, encodeBech32 } from "@helios-lang/crypto"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
+import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -69,11 +70,20 @@ export class MintingPolicyHash extends ScriptHash {
     }
 
     /**
+     * @param {MintingPolicyHash} a
+     * @param {MintingPolicyHash} b
+     * @returns {number}
+     */
+    static compare(a, b) {
+        return compareBytes(a.bytes, b.bytes)
+    }
+
+    /**
      * @param {MintingPolicyHash} other
      * @returns {boolean}
      */
     isEqual(other) {
-        return ByteArrayData.compare(this.bytes, other.bytes) == 0
+        return equalsBytes(this.bytes, other.bytes)
     }
 
     /**

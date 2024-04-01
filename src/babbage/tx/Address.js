@@ -15,7 +15,7 @@ import {
     ValidatorHash
 } from "../hashes/index.js"
 import { config } from "./config.js"
-import { Credential } from "./Credential.js"
+import { PaymentCredential } from "./PaymentCredential.js"
 import { StakingCredential } from "./StakingCredential.js"
 
 /**
@@ -42,9 +42,9 @@ export class Address {
 
     /**
      * @readonly
-     * @type {Credential}
+     * @type {PaymentCredential}
      */
-    credential
+    paymentCredential
 
     /**
      * @readonly
@@ -64,7 +64,7 @@ export class Address {
             )
         }
 
-        this.credential = Credential.fromAddressBytes(this.bytes)
+        this.paymentCredential = PaymentCredential.fromAddressBytes(this.bytes)
         this.stakingCredential = StakingCredential.fromAddressBytes(this.bytes)
     }
 
@@ -117,18 +117,18 @@ export class Address {
     }
 
     /**
-     * @param {Credential} credential
+     * @param {PaymentCredential} paymentCredential
      * @param {Option<StakingCredential>} stakingCredential
      * @param {boolean} isTestnet
      * @return {Address}
      */
     static fromCredentials(
-        credential,
+        paymentCredential,
         stakingCredential,
         isTestnet = config.IS_TESTNET
     ) {
         return this.fromHashes(
-            credential.hash,
+            paymentCredential.hash,
             stakingCredential?.hash?.hash ?? None,
             isTestnet
         )
@@ -150,16 +150,20 @@ export class Address {
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
      * or `ValidatorHash` (i.e. script address),
      * in combination with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
-     * @param {PubKeyHash | ValidatorHash} hash
+     * @param {PubKeyHash | ValidatorHash} paymentHash
      * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromHashes(hash, stakingHash, isTestnet = config.IS_TESTNET) {
-        if (hash instanceof PubKeyHash) {
-            return Address.fromPubKeyHash(hash, stakingHash, isTestnet)
-        } else if (hash instanceof ValidatorHash) {
-            return Address.fromValidatorHash(hash, stakingHash, isTestnet)
+    static fromHashes(paymentHash, stakingHash, isTestnet = config.IS_TESTNET) {
+        if (paymentHash instanceof PubKeyHash) {
+            return Address.fromPubKeyHash(paymentHash, stakingHash, isTestnet)
+        } else if (paymentHash instanceof ValidatorHash) {
+            return Address.fromValidatorHash(
+                paymentHash,
+                stakingHash,
+                isTestnet
+            )
         } else {
             throw new Error("unexpected")
         }
@@ -168,28 +172,30 @@ export class Address {
     /**
      * Simple payment address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
-     * @param {PubKeyHash} hash
+     * @param {PubKeyHash} paymentHash
      * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromPubKeyHash(hash, stakingHash, isTestnet) {
+    static fromPubKeyHash(paymentHash, stakingHash, isTestnet) {
         if (stakingHash) {
             if (stakingHash instanceof PubKeyHash) {
                 return new Address(
                     [isTestnet ? 0x00 : 0x01]
-                        .concat(hash.bytes)
+                        .concat(paymentHash.bytes)
                         .concat(stakingHash.bytes)
                 )
             } else {
                 return new Address(
                     [isTestnet ? 0x20 : 0x21]
-                        .concat(hash.bytes)
+                        .concat(paymentHash.bytes)
                         .concat(stakingHash.bytes)
                 )
             }
         } else {
-            return new Address([isTestnet ? 0x60 : 0x61].concat(hash.bytes))
+            return new Address(
+                [isTestnet ? 0x60 : 0x61].concat(paymentHash.bytes)
+            )
         }
     }
 
@@ -210,7 +216,7 @@ export class Address {
     static fromUplcData(data, isTestnet = config.IS_TESTNET) {
         ConstrData.assert(data, 0, 2)
 
-        const credential = Credential.fromUplcData(data.fields[0])
+        const paymentCredential = PaymentCredential.fromUplcData(data.fields[0])
         const stakingCredentialData = ConstrData.expect(
             data.fields[1],
             "invalid StakingCredential option within Address"
@@ -237,34 +243,40 @@ export class Address {
             throw new Error("unexpected")
         }
 
-        return Address.fromCredentials(credential, stakingCredential, isTestnet)
+        return Address.fromCredentials(
+            paymentCredential,
+            stakingCredential,
+            isTestnet
+        )
     }
 
     /**
      * Simple script address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
-     * @param {ValidatorHash} hash
+     * @param {ValidatorHash} paymentHash
      * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
      * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromValidatorHash(hash, stakingHash, isTestnet) {
+    static fromValidatorHash(paymentHash, stakingHash, isTestnet) {
         if (isSome(stakingHash)) {
             if (stakingHash instanceof PubKeyHash) {
                 return new Address(
                     [isTestnet ? 0x10 : 0x11]
-                        .concat(hash.bytes)
+                        .concat(paymentHash.bytes)
                         .concat(stakingHash.bytes)
                 )
             } else {
                 return new Address(
                     [isTestnet ? 0x30 : 0x31]
-                        .concat(hash.bytes)
+                        .concat(paymentHash.bytes)
                         .concat(stakingHash.bytes)
                 )
             }
         } else {
-            return new Address([isTestnet ? 0x70 : 0x71].concat(hash.bytes))
+            return new Address(
+                [isTestnet ? 0x70 : 0x71].concat(paymentHash.bytes)
+            )
         }
     }
 
@@ -295,7 +307,7 @@ export class Address {
      * @type {Option<PubKeyHash>}
      */
     get pubKeyHash() {
-        return this.credential.pubKeyHash
+        return this.paymentCredential.pubKeyHash
     }
 
     /**
@@ -310,7 +322,7 @@ export class Address {
      * @type {Option<ValidatorHash>}
      */
     get validatorHash() {
-        return this.credential.validatorHash
+        return this.paymentCredential.validatorHash
     }
 
     /**
@@ -373,7 +385,7 @@ export class Address {
      */
     toUplcData() {
         return new ConstrData(0, [
-            this.credential.toUplcData(),
+            this.paymentCredential.toUplcData(),
             encodeOptionData(this.stakingCredential?.toUplcData())
         ])
     }
