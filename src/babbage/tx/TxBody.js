@@ -284,13 +284,13 @@ export class TxBody {
         }
 
         this.inputs.forEach((input, i) => {
-            const paymentCredential = input.output.address.spendingCredential
+            const spendingCredential = input.output.address.spendingCredential
             const datum = input.output.datum
 
             // without datum this is assumed to be a native script
-            if (paymentCredential.isValidator() && datum) {
+            if (spendingCredential.isValidator() && datum) {
                 addEntry(
-                    paymentCredential.validatorHash,
+                    spendingCredential.validatorHash,
                     TxRedeemer.Spending(i, datum.data)
                 )
             }
