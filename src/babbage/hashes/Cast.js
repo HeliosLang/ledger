@@ -8,7 +8,7 @@ export {}
  * @template TStrict
  * @template TPermissive
  * @typedef {{
- *   toUplcData: (x: TPermissive) => UplcData
+ *   toUplcData: (x: TPermissive | UplcData) => UplcData
  *   fromUplcData: (d: UplcData) => TStrict
  * }} Cast
  */

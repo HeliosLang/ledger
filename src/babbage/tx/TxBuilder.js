@@ -2,6 +2,7 @@ import { bytesToHex, equalsBytes } from "@helios-lang/codec-utils"
 import { None, expectSome, isNone } from "@helios-lang/type-utils"
 import { UplcProgramV1, UplcProgramV2, UplcDataValue } from "@helios-lang/uplc"
 import {
+    DatumHash,
     MintingPolicyHash,
     PubKeyHash,
     ScriptHash,
@@ -423,6 +424,10 @@ export class TxBuilder {
                 )
             }
 
+            if (mph.context) {
+                this.attachUplcProgram(mph.context.program)
+            }
+
             if (!this.hasUplcScript(mph.bytes)) {
                 throw new Error(
                     "mint is witnessed by unknown script (hint: attach the script before calling TxBuilder.mint())"
@@ -442,6 +447,12 @@ export class TxBuilder {
     }
 
     /**
+     * @template TDatumPermissive
+     * @overload
+     * @param {Address<any, TDatumPermissive, any>} address
+     * @param {ValueLike} value
+     * @param {{hash: TDatumPermissive} | {inline: TDatumPermissive}} datum
+     *
      * @overload
      * @param {AddressLike} address
      * @param {ValueLike} value
@@ -456,7 +467,16 @@ export class TxBuilder {
      */
 
     /**
-     * @param {[AddressLike, ValueLike] | [AddressLike, ValueLike, Option<TxOutputDatum>] | [TxOutput | TxOutput[]]} args
+     * @template TDatumPermissive
+     * @param {[
+     *   Address<any, TDatumPermissive, any>, ValueLike, {hash: TDatumPermissive} | {inline: TDatumPermissive}
+     * ] | [
+     *   AddressLike, ValueLike
+     * ] | [
+     *   AddressLike, ValueLike, Option<TxOutputDatum>
+     * ] | [
+     *   TxOutput | TxOutput[]
+     * ]} args
      * @returns {TxBuilder}
      */
     pay(...args) {
@@ -467,7 +487,48 @@ export class TxBuilder {
             } else if (args.length == 2) {
                 return new TxOutput(args[0], args[1])
             } else if (args.length == 3) {
-                return new TxOutput(args[0], args[1], args[2])
+                const datum = args[2]
+
+                if (datum instanceof TxOutputDatum) {
+                    return new TxOutput(
+                        /** @type {Address} */ (args[0]),
+                        args[1],
+                        datum
+                    )
+                } else if (datum) {
+                    const address =
+                        /** @type {Address<any, TDatumPermissive, any>} */ (
+                            args[0]
+                        )
+                    const context = address.context
+                    const value = args[1]
+
+                    if ("hash" in datum && context) {
+                        return new TxOutput(
+                            /** @type {Address} */ (address),
+                            value,
+                            TxOutputDatum.Hash(
+                                context.datum.toUplcData(
+                                    /** @type {TDatumPermissive} */ (args[2])
+                                )
+                            )
+                        )
+                    } else if ("inline" in datum && context) {
+                        return new TxOutput(
+                            /** @type {Address} */ (address),
+                            value,
+                            TxOutputDatum.Inline(
+                                context.datum.toUplcData(
+                                    /** @type {TDatumPermissive} */ (args[2])
+                                )
+                            )
+                        )
+                    } else {
+                        throw new Error("invalid arguments")
+                    }
+                } else {
+                    throw new Error("invalid arguments")
+                }
             } else {
                 throw new Error("invalid arguments")
             }
@@ -536,10 +597,20 @@ export class TxBuilder {
     }
 
     /**
+     * @template TRedeemer
+     * @overload
+     * @param {TxInput<any, TRedeemer> | TxInput<any, TRedeemer>[]} utxos
+     * @param {TRedeemer} redeemer
+     *
+     * @overload
+     * @param {TxInput | TxInput[]} utxos
+     * @param {Option<UplcData>} redeemer
+     */
+    /**
      * Add a UTxO instance as an input to the transaction being built.
      * Throws an error if the UTxO is locked at a script address but a redeemer isn't specified (unless the script is a known `NativeScript`).
      * @param {TxInput | TxInput[]} utxos
-     * @param {Option<UplcData>} redeemer
+     * @param {TRedeemer | Option<UplcData>} redeemer
      * @returns {TxBuilder}
      */
     spend(utxos, redeemer = None) {
@@ -565,13 +636,24 @@ export class TxBuilder {
                 )
             }
 
+            const context = utxo.context
+
+            if (context) {
+                this.attachUplcProgram(context.program)
+            }
+
             if (!this.hasUplcScript(paymentCredential.validatorHash.bytes)) {
                 throw new Error(
                     "input is locked by an unknown script (hint: attach the script before calling TxBuilder.spend()"
                 )
             }
 
-            this.addSpendingRedeemer(utxo, redeemer)
+            this.addSpendingRedeemer(
+                utxo,
+                context
+                    ? context.redeemer.toUplcData(/** @type {any} */ (redeemer))
+                    : /** @type {UplcData} */ (redeemer)
+            )
 
             if (!datum) {
                 throw new Error("expected non-null datum")
@@ -752,6 +834,7 @@ export class TxBuilder {
     }
 
     /**
+     * Doesn't throw an error if already added before
      * @private
      * @param {UplcProgramV1} script
      */
@@ -763,6 +846,7 @@ export class TxBuilder {
     }
 
     /**
+     * Doesn't throw an error if already added before
      * @private
      * @param {UplcProgramV2} script
      */
@@ -774,6 +858,7 @@ export class TxBuilder {
     }
 
     /**
+     * Doesn't throw an error if already added before
      * @private
      * @param {UplcProgramV2} script
      */

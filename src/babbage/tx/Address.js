@@ -6,7 +6,9 @@ import {
     ByteArrayData,
     ConstrData,
     decodeUplcData,
-    encodeOptionData
+    encodeOptionData,
+    UplcProgramV1,
+    UplcProgramV2
 } from "@helios-lang/uplc"
 import {
     PubKeyHash,
@@ -24,7 +26,24 @@ import { StakingCredential } from "./StakingCredential.js"
  */
 
 /**
+ * @template TStrict
+ * @template TPermissive
+ * @typedef {import("../hashes/Cast.js").Cast<TStrict, TPermissive>} Cast
+ */
+
+/**
  * @typedef {Address | ByteArrayLike} AddressLike
+ */
+
+/**
+ * @template TDatumStrict
+ * @template TDatumPermissive
+ * @template TPaymentRedeemer
+ * @typedef {{
+ *   paymentProgram: UplcProgramV1 | UplcProgramV2
+ *   datum: Cast<TDatumStrict, TDatumPermissive>
+ *   paymentRedeemer: Cast<any, TPaymentRedeemer>
+ * }} AddressContext
  */
 
 /**
@@ -32,6 +51,9 @@ import { StakingCredential } from "./StakingCredential.js"
  *   * Header (1 byte, see [CIP 19](https://cips.cardano.org/cips/cip19/))
  *   * Witness hash (28 bytes that represent the `PubKeyHash` or `ValidatorHash`)
  *   * Optional staking credential (0 or 28 bytes)
+ * @template [TDatumStrict=UplcData]
+ * @template [TDatumPermissive=UplcData]
+ * @template [TPaymentRedeemer=UplcData]
  */
 export class Address {
     /**
@@ -53,9 +75,16 @@ export class Address {
     stakingCredential
 
     /**
-     * @param {Exclude<AddressLike, Address>} bytes
+     * @readonly
+     * @type {Option<AddressContext<TDatumStrict, TDatumPermissive, TPaymentRedeemer>>}
      */
-    constructor(bytes) {
+    context
+
+    /**
+     * @param {Exclude<AddressLike, Address>} bytes
+     * @param {Option<AddressContext<TDatumStrict, TDatumPermissive, TPaymentRedeemer>>} context
+     */
+    constructor(bytes, context = None) {
         this.bytes = toBytes(bytes)
 
         if (!(this.bytes.length == 29 || this.bytes.length == 57)) {
@@ -66,6 +95,8 @@ export class Address {
 
         this.paymentCredential = PaymentCredential.fromAddressBytes(this.bytes)
         this.stakingCredential = StakingCredential.fromAddressBytes(this.bytes)
+
+        this.context = context
     }
 
     /**
@@ -138,9 +169,12 @@ export class Address {
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
      * or `ValidatorHash` (i.e. script address),
      * without a staking hash.
-     * @param {PubKeyHash | ValidatorHash} hash
+     * @template [TDatumStrict=UplcData]
+     * @template [TDatumPermissive=UplcData]
+     * @template [TPaymentRedeemer=UplcData]
+     * @param {PubKeyHash | ValidatorHash<TDatumStrict, TDatumPermissive, TPaymentRedeemer>} hash
      * @param {boolean} isTestnet
-     * @returns {Address}
+     * @returns {Address<TDatumStrict, TDatumPermissive, TPaymentRedeemer>}
      */
     static fromHash(hash, isTestnet = config.IS_TESTNET) {
         return Address.fromHashes(hash, null, isTestnet)
@@ -150,14 +184,19 @@ export class Address {
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
      * or `ValidatorHash` (i.e. script address),
      * in combination with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
-     * @param {PubKeyHash | ValidatorHash} paymentHash
+     * @template [TDatumStrict=UplcData]
+     * @template [TDatumPermissive=UplcData]
+     * @template [TPaymentRedeemer=UplcData]
+     * @param {PubKeyHash | ValidatorHash<TDatumStrict, TDatumPermissive, TPaymentRedeemer>} paymentHash
      * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
      * @param {boolean} isTestnet
-     * @returns {Address}
+     * @returns {Address<TDatumStrict, TDatumPermissive, TPaymentRedeemer>}
      */
     static fromHashes(paymentHash, stakingHash, isTestnet = config.IS_TESTNET) {
         if (paymentHash instanceof PubKeyHash) {
-            return Address.fromPubKeyHash(paymentHash, stakingHash, isTestnet)
+            return /** @type {any} */ (
+                Address.fromPubKeyHash(paymentHash, stakingHash, isTestnet)
+            )
         } else if (paymentHash instanceof ValidatorHash) {
             return Address.fromValidatorHash(
                 paymentHash,
@@ -253,29 +292,46 @@ export class Address {
     /**
      * Simple script address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
-     * @param {ValidatorHash} paymentHash
+     * @template [TDatumStrict=UplcData]
+     * @template [TDatumPermissive=UplcData]
+     * @template [TPaymentRedeemer=UplcData]
+     * @param {ValidatorHash<TDatumStrict, TDatumPermissive, TPaymentRedeemer>} paymentHash
      * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
      * @param {boolean} isTestnet
-     * @returns {Address}
+     * @returns {Address<TDatumStrict, TDatumPermissive, TPaymentRedeemer>}
      */
     static fromValidatorHash(paymentHash, stakingHash, isTestnet) {
+        /**
+         * @type {Option<AddressContext<TDatumStrict, TDatumPermissive, TPaymentRedeemer>>}
+         */
+        const context = paymentHash.context
+            ? {
+                  paymentProgram: paymentHash.context.program,
+                  datum: paymentHash.context.datum,
+                  paymentRedeemer: paymentHash.context.redeemer
+              }
+            : None
+
         if (isSome(stakingHash)) {
             if (stakingHash instanceof PubKeyHash) {
                 return new Address(
                     [isTestnet ? 0x10 : 0x11]
                         .concat(paymentHash.bytes)
-                        .concat(stakingHash.bytes)
+                        .concat(stakingHash.bytes),
+                    context
                 )
             } else {
                 return new Address(
                     [isTestnet ? 0x30 : 0x31]
                         .concat(paymentHash.bytes)
-                        .concat(stakingHash.bytes)
+                        .concat(stakingHash.bytes),
+                    context
                 )
             }
         } else {
             return new Address(
-                [isTestnet ? 0x70 : 0x71].concat(paymentHash.bytes)
+                [isTestnet ? 0x70 : 0x71].concat(paymentHash.bytes),
+                context
             )
         }
     }

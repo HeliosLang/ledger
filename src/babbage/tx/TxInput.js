@@ -1,10 +1,3 @@
-import { None } from "@helios-lang/type-utils"
-import { ConstrData } from "@helios-lang/uplc"
-import { Address } from "./Address.js"
-import { TxOutput } from "./TxOutput.js"
-import { TxOutputDatum } from "./TxOutputDatum.js"
-import { TxOutputId } from "./TxOutputId.js"
-import { Value } from "../money/Value.js"
 import {
     decodeTuple,
     decodeTupleLazy,
@@ -13,6 +6,13 @@ import {
     isTuple
 } from "@helios-lang/cbor"
 import { ByteStream } from "@helios-lang/codec-utils"
+import { None } from "@helios-lang/type-utils"
+import { ConstrData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
+import { Value } from "../money/Value.js"
+import { Address } from "./Address.js"
+import { TxOutput } from "./TxOutput.js"
+import { TxOutputDatum } from "./TxOutputDatum.js"
+import { TxOutputId } from "./TxOutputId.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -21,7 +21,25 @@ import { ByteStream } from "@helios-lang/codec-utils"
  */
 
 /**
+ * @template TStrict
+ * @template TPermissive
+ * @typedef {import("../hashes/Cast.js").Cast<TStrict, TPermissive>} Cast
+ */
+
+/**
+ * @template TDatum
+ * @template TRedeemer
+ * @typedef {{
+ *   program: UplcProgramV1 | UplcProgramV2
+ *   datum: Cast<TDatum, any>
+ *   redeemer: Cast<any, TRedeemer>
+ * }} TxInputContext
+ */
+
+/**
  * TxInput represents UTxOs that are available for spending
+ * @template [TDatum=UplcData]
+ * @template [TRedeemer=UplcData]
  */
 export class TxInput {
     /**
@@ -37,12 +55,20 @@ export class TxInput {
     #output
 
     /**
+     * @readonly
+     * @type {Option<TxInputContext<TDatum, TRedeemer>>}
+     */
+    context
+
+    /**
      * @param {TxOutputId} outputId
      * @param {Option<TxOutput>} output - used during building/emulation, not part of serialization
+     * @param {Option<TxInputContext<TDatum, TRedeemer>>} context
      */
-    constructor(outputId, output = None) {
+    constructor(outputId, output = None, context = None) {
         this.id = outputId
         this.#output = output
+        this.context = context
     }
 
     /**
