@@ -346,6 +346,7 @@ export class TxBuilder {
      * @param {AssetClassLike} assetClass
      * @param {bigint | number} quantity
      * @param {Option<UplcData>} redeemer - isn't required when minting from a Native script
+     * @returns {TxBuilder}
      */
 
     /**
@@ -354,6 +355,7 @@ export class TxBuilder {
      * @param {MintingPolicyHash<TRedeemer>} policy
      * @param {[ByteArrayLike, number | bigint][]} tokens
      * @param {TRedeemer} redeemer
+     * @returns {TxBuilder}
      */
 
     /**
@@ -361,6 +363,7 @@ export class TxBuilder {
      * @param {MintingPolicyHashLike} policy
      * @param {[ByteArrayLike, number | bigint][]} tokens - list of pairs of [tokenName, quantity], tokenName can be list of bytes or hex-string
      * @param {Option<UplcData>} redeemer - isn't required when minting from a Native script
+     * @returns {TxBuilder}
      */
 
     /**
@@ -452,18 +455,22 @@ export class TxBuilder {
      * @param {Address<any, TDatumPermissive, any>} address
      * @param {ValueLike} value
      * @param {{hash: TDatumPermissive} | {inline: TDatumPermissive}} datum
+     * @returns {TxBuilder}
      *
      * @overload
      * @param {AddressLike} address
      * @param {ValueLike} value
+     * @returns {TxBuilder}
      *
      * @overload
      * @param {AddressLike} address
      * @param {ValueLike} value
      * @param {Option<TxOutputDatum>} datum
+     * @returns {TxBuilder}
      *
      * @overload
      * @param {TxOutput | TxOutput[]} output
+     * @returns {TxBuilder}
      */
 
     /**
@@ -601,10 +608,12 @@ export class TxBuilder {
      * @overload
      * @param {TxInput<any, TRedeemer> | TxInput<any, TRedeemer>[]} utxos
      * @param {TRedeemer} redeemer
+     * @returns {TxBuilder}
      *
      * @overload
      * @param {TxInput | TxInput[]} utxos
      * @param {Option<UplcData>} redeemer
+     * @returns {TxBuilder}
      */
     /**
      * Add a UTxO instance as an input to the transaction being built.
