@@ -348,6 +348,14 @@ export class TxBuilder {
      */
 
     /**
+     * @template TRedeemer
+     * @overload
+     * @param {MintingPolicyHash<TRedeemer>} policy
+     * @param {[ByteArrayLike, number | bigint][]} tokens
+     * @param {TRedeemer} redeemer
+     */
+
+    /**
      * @overload
      * @param {MintingPolicyHashLike} policy
      * @param {[ByteArrayLike, number | bigint][]} tokens - list of pairs of [tokenName, quantity], tokenName can be list of bytes or hex-string

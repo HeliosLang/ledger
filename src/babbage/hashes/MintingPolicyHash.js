@@ -1,8 +1,14 @@
 import { decodeBytes } from "@helios-lang/cbor"
 import { blake2b, encodeBech32 } from "@helios-lang/crypto"
-import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
+import {
+    ByteArrayData,
+    UplcProgramV1,
+    UplcProgramV2,
+    decodeUplcData
+} from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
+import { None } from "@helios-lang/type-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -11,21 +17,43 @@ import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
  */
 
 /**
+ * @template TStrict
+ * @template TPermissive
+ * @typedef {import("./Cast.js").Cast<TStrict, TPermissive>} Cast
+ */
+
+/**
  * @typedef {MintingPolicyHash | ByteArrayLike} MintingPolicyHashLike
+ */
+
+/**
+ * @template [TRedeemer=UplcData]
+ * @typedef {{
+ *   program: UplcProgramV1 | UplcProgramV2,
+ *   redeemer: Cast<UplcData, TRedeemer>
+ * }} MintingPolicyHashContext
  */
 
 /**
  * Represents a blake2b-224 hash of a minting policy script
  *
  * **Note**: to calculate this hash the script is first encoded as a CBOR byte-array and then prepended by a script version byte.
+ * @template [TRedeemer=UplcData]
  * @implements {Hash}
  */
 export class MintingPolicyHash extends ScriptHash {
     /**
+     * @readonly
+     * @type {Option<MintingPolicyHashContext<TRedeemer>>}
+     */
+    context
+
+    /**
      * Can be 0 bytes in case of Ada
      * @param {Exclude<MintingPolicyHashLike, MintingPolicyHash>} bytes
+     * @param {Option<MintingPolicyHashContext<TRedeemer>>} context
      */
-    constructor(bytes) {
+    constructor(bytes, context = None) {
         super(bytes)
 
         if (!(this.bytes.length == 28 || this.bytes.length == 0)) {
@@ -33,6 +61,8 @@ export class MintingPolicyHash extends ScriptHash {
                 `expected 0 or 28 bytes for MintingPolicyHash, got ${this.bytes.length}`
             )
         }
+
+        this.context = context
     }
 
     /**
