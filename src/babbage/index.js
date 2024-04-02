@@ -21,3 +21,9 @@ export * from "./tx/index.js"
  * @template TRedeemerPermissive
  * @typedef {import("./tx/index.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
  */
+
+/**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./tx/index.js").StakingContext<TRedeemerStrict, TRedeemerPermissive>} StakingContext
+ */

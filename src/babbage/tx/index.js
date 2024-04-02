@@ -31,3 +31,9 @@ export { TxWitnesses } from "./TxWitnesses.js"
  * @template TRedeemerPermissive
  * @typedef {import("./SpendingContext.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
  */
+
+/**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./StakingContext.js").StakingContext<TRedeemerStrict, TRedeemerPermissive>} StakingContext
+ */

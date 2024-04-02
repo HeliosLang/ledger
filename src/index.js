@@ -19,3 +19,9 @@ export * as conway from "./conway/index.js"
  * @template TRedeemerPermissive
  * @typedef {import("./babbage/index.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
  */
+
+/**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./babbage/index.js").StakingContext<TRedeemerStrict, TRedeemerPermissive>} StakingContext
+ */
