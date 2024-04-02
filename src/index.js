@@ -5,3 +5,17 @@ export * as mary from "./mary/index.js"
 export * as alonzo from "./alonzo/index.js"
 export * from "./babbage/index.js"
 export * as conway from "./conway/index.js"
+
+/**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./babbage/index.js").MintingContext<TRedeemerStrict, TRedeemerPermissive>} MintingContext
+ */
+
+/**
+ * @template TDatumStrict
+ * @template TDatumPermissive
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./babbage/index.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
+ */

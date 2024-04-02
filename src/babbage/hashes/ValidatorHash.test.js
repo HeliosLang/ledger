@@ -27,6 +27,8 @@ describe(ValidatorHash.name, () => {
          * witnessed by UplcProgram
          * @satisfies {ValidatorHash<{program: UplcProgramV2}>}
          */
-        const witnessed = new ValidatorHash(dummyBytes, { program: dummyProgram })
+        const witnessed = new ValidatorHash(dummyBytes, {
+            program: dummyProgram
+        })
     })
 })

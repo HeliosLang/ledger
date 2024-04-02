@@ -17,3 +17,17 @@ export { TxWitnesses } from "./TxWitnesses.js"
  * @typedef {import("./SpendingCredential.js").SpendingCredentialLike} SpendingCredentialLike
  * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
  */
+
+/**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./MintingContext.js").MintingContext<TRedeemerStrict, TRedeemerPermissive>} MintingContext
+ */
+
+/**
+ * @template TDatumStrict
+ * @template TDatumPermissive
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./SpendingContext.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
+ */

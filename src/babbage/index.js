@@ -7,3 +7,17 @@ export * from "./tx/index.js"
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  */
+
+/**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./tx/index.js").MintingContext<TRedeemerStrict, TRedeemerPermissive>} MintingContext
+ */
+
+/**
+ * @template TDatumStrict
+ * @template TDatumPermissive
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./tx/index.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
+ */

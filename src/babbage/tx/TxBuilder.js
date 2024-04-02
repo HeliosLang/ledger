@@ -42,6 +42,12 @@ import { TxWitnesses } from "./TxWitnesses.js"
  */
 
 /**
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./MintingContext.js").MintingContext<TRedeemerStrict, TRedeemerPermissive>} MintingContext
+ */
+
+/**
  * @template TDatumStrict
  * @template TDatumPermissive
  * @template TRedeemerStrict
@@ -354,28 +360,84 @@ export class TxBuilder {
 
     /**
      * @overload
-     * @param {AssetClassLike} assetClass
+     * @param {AssetClass<null>} assetClass
      * @param {bigint | number} quantity
-     * @param {Option<UplcData>} redeemer - isn't required when minting from a Native script
      * @returns {TxBuilder}
-     */
-
-    /**
+     *
+     * @overload
+     * @param {MintingPolicyHash<null>} policy
+     * @param {[ByteArrayLike, bigint | number][]} tokens
+     * @returns {TxBuilder}
+     *
      * @template TRedeemer
      * @overload
-     * @param {MintingPolicyHash<TRedeemer>} policy
-     * @param {[ByteArrayLike, number | bigint][]} tokens
+     * @param {AssetClass<MintingContext<any, TRedeemer>>} assetClass
+     * @param {bigint | number} quantity
+     * @param {TRedeemer} redeemer
+     * @returns {TxBuilder}
+     *
+     * @template TRedeemer
+     * @overload
+     * @param {MintingPolicyHash<MintingContext<any, TRedeemer>>} policy
+     * @param {[ByteArrayLike, bigint | number][]} tokens
      * @param {TRedeemer} redeemer
      * @returns {TxBuilder}
      */
-
     /**
-     * @overload
-     * @param {MintingPolicyHashLike} policy
-     * @param {[ByteArrayLike, number | bigint][]} tokens - list of pairs of [tokenName, quantity], tokenName can be list of bytes or hex-string
-     * @param {Option<UplcData>} redeemer - isn't required when minting from a Native script
+     * @template TRedeemer
+     * @param {[
+     *   AssetClass<null> | MintingPolicyHash<null>,
+     *   bigint | number | [ByteArrayLike, bigint | number][]
+     * ] | [
+     *   AssetClass<MintingContext<any, TRedeemer>> | MintingPolicyHash<MintingContext<any, TRedeemer>>,
+     *   bigint | number | [ByteArrayLike, bigint | number][],
+     *   TRedeemer
+     * ]} args
      * @returns {TxBuilder}
      */
+    mint(...args) {
+        if (args.length == 2) {
+            const [a, b] = args
+
+            if (
+                a instanceof AssetClass &&
+                (typeof b == "bigint" || typeof b == "number")
+            ) {
+                return this.mintUnsafe(a, b, None)
+            } else if (a instanceof MintingPolicyHash && Array.isArray(b)) {
+                return this.mintUnsafe(a, b, None)
+            } else {
+                throw new Error("invalid arguments")
+            }
+        } else if (args.length == 3) {
+            const [a, b, redeemer] = args
+
+            if (
+                a instanceof AssetClass &&
+                (typeof b == "bigint" || typeof b == "number")
+            ) {
+                this.attachUplcProgram(a.context.program)
+
+                return this.mintUnsafe(
+                    a,
+                    b,
+                    a.context.redeemer.toUplcData(redeemer)
+                )
+            } else if (a instanceof MintingPolicyHash && Array.isArray(b)) {
+                this.attachUplcProgram(a.context.program)
+
+                return this.mintUnsafe(
+                    a,
+                    b,
+                    a.context.redeemer.toUplcData(redeemer)
+                )
+            } else {
+                throw new Error("invalid arguments")
+            }
+        } else {
+            throw new Error("invalid number of arguments")
+        }
+    }
 
     /**
      * Mint a list of tokens associated with a given `MintingPolicyHash`.
@@ -384,50 +446,56 @@ export class TxBuilder {
      *
      * Also throws an error if the redeemer is `null`, and the minting policy isn't a known `NativeScript`.
      *
+     * @overload
+     * @param {AssetClassLike} assetClass
+     * @param {bigint | number} quantity
+     * @param {Option<UplcData>} redeemer - can be None when minting from a Native script (but not set by default)
+     * @returns {TxBuilder}
+     *
+     * @overload
+     * @param {MintingPolicyHashLike} policy
+     * @param {[ByteArrayLike, number | bigint][]} tokens - list of pairs of [tokenName, quantity], tokenName can be list of bytes or hex-string
+     * @param {Option<UplcData>} redeemer - can be None when minting from a Native script (but not set by default)
+     * @returns {TxBuilder}
+     *
      * @template TRedeemer
      * @param {[
      *   AssetClassLike, bigint | number, Option<UplcData>
-     * ] | [
-     *   MintingPolicyHash<TRedeemer>, [ByteArrayLike, number | bigint][], TRedeemer
      * ] | [
      *   MintingPolicyHashLike, [ByteArrayLike, number | bigint][], Option<UplcData>
      * ]} args
      * @returns {TxBuilder}
      */
-    mint(...args) {
+    mintUnsafe(...args) {
+        const [a, b, redeemer] = args
+
         // handle the overloads
         const [mph, tokens] = (() => {
-            const tokens = args[1]
-            if (typeof tokens == "bigint" || typeof tokens == "number") {
+            if (typeof b == "bigint" || typeof b == "number") {
                 const assetClass = AssetClass.fromAlike(
-                    /** @type {AssetClassLike} */ (args[0])
+                    /** @type {AssetClassLike} */ (a)
                 )
+
                 return [
                     assetClass.mph,
                     [
                         /** @type {[number[], bigint | number]} */ ([
                             assetClass.tokenName,
-                            tokens
+                            b
                         ])
                     ]
                 ]
-            } else if (Array.isArray(tokens)) {
+            } else if (Array.isArray(b)) {
                 return [
                     MintingPolicyHash.fromAlike(
-                        /** @type {MintingPolicyHashLike} */ (args[0])
+                        /** @type {MintingPolicyHashLike} */ (a)
                     ),
-                    tokens
+                    b
                 ]
             } else {
                 throw new Error("invalid arguments")
             }
         })()
-
-        const redeemer = mph.context
-            ? /** @type {MintingPolicyHash<any, any>} */ (
-                  mph
-              ).context.redeemer.toUplcData(/** @type {TRedeemer} */ (args[2]))
-            : /** @type {Option<UplcData>} */ (args[2])
 
         this.mintedTokens.addTokens(mph, tokens)
 
@@ -436,10 +504,6 @@ export class TxBuilder {
                 throw new Error(
                     "redeemer not required when minting using a native script (hint: omit the redeemer)"
                 )
-            }
-
-            if (mph.context) {
-                this.attachUplcProgram(mph.context.program)
             }
 
             if (!this.hasUplcScript(mph.bytes)) {
@@ -472,10 +536,8 @@ export class TxBuilder {
      * @param {ValueLike} value
      * @param {TxOutputDatumCastable<TDatum>} datum
      * @returns {TxBuilder}
-     */
-
-    /**
-     * @template [TDatum=UplcData]
+     *
+     * @template TDatum
      * @param {[
      *   Address<null, any>, ValueLike
      * ] | [

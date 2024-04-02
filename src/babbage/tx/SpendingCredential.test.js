@@ -37,7 +37,9 @@ describe(SpendingCredential.name, () => {
         )
 
         const dummyProgram = new UplcProgramV2(new UplcConst(new UplcInt(0)))
-        const witnessedVh = new ValidatorHash(dummyBytes, { program: dummyProgram })
+        const witnessedVh = new ValidatorHash(dummyBytes, {
+            program: dummyProgram
+        })
 
         /**
          * SpendingCredential<{...}> (witnessed by UplcProgram)
