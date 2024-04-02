@@ -1,6 +1,6 @@
 {
     "name": "@helios-lang/ledger",
-    "version": "0.1.15",
+    "version": "0.1.16",
     "description": "Ledger types (eg. for building transactions)",
     "main": "src/index.js",
     "types": "types/index.d.ts",
