@@ -408,7 +408,11 @@ export class TxBuilder {
             }
         })()
 
-        const redeemer = mph.context ? (/** @type {MintingPolicyHash<any, any>} */ (mph)).context.redeemer.toUplcData(/** @type {TRedeemer} */ (args[2])) : /** @type {Option<UplcData>} */ (args[2])
+        const redeemer = mph.context
+            ? /** @type {MintingPolicyHash<any, any>} */ (
+                  mph
+              ).context.redeemer.toUplcData(/** @type {TRedeemer} */ (args[2]))
+            : /** @type {Option<UplcData>} */ (args[2])
 
         this.mintedTokens.addTokens(mph, tokens)
 
