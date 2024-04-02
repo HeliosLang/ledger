@@ -38,8 +38,8 @@ import { TxOutputId } from "./TxOutputId.js"
 
 /**
  * TxInput represents UTxOs that are available for spending
- * @template [TDatum=UplcData]
- * @template [TRedeemer=UplcData]
+ * @template [CSpending=unknown]
+ * @template [CStaking=unknown]
  */
 export class TxInput {
     /**
@@ -55,20 +55,12 @@ export class TxInput {
     #output
 
     /**
-     * @readonly
-     * @type {Option<TxInputContext<TDatum, TRedeemer>>}
-     */
-    context
-
-    /**
      * @param {TxOutputId} outputId
-     * @param {Option<TxOutput>} output - used during building/emulation, not part of serialization
-     * @param {Option<TxInputContext<TDatum, TRedeemer>>} context
+     * @param {Option<TxOutput<CSpending, CStaking>>} output - used during building/emulation, not part of serialization
      */
-    constructor(outputId, output = None, context = None) {
+    constructor(outputId, output = None) {
         this.id = outputId
         this.#output = output
-        this.context = context
     }
 
     /**
@@ -163,7 +155,7 @@ export class TxInput {
 
     /**
      * Shortcut
-     * @type {Address}
+     * @type {Address<CSpending, CStaking>}
      */
     get address() {
         return this.output.address
@@ -179,7 +171,7 @@ export class TxInput {
 
     /**
      * Throws an error if the TxInput hasn't been recovered
-     * @returns {TxOutput}
+     * @returns {TxOutput<CSpending, CStaking>}
      */
     get output() {
         if (this.#output) {
@@ -187,6 +179,20 @@ export class TxInput {
         } else {
             throw new Error("TxInput original output not synced")
         }
+    }
+
+    /**
+     * @type {CSpending}
+     */
+    get spendingContext() {
+        return this.address.spendingContext
+    }
+
+    /**
+     * @type {CStaking}
+     */
+    get stakingContext() {
+        return this.address.stakingContext
     }
 
     /**

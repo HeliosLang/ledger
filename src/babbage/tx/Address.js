@@ -1,7 +1,7 @@
 import { decodeBytes, encodeBytes } from "@helios-lang/cbor"
 import { bytesToHex, toBytes } from "@helios-lang/codec-utils"
 import { decodeBech32, encodeBech32 } from "@helios-lang/crypto"
-import { isSome, None } from "@helios-lang/type-utils"
+import { expectSome, isSome, None } from "@helios-lang/type-utils"
 import {
     ByteArrayData,
     ConstrData,
@@ -17,18 +17,14 @@ import {
     ValidatorHash
 } from "../hashes/index.js"
 import { config } from "./config.js"
-import { PaymentCredential } from "./PaymentCredential.js"
+import { SpendingCredential } from "./SpendingCredential.js"
 import { StakingCredential } from "./StakingCredential.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- */
-
-/**
- * @template TStrict
- * @template TPermissive
- * @typedef {import("../hashes/Cast.js").Cast<TStrict, TPermissive>} Cast
+ * @typedef {import("../hashes/index.js").StakingHashKind} StakingHashKind
+ * @typedef {import("./SpendingCredential.js").SpendingCredentialKind} SpendingCredentialKind
  */
 
 /**
@@ -36,24 +32,12 @@ import { StakingCredential } from "./StakingCredential.js"
  */
 
 /**
- * @template TDatumStrict
- * @template TDatumPermissive
- * @template TPaymentRedeemer
- * @typedef {{
- *   paymentProgram: UplcProgramV1 | UplcProgramV2
- *   datum: Cast<TDatumStrict, TDatumPermissive>
- *   paymentRedeemer: Cast<any, TPaymentRedeemer>
- * }} AddressContext
- */
-
-/**
  * Wrapper for Cardano address bytes. An `Address` consists of three parts internally:
  *   * Header (1 byte, see [CIP 19](https://cips.cardano.org/cips/cip19/))
  *   * Witness hash (28 bytes that represent the `PubKeyHash` or `ValidatorHash`)
  *   * Optional staking credential (0 or 28 bytes)
- * @template [TDatumStrict=UplcData]
- * @template [TDatumPermissive=UplcData]
- * @template [TPaymentRedeemer=UplcData]
+ * @template [CSpending=unknown] - spending can have a context
+ * @template [CStaking=unknown] - staking can have a separate context
  */
 export class Address {
     /**
@@ -64,27 +48,22 @@ export class Address {
 
     /**
      * @readonly
-     * @type {PaymentCredential}
+     * @type {CSpending}
      */
-    paymentCredential
+    spendingContext
 
     /**
      * @readonly
-     * @type {Option<StakingCredential>}
+     * @type {CStaking}
      */
-    stakingCredential
+    stakingContext
 
     /**
-     * @readonly
-     * @type {Option<AddressContext<TDatumStrict, TDatumPermissive, TPaymentRedeemer>>}
+     * @param {ByteArrayLike} bytes
+     * @param {Option<CSpending>} spendingContext
+     * @param {Option<CStaking>} stakingContext
      */
-    context
-
-    /**
-     * @param {Exclude<AddressLike, Address>} bytes
-     * @param {Option<AddressContext<TDatumStrict, TDatumPermissive, TPaymentRedeemer>>} context
-     */
-    constructor(bytes, context = None) {
+    constructor(bytes, spendingContext = None, stakingContext = None) {
         this.bytes = toBytes(bytes)
 
         if (!(this.bytes.length == 29 || this.bytes.length == 57)) {
@@ -93,10 +72,13 @@ export class Address {
             )
         }
 
-        this.paymentCredential = PaymentCredential.fromAddressBytes(this.bytes)
-        this.stakingCredential = StakingCredential.fromAddressBytes(this.bytes)
+        if (spendingContext) {
+            this.spendingContext = spendingContext
+        }
 
-        this.context = context
+        if (stakingContext) {
+            this.stakingContext = stakingContext
+        }
     }
 
     /**
@@ -148,7 +130,7 @@ export class Address {
     }
 
     /**
-     * @param {PaymentCredential} paymentCredential
+     * @param {SpendingCredential} paymentCredential
      * @param {Option<StakingCredential>} stakingCredential
      * @param {boolean} isTestnet
      * @return {Address}
@@ -169,12 +151,14 @@ export class Address {
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
      * or `ValidatorHash` (i.e. script address),
      * without a staking hash.
-     * @template [TDatumStrict=UplcData]
-     * @template [TDatumPermissive=UplcData]
-     * @template [TPaymentRedeemer=UplcData]
-     * @param {PubKeyHash | ValidatorHash<TDatumStrict, TDatumPermissive, TPaymentRedeemer>} hash
+     * @template {PubKeyHash | ValidatorHash} [TSpending=PubKeyHash | ValidatorHash]
+     * @param {TSpending} hash
      * @param {boolean} isTestnet
-     * @returns {Address<TDatumStrict, TDatumPermissive, TPaymentRedeemer>}
+     * @returns {(
+     *   TSpending extends PubKeyHash ? Address<null, null> :
+     *   TSpending extends ValidatorHash<infer CSpending> ? Address<CSpending, null> :
+     *   Address<unknown, null>
+     * )}
      */
     static fromHash(hash, isTestnet = config.IS_TESTNET) {
         return Address.fromHashes(hash, null, isTestnet)
@@ -184,56 +168,86 @@ export class Address {
      * Constructs an Address using either a `PubKeyHash` (i.e. simple payment address)
      * or `ValidatorHash` (i.e. script address),
      * in combination with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
-     * @template [TDatumStrict=UplcData]
-     * @template [TDatumPermissive=UplcData]
-     * @template [TPaymentRedeemer=UplcData]
-     * @param {PubKeyHash | ValidatorHash<TDatumStrict, TDatumPermissive, TPaymentRedeemer>} paymentHash
-     * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
+     * @template {PubKeyHash | ValidatorHash} [TSpending=PubKeyHash | ValidatorHash]
+     * @template {PubKeyHash | StakingValidatorHash} [TStaking=PubKeyHash | StakingValidatorHash]
+     * @param {TSpending} spendingHash
+     * @param {Option<TStaking>} stakingHash
      * @param {boolean} isTestnet
-     * @returns {Address<TDatumStrict, TDatumPermissive, TPaymentRedeemer>}
+     * @returns {(
+     *   TSpending extends PubKeyHash ? (
+     *     TStaking extends PubKeyHash ? Address<null, null> :
+     *     TStaking extends StakingValidatorHash<infer CStaking> ? Address<null, CStaking> :
+     *     Address<null, unknown>
+     *   ) : TSpending extends ValidatorHash<infer CSpending> ? (
+     *     TStaking extends PubKeyHash ? Address<CSpending, null> :
+     *     TStaking extends StakingValidatorHash<infer CStaking> ? Address<CSpending, CStaking> :
+     *     Address<CSpending, unknown>
+     *   ) : Address
+     * )}
      */
-    static fromHashes(paymentHash, stakingHash, isTestnet = config.IS_TESTNET) {
-        if (paymentHash instanceof PubKeyHash) {
+    static fromHashes(
+        spendingHash,
+        stakingHash,
+        isTestnet = config.IS_TESTNET
+    ) {
+        if (spendingHash instanceof PubKeyHash) {
             return /** @type {any} */ (
-                Address.fromPubKeyHash(paymentHash, stakingHash, isTestnet)
+                Address.fromPubKeyHash(spendingHash, stakingHash, isTestnet)
             )
-        } else if (paymentHash instanceof ValidatorHash) {
-            return Address.fromValidatorHash(
-                paymentHash,
-                stakingHash,
-                isTestnet
+        } else if (spendingHash instanceof ValidatorHash) {
+            return /** @type {any} */ (
+                Address.fromValidatorHash(spendingHash, stakingHash, isTestnet)
             )
         } else {
-            throw new Error("unexpected")
+            throw new Error("invalid Spending hash")
         }
     }
 
     /**
      * Simple payment address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
+     * @template {PubKeyHash | StakingValidatorHash} [TStaking=PubKeyHash | StakingValidatorHash]
      * @param {PubKeyHash} paymentHash
-     * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
+     * @param {Option<TStaking>} stakingHash
      * @param {boolean} isTestnet
-     * @returns {Address}
+     * @returns {(
+     *   TStaking extends PubKeyHash ? Address<null, null> :
+     *   TStaking extends StakingValidatorHash<infer C> ? Address<null, C> :
+     *   Address<null, unknown>
+     * )}
      */
     static fromPubKeyHash(paymentHash, stakingHash, isTestnet) {
         if (stakingHash) {
             if (stakingHash instanceof PubKeyHash) {
-                return new Address(
-                    [isTestnet ? 0x00 : 0x01]
-                        .concat(paymentHash.bytes)
-                        .concat(stakingHash.bytes)
+                return /** @type {any} */ (
+                    new Address(
+                        [isTestnet ? 0x00 : 0x01]
+                            .concat(paymentHash.bytes)
+                            .concat(stakingHash.bytes),
+                        None,
+                        None
+                    )
+                )
+            } else if (stakingHash instanceof StakingValidatorHash) {
+                return /** @type {any} */ (
+                    new Address(
+                        [isTestnet ? 0x20 : 0x21]
+                            .concat(paymentHash.bytes)
+                            .concat(stakingHash.bytes),
+                        None,
+                        stakingHash.context
+                    )
                 )
             } else {
-                return new Address(
-                    [isTestnet ? 0x20 : 0x21]
-                        .concat(paymentHash.bytes)
-                        .concat(stakingHash.bytes)
-                )
+                throw new Error("invalid Staking hash")
             }
         } else {
-            return new Address(
-                [isTestnet ? 0x60 : 0x61].concat(paymentHash.bytes)
+            return /** @type {any} */ (
+                new Address(
+                    [isTestnet ? 0x60 : 0x61].concat(paymentHash.bytes),
+                    None,
+                    None
+                )
             )
         }
     }
@@ -255,7 +269,9 @@ export class Address {
     static fromUplcData(data, isTestnet = config.IS_TESTNET) {
         ConstrData.assert(data, 0, 2)
 
-        const paymentCredential = PaymentCredential.fromUplcData(data.fields[0])
+        const paymentCredential = SpendingCredential.fromUplcData(
+            data.fields[0]
+        )
         const stakingCredentialData = ConstrData.expect(
             data.fields[1],
             "invalid StakingCredential option within Address"
@@ -292,46 +308,49 @@ export class Address {
     /**
      * Simple script address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
-     * @template [TDatumStrict=UplcData]
-     * @template [TDatumPermissive=UplcData]
-     * @template [TPaymentRedeemer=UplcData]
-     * @param {ValidatorHash<TDatumStrict, TDatumPermissive, TPaymentRedeemer>} paymentHash
-     * @param {Option<PubKeyHash | StakingValidatorHash>} stakingHash
+     * @template [CSpending=unknown]
+     * @param {ValidatorHash<CSpending>} spendingHash
+     * @template {PubKeyHash | StakingValidatorHash} [TStaking=PubKeyHash | StakingValidatorHash]pytho
+     * @param {Option<TStaking>} stakingHash
      * @param {boolean} isTestnet
-     * @returns {Address<TDatumStrict, TDatumPermissive, TPaymentRedeemer>}
+     * @returns {(
+     *   TStaking extends (null | undefined | PubKeyHash) ? Address<CSpending, null> :
+     *   TStaking extends StakingValidatorHash<infer CStaking> ? Address<CSpending, CStaking> :
+     *   Address<CSpending, unknown>
+     * )}
      */
-    static fromValidatorHash(paymentHash, stakingHash, isTestnet) {
-        /**
-         * @type {Option<AddressContext<TDatumStrict, TDatumPermissive, TPaymentRedeemer>>}
-         */
-        const context = paymentHash.context
-            ? {
-                  paymentProgram: paymentHash.context.program,
-                  datum: paymentHash.context.datum,
-                  paymentRedeemer: paymentHash.context.redeemer
-              }
-            : None
-
+    static fromValidatorHash(spendingHash, stakingHash, isTestnet) {
         if (isSome(stakingHash)) {
             if (stakingHash instanceof PubKeyHash) {
-                return new Address(
-                    [isTestnet ? 0x10 : 0x11]
-                        .concat(paymentHash.bytes)
-                        .concat(stakingHash.bytes),
-                    context
+                return /** @type {any} */ (
+                    new Address(
+                        [isTestnet ? 0x10 : 0x11]
+                            .concat(spendingHash.bytes)
+                            .concat(stakingHash.bytes),
+                        spendingHash.context,
+                        null
+                    )
+                )
+            } else if (stakingHash instanceof StakingValidatorHash) {
+                return /** @type {any} */ (
+                    new Address(
+                        [isTestnet ? 0x30 : 0x31]
+                            .concat(spendingHash.bytes)
+                            .concat(stakingHash.bytes),
+                        spendingHash.context,
+                        stakingHash.context
+                    )
                 )
             } else {
-                return new Address(
-                    [isTestnet ? 0x30 : 0x31]
-                        .concat(paymentHash.bytes)
-                        .concat(stakingHash.bytes),
-                    context
-                )
+                throw new Error("invalid StakingHash type")
             }
         } else {
-            return new Address(
-                [isTestnet ? 0x70 : 0x71].concat(paymentHash.bytes),
-                context
+            return /** @type {any} */ (
+                new Address(
+                    [isTestnet ? 0x70 : 0x71].concat(spendingHash.bytes),
+                    spendingHash.context,
+                    null
+                )
             )
         }
     }
@@ -359,15 +378,35 @@ export class Address {
     }
 
     /**
+     * @type {SpendingCredential<SpendingCredentialKind, CSpending>}
+     */
+    get spendingCredential() {
+        return SpendingCredential.fromAddressBytes(
+            this.bytes,
+            this.spendingContext
+        )
+    }
+
+    /**
      * Returns the underlying `PubKeyHash` of a simple payment address, or `null` for a script address.
      * @type {Option<PubKeyHash>}
      */
     get pubKeyHash() {
-        return this.paymentCredential.pubKeyHash
+        return this.spendingCredential.pubKeyHash
     }
 
     /**
-     * @type {Option<StakingHash>}
+     * @type {Option<StakingCredential<StakingHashKind, CStaking>>}
+     */
+    get stakingCredential() {
+        return StakingCredential.fromAddressBytes(
+            this.bytes,
+            this.stakingContext
+        )
+    }
+
+    /**
+     * @type {Option<StakingHash<StakingHashKind, CStaking>>}
      */
     get stakingHash() {
         return this.stakingCredential ? this.stakingCredential.hash : None
@@ -375,10 +414,10 @@ export class Address {
 
     /**
      * Returns the underlying `ValidatorHash` of a script address, or `null` for a regular payment address.
-     * @type {Option<ValidatorHash>}
+     * @type {Option<ValidatorHash<CSpending>>}
      */
     get validatorHash() {
-        return this.paymentCredential.validatorHash
+        return this.spendingCredential.validatorHash
     }
 
     /**
@@ -441,7 +480,7 @@ export class Address {
      */
     toUplcData() {
         return new ConstrData(0, [
-            this.paymentCredential.toUplcData(),
+            this.spendingCredential.toUplcData(),
             encodeOptionData(this.stakingCredential?.toUplcData())
         ])
     }

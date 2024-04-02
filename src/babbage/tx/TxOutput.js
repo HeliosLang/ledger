@@ -38,11 +38,13 @@ import { TxOutputDatum } from "./TxOutputDatum.js"
 
 /**
  * Represents a transaction output that is used when building a transaction.
+ * @template [CSpending=unknown]
+ * @template [CStaking=unknown]
  */
 export class TxOutput {
     /**
      * Mutation is useful when correcting the quantity of lovelace in a utxo
-     * @type {Address}
+     * @type {Address<CSpending, CStaking>}
      */
     address
 
@@ -65,13 +67,13 @@ export class TxOutput {
 
     /**
      * Constructs a `TxOutput` instance using an `Address`, a `Value`, an optional `Datum`, and optional `UplcProgram` reference script.
-     * @param {AddressLike} address
+     * @param {Address<CSpending, CStaking>} address
      * @param {ValueLike} value
      * @param {Option<TxOutputDatum>} datum
      * @param {Option<UplcProgramV1 | UplcProgramV2>} refScript - plutus v2 script for now
      */
     constructor(address, value, datum = None, refScript = None) {
-        this.address = Address.fromAlike(address)
+        this.address = address
         this.value = Value.fromAlike(value)
         this.datum = datum
         this.refScript = refScript
@@ -163,6 +165,20 @@ export class TxOutput {
             TxOutputDatum.fromUplcData(data.fields[2])
             // The refScript hash isn't very useful
         )
+    }
+
+    /**
+     * @type {CSpending}
+     */
+    get spendingContext() {
+        return this.address.spendingContext
+    }
+
+    /**
+     * @type {CStaking}
+     */
+    get stakingContext() {
+        return this.address.stakingContext
     }
 
     /**

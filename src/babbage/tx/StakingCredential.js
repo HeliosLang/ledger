@@ -3,39 +3,46 @@ import { ConstrData } from "@helios-lang/uplc"
 import {
     PubKeyHash,
     StakingHash,
-    StakingValidatorHash
+    StakingValidatorHash,
+    ValidatorHash
 } from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ * @typedef {import("../hashes/index.js").StakingHashKind} StakingHashKind
+ * @typedef {import("../hashes/index.js").StakingHashLike} StakingHashLike
  */
 
 /**
- * @typedef {StakingCredential | StakingHash | PubKeyHash | StakingValidatorHash} StakingCredentialLike
+ * @typedef {StakingCredential | StakingHashLike} StakingCredentialLike
  */
 
 /**
  * TODO: implement support for staking pointers
+ * @template {StakingHashKind} [K=StakingHashKind]
+ * @template [C=unknown] - optional context
  */
 export class StakingCredential {
     /**
      * @readonly
-     * @type {StakingHash}
+     * @type {StakingHash<K, C>}
      */
     hash
 
     /**
-     * @param {Exclude<StakingCredentialLike, StakingCredential>} hash
+     * @param {StakingHash<K, C>} hash
      */
     constructor(hash) {
-        this.hash = StakingHash.fromAlike(hash)
+        this.hash = hash
     }
 
     /**
+     * @template [C=unknown]
      * @param {number[]} bytes
+     * @param {Option<C>} context
      * @returns {Option<StakingCredential>}
      */
-    static fromAddressBytes(bytes) {
+    static fromAddressBytes(bytes, context = None) {
         if (bytes.length > 29) {
             const head = bytes[0]
             const body = bytes.slice(29, 57)
@@ -50,7 +57,9 @@ export class StakingCredential {
                 case 2:
                 case 3:
                     return new StakingCredential(
-                        StakingHash.Validator(new StakingValidatorHash(body))
+                        StakingHash.Validator(
+                            new StakingValidatorHash(body, context)
+                        )
                     )
                 default:
                     throw new Error(`unhandled StakingCredential type ${type}`)
@@ -61,13 +70,22 @@ export class StakingCredential {
     }
 
     /**
-     * @param {StakingCredentialLike} arg
-     * @returns {StakingCredential}
+     * @template {StakingCredentialLike} T
+     * @param {T} arg
+     * @returns {(
+     *   T extends StakingCredential<infer K, infer C> ? StakingCredential<K, C> :
+     *   T extends StakingHash<infer K, infer C> ? StakingCredential<K, C> :
+     *   T extends PubKeyHash ? StakingCredential<"PubKey", null> :
+     *   T extends ValidatorHash<infer C> ? StakingCredential<"Validator", C> :
+     *   StakingCredential
+     * )}
      */
     static fromAlike(arg) {
-        return arg instanceof StakingCredential
-            ? arg
-            : new StakingCredential(arg)
+        return /** @type {any} */ (
+            arg instanceof StakingCredential
+                ? arg
+                : new StakingCredential(StakingHash.fromAlike(arg))
+        )
     }
 
     /**
@@ -87,7 +105,14 @@ export class StakingCredential {
     }
 
     /**
-     * @returns {StakingHash}
+     * @type {C}
+     */
+    get context() {
+        return this.hash.context
+    }
+
+    /**
+     * @returns {StakingHash<K, C>}
      */
     expectStakingHash() {
         return this.hash

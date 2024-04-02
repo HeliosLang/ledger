@@ -284,7 +284,7 @@ export class TxBody {
         }
 
         this.inputs.forEach((input, i) => {
-            const paymentCredential = input.output.address.paymentCredential
+            const paymentCredential = input.output.address.spendingCredential
             const datum = input.output.datum
 
             // without datum this is assumed to be a native script

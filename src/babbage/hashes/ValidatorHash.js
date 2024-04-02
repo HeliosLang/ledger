@@ -1,25 +1,13 @@
 import { decodeBytes } from "@helios-lang/cbor"
-import {
-    ByteArrayData,
-    UplcProgramV1,
-    UplcProgramV2,
-    decodeUplcData
-} from "@helios-lang/uplc"
+import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
-import { None } from "@helios-lang/type-utils"
+import { None, isSome } from "@helios-lang/type-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- 
  * @typedef {import("./Hash.js").Hash} Hash
- */
-
-/**
- * @template TStrict
- * @template TPermissive
- * @typedef {import("./Cast.js").Cast<TStrict, TPermissive>} Cast
  */
 
 /**
@@ -27,27 +15,20 @@ import { None } from "@helios-lang/type-utils"
  */
 
 /**
- * @template TDatumStrict
- * @template TDatumPermissive
- * @template TRedeemer
- * @typedef {{
- *   program: UplcProgramV1 | UplcProgramV2
- *   datum: Cast<TDatumStrict, TDatumPermissive>
- *   redeemer: Cast<any, TRedeemer>
- * }} ValidatorHashContext
- */
-
-/**
  * Represents a blake2b-224 hash of a spending validator script (first encoded as a CBOR byte-array and prepended by a script version byte).
- * @template [TDatumStrict=UplcData]
- * @template [TDatumPermissive=UplcData]
- * @template [TRedeemer=UplcData]
+ * @template [C=unknown]
  * @implements {Hash}
  */
 export class ValidatorHash extends ScriptHash {
     /**
-     * @param {Exclude<ValidatorHashLike, ValidatorHash>} bytes
-     * @param {Option<ValidatorHashContext<TDatumStrict, TDatumPermissive, TRedeemer>>} context
+     * @readonly
+     * @type {C}
+     */
+    context
+
+    /**
+     * @param {ByteArrayLike} bytes
+     * @param {Option<C>} context
      */
     constructor(bytes, context = None) {
         super(bytes)
@@ -58,15 +39,27 @@ export class ValidatorHash extends ScriptHash {
             )
         }
 
-        this.context = context
+        if (isSome(context)) {
+            this.context = context
+        }
     }
 
     /**
-     * @param {ValidatorHashLike} arg
-     * @returns {ValidatorHash}
+     * @returns {ValidatorHash<unknown>}
+     */
+    static dummy() {
+        return new ValidatorHash(new Array(28).fill(0))
+    }
+
+    /**
+     * @template {ValidatorHashLike} T
+     * @param {T} arg
+     * @returns {arg extends ValidatorHash<infer C> ? ValidatorHash<C> : ValidatorHash}
      */
     static fromAlike(arg) {
-        return arg instanceof ValidatorHash ? arg : new ValidatorHash(arg)
+        return /** @type {any} */ (
+            arg instanceof ValidatorHash ? arg : new ValidatorHash(arg)
+        )
     }
 
     /**

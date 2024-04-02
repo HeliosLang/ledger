@@ -8,18 +8,13 @@ import {
 } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
-import { None } from "@helios-lang/type-utils"
+import { None, isSome } from "@helios-lang/type-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Hash.js").Hash} Hash
- */
-
-/**
- * @template TStrict
- * @template TPermissive
- * @typedef {import("./Cast.js").Cast<TStrict, TPermissive>} Cast
+ * @typedef {import("./MintingContext.js").MintingContext} MintingContext
  */
 
 /**
@@ -27,31 +22,28 @@ import { None } from "@helios-lang/type-utils"
  */
 
 /**
- * @template [TRedeemer=UplcData]
- * @typedef {{
- *   program: UplcProgramV1 | UplcProgramV2,
- *   redeemer: Cast<UplcData, TRedeemer>
- * }} MintingPolicyHashContext
- */
-
-/**
  * Represents a blake2b-224 hash of a minting policy script
  *
  * **Note**: to calculate this hash the script is first encoded as a CBOR byte-array and then prepended by a script version byte.
- * @template [TRedeemer=UplcData]
+ *
+ * `C` is some optional context:
+ *   null: unwitnessed or witnessed by NativeScript
+ *   unknown: witnessed or unwitnessed (default)
+ *   {program: ..., redeemer: ...}: witnessed by UplcProgram
+ * @template [C=unknown]
  * @implements {Hash}
  */
 export class MintingPolicyHash extends ScriptHash {
     /**
      * @readonly
-     * @type {Option<MintingPolicyHashContext<TRedeemer>>}
+     * @type {C}
      */
     context
 
     /**
      * Can be 0 bytes in case of Ada
-     * @param {Exclude<MintingPolicyHashLike, MintingPolicyHash>} bytes
-     * @param {Option<MintingPolicyHashContext<TRedeemer>>} context
+     * @param {ByteArrayLike} bytes
+     * @param {Option<C>} context - not recommended to set this manually
      */
     constructor(bytes, context = None) {
         super(bytes)
@@ -62,17 +54,20 @@ export class MintingPolicyHash extends ScriptHash {
             )
         }
 
-        this.context = context
+        if (isSome(context)) {
+            this.context = context
+        }
     }
 
     /**
-     * @param {MintingPolicyHashLike} arg
-     * @returns {MintingPolicyHash}
+     * @template {MintingPolicyHashLike} T
+     * @param {T} arg
+     * @returns {T extends MintingPolicyHash<infer C> ? MintingPolicyHash<C> : MintingPolicyHash}
      */
     static fromAlike(arg) {
-        return arg instanceof MintingPolicyHash
-            ? arg
-            : new MintingPolicyHash(arg)
+        return /** @type {any} */ (
+            arg instanceof MintingPolicyHash ? arg : new MintingPolicyHash(arg)
+        )
     }
 
     /**

@@ -1,7 +1,8 @@
 import { decodeBytes } from "@helios-lang/cbor"
+import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
+import { None, isSome } from "@helios-lang/type-utils"
 import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
-import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -10,20 +11,29 @@ import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
  */
 
 /**
- * @typedef {StakingValidatorHash | ByteArrayLike} StakingValidatorHashLike
+ * @template [C=unknown]
+ * @typedef {StakingValidatorHash<C> | ByteArrayLike} StakingValidatorHashLike
  */
 
 /**
  * Represents a blake2b-224 hash of a staking script.
  *
  * **Note**: before hashing, the staking script is first encoded as a CBOR byte-array and then prepended by a script version byte.
+ * @template [C=unknown]
  * @implements {Hash}
  */
 export class StakingValidatorHash extends ScriptHash {
     /**
-     * @param {Exclude<StakingValidatorHashLike, StakingValidatorHash>} bytes
+     * @readonly
+     * @type {C}
      */
-    constructor(bytes) {
+    context
+
+    /**
+     * @param {ByteArrayLike} bytes
+     * @param {Option<C>} context
+     */
+    constructor(bytes, context = None) {
         super(bytes)
 
         if (this.bytes.length != 28) {
@@ -31,16 +41,30 @@ export class StakingValidatorHash extends ScriptHash {
                 `expected 28 bytes for StakingValidatorHash, got ${this.bytes.length}`
             )
         }
+
+        if (isSome(context)) {
+            this.context = context
+        }
     }
 
     /**
-     * @param {StakingValidatorHashLike} arg
-     * @returns {StakingValidatorHash}
+     * @returns {StakingValidatorHash<unknown>}
+     */
+    static dummy() {
+        return new StakingValidatorHash(new Array(28).fill(0))
+    }
+
+    /**
+     * @template {StakingValidatorHashLike} T
+     * @param {T} arg
+     * @returns {T extends StakingValidatorHash<infer C> ? StakingValidatorHash<C> : StakingValidatorHash}
      */
     static fromAlike(arg) {
-        return arg instanceof StakingValidatorHash
-            ? arg
-            : new StakingValidatorHash(arg)
+        return /** @type {any} */ (
+            arg instanceof StakingValidatorHash
+                ? arg
+                : new StakingValidatorHash(arg)
+        )
     }
 
     /**

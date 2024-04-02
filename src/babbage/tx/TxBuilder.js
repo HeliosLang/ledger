@@ -2,10 +2,8 @@ import { bytesToHex, equalsBytes } from "@helios-lang/codec-utils"
 import { None, expectSome, isNone } from "@helios-lang/type-utils"
 import { UplcProgramV1, UplcProgramV2, UplcDataValue } from "@helios-lang/uplc"
 import {
-    DatumHash,
     MintingPolicyHash,
     PubKeyHash,
-    ScriptHash,
     ValidatorHash
 } from "../hashes/index.js"
 import { Assets, AssetClass, Value } from "../money/index.js"
@@ -41,6 +39,19 @@ import { TxWitnesses } from "./TxWitnesses.js"
  * @typedef {import("./Address.js").AddressLike} AddressLike
  * @typedef {import("./StakingAddress.js").StakingAddressLike} StakingAddressLike
  * @typedef {import("./TxMetadataAttr.js").TxMetadataAttr} TxMetadataAttr
+ */
+
+/**
+ * @template TDatumStrict
+ * @template TDatumPermissive
+ * @template TRedeemerStrict
+ * @template TRedeemerPermissive
+ * @typedef {import("./SpendingContext.js").SpendingContext<TDatumStrict, TDatumPermissive, TRedeemerStrict, TRedeemerPermissive>} SpendingContext
+ */
+
+/**
+ * @template T
+ * @typedef {import("./TxOutputDatum.js").TxOutputDatumCastable<T>} TxOutputDatumCastable
  */
 
 export class TxBuilder {
@@ -450,13 +461,45 @@ export class TxBuilder {
     }
 
     /**
-     * @template TDatumPermissive
      * @overload
-     * @param {Address<any, TDatumPermissive, any>} address
+     * @param {Address<null, any>} address
      * @param {ValueLike} value
-     * @param {{hash: TDatumPermissive} | {inline: TDatumPermissive}} datum
      * @returns {TxBuilder}
      *
+     * @template TDatum
+     * @overload
+     * @param {Address<SpendingContext<any, TDatum, any, any>, any>} address
+     * @param {ValueLike} value
+     * @param {TxOutputDatumCastable<TDatum>} datum
+     * @returns {TxBuilder}
+     */
+
+    /**
+     * @template [TDatum=UplcData]
+     * @param {[
+     *   Address<null, any>, ValueLike
+     * ] | [
+     *   Address<SpendingContext<any, TDatum, any, any>, any>, ValueLike, TxOutputDatumCastable<TDatum>
+     * ]} args
+     * @returns {TxBuilder}
+     */
+    pay(...args) {
+        if (args.length == 2) {
+            return this.payUnsafe(...args)
+        } else if (args.length == 3) {
+            const [address, value, datum] = args
+
+            return this.payUnsafe(
+                address,
+                value,
+                TxOutputDatum.fromCast(datum, address.spendingContext.datum)
+            )
+        } else {
+            throw new Error("invalid number of args")
+        }
+    }
+
+    /**
      * @overload
      * @param {AddressLike} address
      * @param {ValueLike} value
@@ -474,10 +517,7 @@ export class TxBuilder {
      */
 
     /**
-     * @template TDatumPermissive
      * @param {[
-     *   Address<any, TDatumPermissive, any>, ValueLike, {hash: TDatumPermissive} | {inline: TDatumPermissive}
-     * ] | [
      *   AddressLike, ValueLike
      * ] | [
      *   AddressLike, ValueLike, Option<TxOutputDatum>
@@ -486,63 +526,24 @@ export class TxBuilder {
      * ]} args
      * @returns {TxBuilder}
      */
-    pay(...args) {
+    payUnsafe(...args) {
         // handle overloads
         const outputs = (() => {
             if (args.length == 1) {
                 return args[0]
             } else if (args.length == 2) {
-                return new TxOutput(args[0], args[1])
+                return new TxOutput(Address.fromAlike(args[0]), args[1])
             } else if (args.length == 3) {
                 const datum = args[2]
 
-                if (datum instanceof TxOutputDatum) {
-                    return new TxOutput(
-                        /** @type {Address} */ (args[0]),
-                        args[1],
-                        datum
-                    )
-                } else if (datum) {
-                    const address =
-                        /** @type {Address<any, TDatumPermissive, any>} */ (
-                            args[0]
-                        )
-                    const context = address.context
-                    const value = args[1]
-
-                    if ("hash" in datum && context) {
-                        return new TxOutput(
-                            /** @type {Address} */ (address),
-                            value,
-                            TxOutputDatum.Hash(
-                                context.datum.toUplcData(
-                                    /** @type {TDatumPermissive} */ (args[2])
-                                )
-                            )
-                        )
-                    } else if ("inline" in datum && context) {
-                        return new TxOutput(
-                            /** @type {Address} */ (address),
-                            value,
-                            TxOutputDatum.Inline(
-                                context.datum.toUplcData(
-                                    /** @type {TDatumPermissive} */ (args[2])
-                                )
-                            )
-                        )
-                    } else {
-                        throw new Error("invalid arguments")
-                    }
-                } else {
-                    throw new Error("invalid arguments")
-                }
+                return new TxOutput(Address.fromAlike(args[0]), args[1], datum)
             } else {
                 throw new Error("invalid arguments")
             }
         })()
 
         if (Array.isArray(outputs)) {
-            outputs.forEach((output) => this.pay(output))
+            outputs.forEach((output) => this.payUnsafe(output))
             return this
         }
 
@@ -604,25 +605,65 @@ export class TxBuilder {
     }
 
     /**
-     * @template TRedeemer
      * @overload
-     * @param {TxInput<any, TRedeemer> | TxInput<any, TRedeemer>[]} utxos
-     * @param {TRedeemer} redeemer
+     * @param {TxInput<null, any> | TxInput<null, any>[]} utxos
      * @returns {TxBuilder}
      *
+     * @template TRedeemer
      * @overload
-     * @param {TxInput | TxInput[]} utxos
-     * @param {Option<UplcData>} redeemer
+     * @param {TxInput<SpendingContext<any, any, any, TRedeemer>, any> | TxInput<SpendingContext<any, any, any, TRedeemer>, any>[]} utxos
+     * @param {TRedeemer} redeemer
      * @returns {TxBuilder}
      */
+    /**
+     * @template TRedeemer
+     * @param {[
+     *   TxInput<null, any> | TxInput<null, any>[]
+     * ] | [
+     *   TxInput<SpendingContext<any, any, any, TRedeemer>, any> | TxInput<SpendingContext<any, any, any, TRedeemer>, any>[],
+     *   TRedeemer
+     * ]} args
+     * @returns {TxBuilder}
+     */
+    spend(...args) {
+        if (args.length == 1) {
+            return this.spendUnsafe(args[0])
+        } else if (args.length == 2) {
+            const [utxos, redeemer] = args
+
+            if (Array.isArray(utxos)) {
+                if (utxos.length == 0) {
+                    throw new Error("expected at least one UTxO")
+                }
+
+                utxos.forEach((utxo) =>
+                    this.attachUplcProgram(utxo.spendingContext.program)
+                )
+                return this.spendUnsafe(
+                    utxos,
+                    utxos[0].spendingContext.redeemer.toUplcData(redeemer)
+                )
+            } else {
+                this.attachUplcProgram(utxos.spendingContext.program)
+
+                return this.spendUnsafe(
+                    utxos,
+                    utxos.spendingContext.redeemer.toUplcData(redeemer)
+                )
+            }
+        } else {
+            throw new Error("invalid number of arguments")
+        }
+    }
+
     /**
      * Add a UTxO instance as an input to the transaction being built.
      * Throws an error if the UTxO is locked at a script address but a redeemer isn't specified (unless the script is a known `NativeScript`).
      * @param {TxInput | TxInput[]} utxos
-     * @param {TRedeemer | Option<UplcData>} redeemer
+     * @param {Option<UplcData>} redeemer
      * @returns {TxBuilder}
      */
-    spend(utxos, redeemer = None) {
+    spendUnsafe(utxos, redeemer = None) {
         if (Array.isArray(utxos)) {
             utxos.forEach((utxo) => this.spend(utxo, redeemer))
 
@@ -632,46 +673,35 @@ export class TxBuilder {
         const utxo = utxos
 
         const origOutput = utxo.output
-        const paymentCredential = utxo.address.paymentCredential
+        const spendingCredential = utxo.address.spendingCredential
         const datum = origOutput?.datum
 
         // add the input (also sorts the inputs)
         this.addInput(utxo)
 
         if (redeemer) {
-            if (!paymentCredential.isValidator()) {
+            if (!spendingCredential.isValidator()) {
                 throw new Error(
                     "input isn't locked by a script, (hint: omit the redeemer)"
                 )
             }
 
-            const context = utxo.context
-
-            if (context) {
-                this.attachUplcProgram(context.program)
-            }
-
-            if (!this.hasUplcScript(paymentCredential.validatorHash.bytes)) {
+            if (!this.hasUplcScript(spendingCredential.validatorHash.bytes)) {
                 throw new Error(
                     "input is locked by an unknown script (hint: attach the script before calling TxBuilder.spend()"
                 )
             }
 
-            this.addSpendingRedeemer(
-                utxo,
-                context
-                    ? context.redeemer.toUplcData(/** @type {any} */ (redeemer))
-                    : /** @type {UplcData} */ (redeemer)
-            )
+            this.addSpendingRedeemer(utxo, redeemer)
 
             if (!datum) {
                 throw new Error("expected non-null datum")
             }
 
             this.addDatum(datum.data)
-        } else if (paymentCredential.isValidator()) {
+        } else if (spendingCredential.isValidator()) {
             // redeemerless spending from a validator is only possible if it is a native script
-            if (!this.hasNativeScript(paymentCredential.validatorHash.bytes)) {
+            if (!this.hasNativeScript(spendingCredential.validatorHash.bytes)) {
                 throw new Error(
                     "input is locked by a script, but redeemer isn't specified (hint: if this is a NativeScript, attach that script before calling TxBuiilder.spend())"
                 )
@@ -803,12 +833,12 @@ export class TxBuilder {
     addOutput(output) {
         output.value.assertAllPositive()
 
-        const paymentCredential = output.address.paymentCredential
+        const spendingCredential = output.address.spendingCredential
 
         if (
             isNone(output.datum) &&
-            paymentCredential.isValidator() &&
-            !this.hasNativeScript(paymentCredential.validatorHash.bytes)
+            spendingCredential.isValidator() &&
+            !this.hasNativeScript(spendingCredential.validatorHash.bytes)
         ) {
             throw new Error(
                 "TxOutput must include datum when sending to validator which isn't a known NativeScript (hint: add the NativeScript to this transaction first)"
@@ -1077,7 +1107,7 @@ export class TxBuilder {
      * @param {Address} changeAddress
      */
     balanceAssets(changeAddress) {
-        if (changeAddress.paymentCredential.isValidator()) {
+        if (changeAddress.spendingCredential.isValidator()) {
             throw new Error("can't send change to validator")
         }
 

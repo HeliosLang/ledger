@@ -1,12 +1,13 @@
-import { ByteStream, bytesToHex, toBytes } from "@helios-lang/codec-utils"
-import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
-import { blake2b, encodeBech32 } from "@helios-lang/crypto"
 import {
     decodeBytes,
     decodeConstr,
     encodeBytes,
     encodeConstr
 } from "@helios-lang/cbor"
+import { ByteStream, bytesToHex, toBytes } from "@helios-lang/codec-utils"
+import { blake2b, encodeBech32 } from "@helios-lang/crypto"
+import { None } from "@helios-lang/type-utils"
+import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
 import { MintingPolicyHash } from "../hashes/index.js"
 
 /**
@@ -14,6 +15,7 @@ import { MintingPolicyHash } from "../hashes/index.js"
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../hashes/index.js").MintingPolicyHashLike} MintingPolicyHashLike
  */
+
 /**
  * @typedef {string | [
  *   MintingPolicyHashLike,
@@ -26,10 +28,11 @@ import { MintingPolicyHash } from "../hashes/index.js"
 
 /**
  * Represents a `MintingPolicyHash` combined with a token name.
+ * @template [C=unknown]
  */
 export class AssetClass {
     /**
-     * @type {MintingPolicyHash}
+     * @type {MintingPolicyHash<C>}
      */
     mph
 
@@ -39,38 +42,52 @@ export class AssetClass {
     tokenName
 
     /**
-     * Intelligently converts arguments.
-     *
-     * The format for single argument string is "<hex-encoded-mph>.<hex-encoded-token-name>".
-     * @param {MintingPolicyHashLike} mph
+     * @readonly
+     * @type {C}
+     */
+    context
+
+    /**
+     * @param {MintingPolicyHash<C>} mph - policy with optional context
      * @param {ByteArrayLike} tokenName
      */
     constructor(mph, tokenName) {
-        this.mph = MintingPolicyHash.fromAlike(mph)
+        this.mph = mph
         this.tokenName = toBytes(tokenName)
+
+        if (mph.context) {
+            this.context = mph.context
+        }
     }
 
     /**
      * @type {AssetClass}
      */
     static get ADA() {
-        return new AssetClass("", "")
+        return AssetClass.fromAlike(".")
     }
 
     /**
-     * @param {AssetClassLike} arg
-     * @returns {AssetClass}
+     * @template {AssetClassLike} T
+     * @param {T} arg
+     * @returns {T extends [MintingPolicyHash<infer C>, ByteArrayLike] ? AssetClass<C> : T extends AssetClass<infer C> ?  AssetClass<C> : AssetClass}
      */
     static fromAlike(arg) {
-        if (arg instanceof AssetClass) {
-            return arg
-        } else if (typeof arg == "string") {
-            return AssetClass.fromString(arg)
-        } else if (Array.isArray(arg)) {
-            return new AssetClass(arg[0], arg[1])
-        } else {
-            return new AssetClass(arg.mph, arg.tokenName)
-        }
+        return /** @type {any} */ (
+            arg instanceof AssetClass
+                ? arg
+                : typeof arg == "string"
+                  ? AssetClass.fromString(arg)
+                  : Array.isArray(arg)
+                    ? new AssetClass(
+                          MintingPolicyHash.fromAlike(arg[0]),
+                          arg[1]
+                      )
+                    : new AssetClass(
+                          MintingPolicyHash.fromAlike(arg.mph),
+                          arg.tokenName
+                      )
+        )
     }
 
     /**
@@ -108,7 +125,7 @@ export class AssetClass {
             )
         }
 
-        return new AssetClass(parts[0], parts[1])
+        return new AssetClass(MintingPolicyHash.fromAlike(parts[0]), parts[1])
     }
 
     /**

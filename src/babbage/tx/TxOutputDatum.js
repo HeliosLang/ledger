@@ -19,7 +19,18 @@ import { DatumHash } from "../hashes/index.js"
  */
 
 /**
+ * @template TStrict
+ * @template TPermissive
+ * @typedef {import("../hashes/Cast.js").Cast<TStrict, TPermissive>} Cast
+ */
+
+/**
  * @typedef {Option<TxOutputDatum> | DatumHash | UplcData} TxOutputDatumLike
+ */
+
+/**
+ * @template T
+ * @typedef {{hash: T} | {inline: T}} TxOutputDatumCastable
  */
 
 /**
@@ -121,6 +132,21 @@ export class TxOutputDatum {
         } else {
             return TxOutputDatum.Inline(arg)
         }
+    }
+
+    /**
+     * @template T
+     * @template {TxOutputDatumCastable<T>} D
+     * @param {D} data
+     * @param {Cast<any, T>} cast
+     * @returns {D extends {hash: T} ? TxOutputDatum<"Hash"> : TxOutputDatum<"Inline">}
+     */
+    static fromCast(data, cast) {
+        return /** @type {any} */ (
+            "hash" in data
+                ? TxOutputDatum.Hash(cast.toUplcData(data.hash))
+                : TxOutputDatum.Inline(cast.toUplcData(data.inline))
+        )
     }
 
     /**
