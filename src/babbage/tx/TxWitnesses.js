@@ -8,6 +8,7 @@ import {
 import { bytesToHex, equalsBytes } from "@helios-lang/codec-utils"
 import { blake2b } from "@helios-lang/crypto"
 import { decodeUplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
+import { MintingPolicyHash, ValidatorHash } from "../hashes/index.js"
 import { NativeScript } from "../native/index.js"
 import { NetworkParamsHelper } from "../params/index.js"
 import { Signature } from "./Signature.js"
@@ -35,7 +36,6 @@ import { TxRedeemer } from "./TxRedeemer.js"
  */
 export class TxWitnesses {
     /**
-     * @readonly
      * @type {Signature[]}
      */
     signatures
@@ -143,6 +143,18 @@ export class TxWitnesses {
     }
 
     /**
+     * Used to calculate the correct min fee
+     * @param {number} n
+     */
+    addDummySignatures(n) {
+        const n0 = this.signatures.length
+
+        for (let i = n0; i < n; i++) {
+            this.signatures.push(Signature.dummy())
+        }
+    }
+
+    /**
      * @param {Signature} signature
      */
     addSignature(signature) {
@@ -155,6 +167,17 @@ export class TxWitnesses {
         ) {
             this.signatures.push(signature)
         }
+    }
+
+    /**
+     * @param {NetworkParamsHelper} networkParams
+     * @returns {bigint}
+     */
+    calcExFee(networkParams) {
+        return this.redeemers.reduce(
+            (sum, redeemer) => sum + redeemer.calcExFee(networkParams),
+            0n
+        )
     }
 
     /**
@@ -176,6 +199,47 @@ export class TxWitnesses {
     }
 
     /**
+     * @param {number[] | MintingPolicyHash | ValidatorHash} hash
+     * @returns {UplcProgramV1 | UplcProgramV2}
+     */
+    findUplcProgram(hash) {
+        const bytes = Array.isArray(hash) ? hash : hash.bytes
+
+        const v2Script = this.v2Scripts
+            .concat(this.v2RefScripts)
+            .find((s) => equalsBytes(s.hash(), bytes))
+
+        if (v2Script) {
+            return v2Script
+        }
+
+        const v1Script = this.v1Scripts.find((s) =>
+            equalsBytes(s.hash(), bytes)
+        )
+
+        if (v1Script) {
+            return v1Script
+        }
+
+        if (hash instanceof MintingPolicyHash) {
+            throw new Error(
+                `script for minting policy ${hash.toHex()} not found`
+            )
+        } else if (hash instanceof ValidatorHash) {
+            throw new Error(`script for validator ${hash.toHex()} not found`)
+        } else {
+            throw new Error(`script for ${bytesToHex(hash)} not found`)
+        }
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    isSmart() {
+        return this.allScripts.length > 0
+    }
+
+    /**
      * @param {(UplcProgramV1 | UplcProgramV2)[]} refScriptsInRefInputs
      */
     recover(refScriptsInRefInputs) {
@@ -192,6 +256,15 @@ export class TxWitnesses {
                 }
             }
         })
+    }
+
+    /**
+     * Used to removed any dummy signatures added while calculating the tx fee
+     */
+    removeDummySignatures() {
+        this.signatures = this.signatures.filter(
+            (signature) => !signature.isDummy()
+        )
     }
 
     /**
@@ -242,34 +315,6 @@ export class TxWitnesses {
     verifySignatures(bodyBytes) {
         for (let signature of this.signatures) {
             signature.verify(blake2b(bodyBytes))
-        }
-    }
-
-    /**
-     * Throws error if execution budget is exceeded
-     * @param {NetworkParamsHelper} networkParams
-     */
-    checkExecutionBudgetLimits(networkParams) {
-        let totalMem = 0n
-        let totalCpu = 0n
-
-        for (let redeemer of this.redeemers) {
-            totalMem += redeemer.cost.mem
-            totalCpu += redeemer.cost.cpu
-        }
-
-        let [maxMem, maxCpu] = networkParams.maxTxExecutionBudget
-
-        if (totalMem > BigInt(maxMem)) {
-            throw new Error(
-                `execution budget exceeded for mem (${totalMem.toString()} > ${maxMem.toString()})\n`
-            )
-        }
-
-        if (totalCpu > BigInt(maxCpu)) {
-            throw new Error(
-                `execution budget exceeded for cpu (${totalCpu.toString()} > ${maxCpu.toString()})\n`
-            )
         }
     }
 }

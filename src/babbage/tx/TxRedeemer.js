@@ -160,6 +160,19 @@ export class TxRedeemer {
     /**
      * @type {number}
      */
+    get index() {
+        if (this.isMinting()) {
+            return this.props.policyIndex
+        } else if (this.isSpending()) {
+            return this.props.inputIndex
+        } else {
+            throw new Error(`unhandled TxRedeemer kind ${this.kind}`)
+        }
+    }
+
+    /**
+     * @type {number}
+     */
     get tag() {
         if (this.isMinting()) {
             return 0
@@ -168,6 +181,17 @@ export class TxRedeemer {
         } else {
             throw new Error(`unhandled TxRedeemer kind ${this.kind}`)
         }
+    }
+
+    /**
+     * @param {NetworkParamsHelper} networkParams
+     * @returns {bigint}
+     */
+    calcExFee(networkParams) {
+        const { mem, cpu } = this.props.cost
+        const [memFee, cpuFee] = networkParams.exFeeParams
+
+        return BigInt(Math.ceil(Number(mem) * memFee + Number(cpu) * cpuFee))
     }
 
     /**
@@ -247,21 +271,5 @@ export class TxRedeemer {
         } else {
             throw new Error("unhandled TxRedeemer kind")
         }
-    }
-
-    /**
-     * @param {NetworkParamsHelper} networkParams
-     * @returns {bigint}
-     */
-    estimateFee(networkParams) {
-        // this.#exUnits.mem and this.#exUnits can be 0 if we are estimating the fee for an initial balance
-
-        let [memFee, cpuFee] = networkParams.exFeeParams
-
-        return BigInt(
-            Math.ceil(
-                Number(this.cost.mem) * memFee + Number(this.cost.cpu) * cpuFee
-            )
-        )
     }
 }

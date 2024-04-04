@@ -125,7 +125,7 @@ export class NetworkParamsHelper {
     get minCollateralPct() {
         return expectSome(
             this.params?.latestParams?.collateralPercentage,
-            "'networkParams.latestParmas.collateralPercentage' undefined"
+            "'networkParams.latestParams.collateralPercentage' undefined"
         )
     }
 

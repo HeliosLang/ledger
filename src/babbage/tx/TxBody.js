@@ -37,6 +37,8 @@ import { TxInput } from "./TxInput.js"
 import { TxOutput } from "./TxOutput.js"
 import { TxOutputId } from "./TxOutputId.js"
 import { TxRedeemer } from "./TxRedeemer.js"
+import { Signature } from "./Signature.js"
+import { ScriptPurpose } from "./ScriptPurpose.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
@@ -83,8 +85,7 @@ export class TxBody {
     outputs
 
     /**
-     * Lovelace fee
-     * @readonly
+     * Lovelace fee, mutated as part of final balancing
      * @type {bigint}
      */
     fee
@@ -263,40 +264,49 @@ export class TxBody {
     }
 
     /**
-     * NativeScripts aren't added here
-     * @type {Map<string, TxRedeemer[]>}
+     * Used to validate if all the necessary scripts are included TxWitnesses (and that there are not redundant scripts)
+     * @type {ScriptHash[]}
      */
-    get spendingRedeemers() {
+    get allScriptHashes() {
         /**
-         * @type {Map<string, TxRedeemer[]>}
+         * @type {Map<string, ScriptHash>}
          */
-        const res = new Map()
+        const m = new Map()
 
-        /**
-         * @param {ValidatorHash} hash
-         * @param {TxRedeemer} redeemer
-         */
-        function addEntry(hash, redeemer) {
-            const key = hash.toHex()
+        this.inputs.forEach((utxo) => {
+            const scriptHash = utxo.output.address.validatorHash
 
-            const entries = (res.get(key) ?? []).concat([redeemer])
-            res.set(key, entries)
-        }
-
-        this.inputs.forEach((input, i) => {
-            const spendingCredential = input.output.address.spendingCredential
-            const datum = input.output.datum
-
-            // without datum this is assumed to be a native script
-            if (spendingCredential.isValidator() && datum) {
-                addEntry(
-                    spendingCredential.validatorHash,
-                    TxRedeemer.Spending(i, datum.data)
-                )
+            if (scriptHash) {
+                m.set(scriptHash.toHex(), scriptHash)
             }
         })
 
-        return res
+        this.minted.getPolicies().forEach((mph) => m.set(mph.toHex(), mph))
+
+        return Array.from(m.values())
+    }
+
+    /**
+     * Calculates the number of dummy signatures needed to get precisely the right tx size.
+     * @returns {number}
+     */
+    countUniqueSigners() {
+        /**
+         * @type {Set<string>}
+         */
+        let set = new Set()
+
+        this.inputs.concat(this.collateral).forEach((utxo) => {
+            const pubKeyHash = utxo.output.address.pubKeyHash
+
+            if (pubKeyHash) {
+                set.add(pubKeyHash.toHex())
+            }
+        })
+
+        this.signers.forEach((signer) => set.add(signer.toHex()))
+
+        return set.size
     }
 
     /**
@@ -540,152 +550,35 @@ export class TxBody {
             this.getValidityTimeRange(networkParams).toUplcData(),
             new ListData(this.signers.map((signer) => signer.toUplcData())),
             new MapData(
-                [] //redeemers.map((r) => [r.toScriptPurposeData(this), r.data])
+                redeemers.map((redeemer) => {
+                    if (redeemer.isMinting()) {
+                        return [
+                            ScriptPurpose.Minting(
+                                redeemer,
+                                this.minted.getPolicies()[redeemer.index]
+                            ).toUplcData(),
+                            redeemer.data
+                        ]
+                    } else if (redeemer.isSpending()) {
+                        return [
+                            ScriptPurpose.Spending(
+                                redeemer,
+                                this.inputs[redeemer.index].id
+                            ).toUplcData(),
+                            redeemer.data
+                        ]
+                    } else {
+                        throw new Error(
+                            `unhandled TxRedeemer kind ${redeemer.kind}`
+                        )
+                    }
+                })
             ),
             new MapData(
                 datums.map((d) => [DatumHash.hashUplcData(d).toUplcData(), d])
             ),
             new ConstrData(0, [new ByteArrayData(txId.bytes)])
         ])
-    }
-
-    /**
-     * @param {NetworkParamsHelper} networkParams
-     * @param {Option<bigint>} minCollateral
-     */
-    validateCollateral(networkParams, minCollateral) {
-        if (this.collateral.length > networkParams.maxCollateralInputs) {
-            throw new Error("too many collateral inputs")
-        }
-
-        if (!minCollateral) {
-            if (this.collateral.length != 0) {
-                throw new Error("unnecessary collateral included")
-            }
-        } else {
-            let sum = new Value()
-
-            for (let col of this.collateral) {
-                if (!col.output) {
-                    throw new Error(
-                        "expected collateral TxInput.origOutput to be set"
-                    )
-                } else if (!col.output.value.assets.isZero()) {
-                    throw new Error("collateral can only contain lovelace")
-                } else {
-                    sum = sum.add(col.output.value)
-                }
-            }
-
-            if (this.collateralReturn != null) {
-                sum = sum.subtract(this.collateralReturn.value)
-            }
-
-            if (sum.lovelace < minCollateral) {
-                throw new Error("not enough collateral")
-            }
-
-            if (sum.lovelace > minCollateral * 5n) {
-                console.error("Warning: way too much collateral")
-            }
-        }
-    }
-
-    /**
-     * Throws an error in the inputs aren't in the correct order
-     * @private
-     */
-    validateInputs() {
-        this.inputs.forEach((input, i) => {
-            if (i > 0) {
-                const prev = this.inputs[i - 1]
-
-                // can be less than -1 if utxoIds aren't consecutive
-                if (TxInput.compare(prev, input) >= 0) {
-                    throw new Error("inputs aren't sorted")
-                }
-            }
-        })
-    }
-
-    /**
-     * Checks that each output contains enough lovelace
-     * @private
-     * @param {NetworkParamsHelper} networkParams
-     */
-    validateOutputs(networkParams) {
-        this.outputs.forEach((output) => {
-            const minLovelace = output.calcDeposit(networkParams)
-
-            if (minLovelace > output.value.lovelace) {
-                throw new Error(
-                    `not enough lovelace in output (expected at least ${minLovelace.toString()}, got ${output.value.lovelace})`
-                )
-            }
-
-            output.value.assets.assertSorted()
-        })
-    }
-
-    /**
-     * Makes sore inputs, withdrawals, and minted assets are in correct order, this is needed for the redeemer indices
-     * Mutates
-     */
-    validateOrder() {
-        // same for ref inputs
-        this.refInputs.forEach((input, i) => {
-            if (i > 0) {
-                const prev = this.refInputs[i - 1]
-
-                // can be less than -1 if utxoIds aren't consecutive
-                if (TxInput.compare(prev, input) >= 0) {
-                    throw new Error("refInputs not sorted")
-                }
-            }
-        })
-
-        // TODO: also add withdrawals in sorted manner
-        //this.withdrawals = new Map(
-        //Array.from(this.withdrawals.entries()).sort((a, b) => {
-        //return Address.compStakingHashes(a[0], b[0])
-        //})
-        //)
-
-        // minted assets should've been added in sorted manner, so this is just a check
-        this.minted.assertSorted()
-    }
-
-    /**
-     * Throws an error if the refinputs aren't sorted
-     * @private
-     */
-    validateRefInputs() {
-        this.refInputs.forEach((input, i) => {
-            if (i > 0) {
-                const prev = this.refInputs[i - 1]
-
-                // can be less than -1 if utxoIds aren't consecutive
-                if (TxInput.compare(prev, input) >= 0) {
-                    throw new Error("refInputs not sorted")
-                }
-            }
-        })
-    }
-
-    /**
-     * Thows an error if the withdrawals aren't sorted according the StakingAddresses
-     * @private
-     */
-    validatorWithdrawals() {
-        this.withdrawals.forEach(([sa], i) => {
-            if (i > 0) {
-                const prev = this.withdrawals[i - 1][0]
-
-                if (StakingAddress.compare(prev, sa) >= 0) {
-                    throw new Error("withdrawals not sorted")
-                }
-            }
-        })
     }
 
     /**

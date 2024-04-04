@@ -88,7 +88,6 @@ export class ScriptPurpose {
     }
 
     /**
-     * @private
      * @returns {ConstrData}
      */
     toUplcData() {

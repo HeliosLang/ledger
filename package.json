@@ -6,15 +6,14 @@
     "types": "types/index.d.ts",
     "type": "module",
     "scripts": {
-        "build": "npm test",
-        "clean": "find src/ -name *.d.ts* | xargs rm -f",
-        "postpublish": "npm run clean",
-        "prebuild": "npm run clean && npx tsc -p jsconfig.json --noEmit false --emitDeclarationOnly",
+        "build": "npm run prettify && npm run build:types && npm run test:suite",
+        "build:types": "npx tsc -p jsconfig.json --noEmit false --emitDeclarationOnly",
+        "prepack": "npm run build",
         "prettify": "npx prettier . --write",
         "test": "npm run test:pretty && npm run test:types && npm run test:suite",
         "test:pretty": "npx prettier . --check",
         "test:suite": "node --test  --experimental-test-coverage",
-        "test:types": "npx tsc -p jsconfig.json --noEmit"
+        "test:types": "npm run build:types"
     },
     "author": "Christian Schmitz",
     "license": "BSD-3-Clause",

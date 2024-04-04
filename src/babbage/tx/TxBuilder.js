@@ -13,7 +13,7 @@ import { timeToDate } from "../time/index.js"
 import { Address } from "./Address.js"
 import { DCert } from "./DCert.js"
 import { StakingAddress } from "./StakingAddress.js"
-import { Tx } from "./Tx.js"
+import { Tx, calcScriptDataHash } from "./Tx.js"
 import { TxInput } from "./TxInput.js"
 import { TxMetadata } from "./TxMetadata.js"
 import { TxOutput } from "./TxOutput.js"
@@ -198,22 +198,31 @@ export class TxBuilder {
         const { firstValidSlot, lastValidSlot } =
             this.buildValidityTimeRange(networkParams)
 
-        // there is no check here to assure that there aren't any redundant scripts included, this is left up the validation of Tx itself
+        // TODO: there is no check here to assure that there aren't any redundant scripts included, this is left up the validation of Tx itself
 
         // balance the non-ada assets, adding necessary change outputs
         this.balanceAssets(changeAddress)
 
+        // start with the max possible fee, minimize later
+        const fee = networkParams.maxTxFee
+
         // balance collateral (if collateral wasn't already set manually)
-        this.balanceCollateral(networkParams, changeAddress, spareUtxos.slice())
+        const collateralChangeOutput = this.balanceCollateral(
+            networkParams,
+            changeAddress,
+            spareUtxos.slice(),
+            fee
+        )
 
         // make sure that each output contains the necessary minimum amount of lovelace
         this.correctOutputs(networkParams)
 
         // balance the lovelace using maxTxFee as the fee
-        const { changeOutput, fee } = this.balanceLovelace(
+        const changeOutput = this.balanceLovelace(
             networkParams,
             changeAddress,
-            spareUtxos.slice()
+            spareUtxos.slice(),
+            fee
         )
 
         // the final fee will never be higher than the current `fee`, so the inputs and outputs won't change, and we will get redeemers with the right indices
@@ -232,7 +241,7 @@ export class TxBuilder {
 
         // TODO: correct the fee and the changeOutput
 
-        return new Tx(
+        const tx = new Tx(
             new TxBody({
                 inputs: this.inputs,
                 outputs: this.outputs,
@@ -261,6 +270,37 @@ export class TxBuilder {
             false,
             metadata
         )
+
+        // calculate the min fee
+        const finalFee = tx.calcMinFee(networkParams)
+        const feeDiff = fee - finalFee
+
+        if (feeDiff < 0n) {
+            throw new Error(
+                "internal error: expected finalFee to be smaller than maxTxFee"
+            )
+        }
+
+        // correct the change outputs
+        tx.body.fee = finalFee
+        changeOutput.value.lovelace -= feeDiff
+
+        if (collateralChangeOutput) {
+            const minCollateral = tx.calcMinCollateral(networkParams)
+
+            if (minCollateral > collateralChangeOutput.value.lovelace) {
+                throw new Error(
+                    "internal error: expected final Collateral to be smaller than initial collateral"
+                )
+            }
+
+            collateralChangeOutput.value.lovelace = minCollateral
+        }
+
+        // do a final validation of the tx
+        tx.validate(networkParams, true)
+
+        return tx
     }
 
     reset() {
@@ -382,8 +422,7 @@ export class TxBuilder {
      * @param {[ByteArrayLike, bigint | number][]} tokens
      * @param {TRedeemer} redeemer
      * @returns {TxBuilder}
-     */
-    /**
+     *
      * @template TRedeemer
      * @param {[
      *   AssetClass<null> | MintingPolicyHash<null>,
@@ -576,9 +615,7 @@ export class TxBuilder {
      * @overload
      * @param {TxOutput | TxOutput[]} output
      * @returns {TxBuilder}
-     */
-
-    /**
+     *
      * @param {[
      *   AddressLike, ValueLike
      * ] | [
@@ -644,12 +681,12 @@ export class TxBuilder {
      * @overload
      * @param {number} key
      * @param {TxMetadataAttr} value
+     * @returns {TxBuilder}
      *
      * @overload
      * @param {{[key: number]: TxMetadataAttr}} attributes
-     */
-
-    /**
+     * @returns {TxBuilder}
+     *
      * @param {[number, TxMetadataAttr] | [{[key: number]: TxMetadataAttr}]} args
      * @returns {TxBuilder}
      */
@@ -1230,15 +1267,14 @@ export class TxBuilder {
      * @param {NetworkParamsHelper} networkParams
      * @param {Address} changeAddress
      * @param {TxInput[]} spareUtxos
+     * @param {bigint} baseFee
+     * @returns {Option<TxOutput>} - collateral change output which can be corrected later
      */
-    balanceCollateral(networkParams, changeAddress, spareUtxos) {
+    balanceCollateral(networkParams, changeAddress, spareUtxos, baseFee) {
         // don't do this step if collateral was already added explicitly
         if (this.collateral.length > 0 || !this.hasUplcScripts()) {
             return
         }
-
-        // simply use the maxTxFee for now (only about 2.4ADA)
-        const baseFee = networkParams.maxTxFee
 
         const minCollateral =
             (baseFee * BigInt(networkParams.minCollateralPct) + 100n) / 100n // integer division that rounds up
@@ -1307,6 +1343,8 @@ export class TxBuilder {
         collateralInputs.forEach((utxo) => {
             this.addCollateral(utxo)
         })
+
+        return changeOutput
     }
 
     /**
@@ -1319,9 +1357,10 @@ export class TxBuilder {
      * @param {NetworkParamsHelper} networkParams
      * @param {Address} changeAddress
      * @param {TxInput[]} spareUtxos - used when there are yet enough inputs to cover everything (eg. due to min output lovelace requirements, or fees)
-     * @returns {{changeOutput: TxOutput, fee: bigint}}
+     * @param {bigint} fee
+     * @returns {TxOutput} - change output, will be corrected once the final fee is known
      */
-    balanceLovelace(networkParams, changeAddress, spareUtxos) {
+    balanceLovelace(networkParams, changeAddress, spareUtxos, fee) {
         // don't include the changeOutput in this value
         let nonChangeOutputValue = this.sumOutputValue()
 
@@ -1334,7 +1373,6 @@ export class TxBuilder {
 
         const minLovelace = changeOutput.value.lovelace
 
-        let fee = networkParams.maxTxFee
         let inputValue = this.sumInputAndMintedValue()
         let feeValue = new Value(fee)
 
@@ -1394,9 +1432,7 @@ export class TxBuilder {
 
         changeOutput.value = diff
 
-        // we can mutate the lovelace value of 'changeOutput' until we have a balanced transaction with precisely the right fee
-
-        return { changeOutput, fee }
+        return changeOutput
     }
 
     /**
@@ -1523,10 +1559,10 @@ export class TxBuilder {
      */
     buildSpendingRedeemers(execContext = None) {
         return this.spendingRedeemers.map(([utxo, data]) => {
-            const vh = expectSome(utxo.address.validatorHash)
             const i = this.inputs.findIndex((inp) => inp.isEqual(utxo))
             let redeemer = TxRedeemer.Spending(i, data)
 
+            const vh = expectSome(utxo.address.validatorHash)
             const script = this.getUplcScript(vh)
 
             if (execContext) {
@@ -1557,27 +1593,7 @@ export class TxBuilder {
      */
     buildScriptDataHash(networkParams, redeemers) {
         if (redeemers.length > 0) {
-            let bytes = encodeDefList(redeemers)
-
-            if (this.datums.length > 0) {
-                bytes = bytes.concat(new ListData(this.datums).toCbor())
-            }
-
-            // language view encodings?
-            let sortedCostParams = networkParams.sortedV2CostParams
-
-            bytes = bytes.concat(
-                encodeMap([
-                    [
-                        encodeInt(1),
-                        encodeDefList(
-                            sortedCostParams.map((cp) => encodeInt(BigInt(cp)))
-                        )
-                    ]
-                ])
-            )
-
-            return blake2b(bytes)
+            return calcScriptDataHash(networkParams, this.datums, redeemers)
         } else {
             return None
         }
