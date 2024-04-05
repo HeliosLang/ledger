@@ -1,4 +1,10 @@
-import { ByteStream, bytesToHex, toBytes } from "@helios-lang/codec-utils"
+import {
+    ByteStream,
+    bytesToHex,
+    decodeUtf8,
+    isValidUtf8,
+    toBytes
+} from "@helios-lang/codec-utils"
 import {
     AssetClass,
     handleAssetClassArgs,
@@ -23,14 +29,26 @@ import { MintingPolicyHash, ScriptHash } from "../hashes/index.js"
  */
 
 /**
- * @typedef {Assets | [
- *   MintingPolicyHashLike,
- *   [
+ * @typedef {[
  *     ByteArrayLike,
  *     bigint | number
- *   ][]
- * ][]} AssetsLike
+ * ][] | Record<string, bigint | number>} TokensLike
  */
+
+/**
+ * @typedef {Assets | [
+ *   MintingPolicyHashLike,
+ *   TokensLike
+ * ][] | Record<string, TokensLike>} AssetsLike
+ */
+
+/**
+ *   1. 100
+ *   2. 222
+ *   3. 333
+ *   4. 444
+ */
+const CIP68_PREFIXES = ["000643b0", "000de140", "0014df10", "001BC280"]
 
 /**
  * Represents a list of non-Ada tokens.
@@ -46,15 +64,20 @@ export class Assets {
      * @param {Exclude<AssetsLike, Assets>} arg Either a list of `AssetClass`/quantity pairs, or a list of `MintingPolicyHash`/`tokens` pairs (where each `tokens` entry is a bytearray/quantity pair).
      */
     constructor(arg = []) {
-        this.assets = arg.map(([mph, tokens]) => {
-            return [
-                MintingPolicyHash.fromAlike(mph),
-                tokens.map(([tokenName, qty]) => [
-                    toBytes(tokenName),
-                    BigInt(qty)
-                ])
-            ]
-        })
+        this.assets = (Array.isArray(arg) ? arg : Object.entries(arg)).map(
+            ([mph, tokens]) => {
+                return [
+                    MintingPolicyHash.fromAlike(mph),
+                    (Array.isArray(tokens)
+                        ? tokens
+                        : Object.entries(tokens)
+                    ).map(([tokenName, qty]) => [
+                        toBytes(tokenName),
+                        BigInt(qty)
+                    ])
+                ]
+            }
+        )
 
         this.normalize()
     }
@@ -76,7 +99,10 @@ export class Assets {
             arg.map(([acl, qty]) => {
                 const ac = AssetClass.fromAlike(acl)
 
-                return [ac.mph, [[ac.tokenName, qty]]]
+                return /** @type {[MintingPolicyHash, [number[], bigint][]]} */ ([
+                    ac.mph,
+                    [[ac.tokenName, qty]]
+                ])
             })
         )
     }
@@ -245,10 +271,23 @@ export class Assets {
             this.assets.map(([mph, tokens]) => [
                 mph.toHex(),
                 Object.fromEntries(
-                    tokens.map(([tokenName, qty]) => [
-                        bytesToHex(tokenName),
-                        qty.toString()
-                    ])
+                    tokens.map(([tokenName, qty]) => {
+                        const hasCip68Prefix = CIP68_PREFIXES.includes(
+                            bytesToHex(tokenName.slice(0, 4))
+                        )
+
+                        return [
+                            bytesToHex(tokenName),
+                            {
+                                name: hasCip68Prefix
+                                    ? decodeUtf8(tokenName.slice(4))
+                                    : isValidUtf8(tokenName)
+                                      ? decodeUtf8(tokenName)
+                                      : undefined,
+                                quantity: qty.toString()
+                            }
+                        ]
+                    })
                 )
             ])
         )
@@ -473,10 +512,12 @@ export class Assets {
         const s = BigInt(scalar)
 
         return new Assets(
-            this.assets.map(([mph, tokens]) => [
-                mph,
-                tokens.map(([token, qty]) => [token, qty * s])
-            ])
+            this.assets.map(([mph, tokens]) => {
+                return /** @type {[MintingPolicyHash, [number[], bigint][]]} */ ([
+                    mph,
+                    tokens.map(([token, qty]) => [token, qty * s])
+                ])
+            })
         )
     }
 

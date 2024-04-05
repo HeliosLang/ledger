@@ -1,10 +1,10 @@
 import { describe, it } from "node:test"
-import { deepEqual, strictEqual, throws } from "node:assert";
-import { Value } from "../money/index.js";
-import { NetworkParamsHelper } from "../params/index.js";
-import { Address } from "./Address.js";
+import { deepEqual, strictEqual, throws } from "node:assert"
+import { Value } from "../money/index.js"
+import { NetworkParamsHelper } from "../params/index.js"
+import { Address } from "./Address.js"
 import { Tx } from "./Tx.js"
-import { TxOutput } from "./TxOutput.js";
+import { TxOutput } from "./TxOutput.js"
 
 describe(`basic ${Tx.name}`, () => {
     /**
@@ -15,8 +15,10 @@ describe(`basic ${Tx.name}`, () => {
      * input utxo: d4b22d33611fb2b3764080cb349b3f12d353aef1d4319ee33e44594bbebe5e83#0
      * command: cardano-cli transaction build --tx-in d4b22d33611fb2b3764080cb349b3f12d353aef1d4319ee33e44594bbebe5e83#0 --tx-out addr_test1vqzhgmkqsyyzxthk7vzxet4283wx8wwygu9nq0v94mdldxs0d56ku+10000000 --change-address addr_test1vzzcg26lxj3twnnx889lrn60pqn0z3km2yahhsz0fvpyxdcj5qp8w --testnet-magic 2 --out-file /data/preview/transactions/202209042119.tx --babbage-era --cddl-format
      */
-    const unsignedHex = "84a30081825820d4b22d33611fb2b3764080cb349b3f12d353aef1d4319ee33e44594bbebe5e83000182a200581d6085842b5f34a2b74e6639cbf1cf4f0826f146db513b7bc04f4b024337011b000000025370c627a200581d6005746ec08108232ef6f3046caeaa3c5c63b9c4470b303d85aedbf69a011a00989680021a00028759a0f5f6";
-    const signedHex= "84a30081825820d4b22d33611fb2b3764080cb349b3f12d353aef1d4319ee33e44594bbebe5e83000182a200581d6085842b5f34a2b74e6639cbf1cf4f0826f146db513b7bc04f4b024337011b000000025370c627a200581d6005746ec08108232ef6f3046caeaa3c5c63b9c4470b303d85aedbf69a011a00989680021a00028759a10081825820a0e006bbd52e9db2dcd904e90c335212d2968fcae92ee9dd01204543c314359b584073afc3d75355883cd9a83140ed6480354578148f861f905d65a75b773d004eca5869f7f2a580c6d9cc7d54da3b307aa6cb1b8d4eb57603e37eff83ca56ec620cf5f6";
+    const unsignedHex =
+        "84a30081825820d4b22d33611fb2b3764080cb349b3f12d353aef1d4319ee33e44594bbebe5e83000182a200581d6085842b5f34a2b74e6639cbf1cf4f0826f146db513b7bc04f4b024337011b000000025370c627a200581d6005746ec08108232ef6f3046caeaa3c5c63b9c4470b303d85aedbf69a011a00989680021a00028759a0f5f6"
+    const signedHex =
+        "84a30081825820d4b22d33611fb2b3764080cb349b3f12d353aef1d4319ee33e44594bbebe5e83000182a200581d6085842b5f34a2b74e6639cbf1cf4f0826f146db513b7bc04f4b024337011b000000025370c627a200581d6005746ec08108232ef6f3046caeaa3c5c63b9c4470b303d85aedbf69a011a00989680021a00028759a10081825820a0e006bbd52e9db2dcd904e90c335212d2968fcae92ee9dd01204543c314359b584073afc3d75355883cd9a83140ed6480354578148f861f905d65a75b773d004eca5869f7f2a580c6d9cc7d54da3b307aa6cb1b8d4eb57603e37eff83ca56ec620cf5f6"
 
     const unsigned = Tx.fromCbor(unsignedHex)
     const signed = Tx.fromCbor(signedHex)
@@ -56,7 +58,15 @@ describe(`basic ${Tx.name}`, () => {
     })
 
     it("recovered signed doesn't fail regular validations", async () => {
-        await signed.recover(async () => new TxOutput(Address.fromAlike("addr_test1vzzcg26lxj3twnnx889lrn60pqn0z3km2yahhsz0fvpyxdcj5qp8w"), new Value(10_000_000_000n)))
+        await signed.recover(
+            async () =>
+                new TxOutput(
+                    Address.fromAlike(
+                        "addr_test1vzzcg26lxj3twnnx889lrn60pqn0z3km2yahhsz0fvpyxdcj5qp8w"
+                    ),
+                    new Value(10_000_000_000n)
+                )
+        )
         signed.validate(params)
     })
 })

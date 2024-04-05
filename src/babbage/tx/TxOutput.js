@@ -73,7 +73,8 @@ export class TxOutput {
      * @param {Option<UplcProgramV1 | UplcProgramV2>} refScript - plutus v2 script for now
      */
     constructor(address, value, datum = None, refScript = None) {
-        this.address = address instanceof Address ? address : Address.fromAlike(address)
+        this.address =
+            address instanceof Address ? address : Address.fromAlike(address)
         this.value = Value.fromAlike(value)
         this.datum = datum
         this.refScript = refScript
