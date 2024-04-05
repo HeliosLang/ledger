@@ -204,10 +204,6 @@ export class Tx {
      * @returns {TxId}
      */
     id() {
-        if (!this.valid) {
-            throw new Error("can't get TxId of unfinalized Tx")
-        }
-
         return new TxId(this.body.hash())
     }
 

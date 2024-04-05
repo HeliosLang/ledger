@@ -38,8 +38,16 @@ export class NetworkParamsHelper {
     }
 
     /**
+     * @returns {NetworkParamsHelper}
+     */
+    static default() {
+        return new NetworkParamsHelper(DEFAULT_NETWORK_PARAMS)
+    }
+
+    /**
      *
      * @param {Option<NetworkParams | NetworkParamsHelper>} params
+     * @returns {NetworkParamsHelper}
      */
     static fromAlikeOrDefault(params = None) {
         if (!params) {

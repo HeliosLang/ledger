@@ -18,6 +18,7 @@ import { TxOutputId } from "./TxOutputId.js"
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
+ * @typedef {import("./TxOutputId.js").TxOutputIdLike} TxOutputIdLike
  */
 
 /**
@@ -55,11 +56,11 @@ export class TxInput {
     #output
 
     /**
-     * @param {TxOutputId} outputId
+     * @param {TxOutputIdLike} outputId
      * @param {Option<TxOutput<CSpending, CStaking>>} output - used during building/emulation, not part of serialization
      */
     constructor(outputId, output = None) {
-        this.id = outputId
+        this.id = TxOutputId.fromAlike(outputId)
         this.#output = output
     }
 

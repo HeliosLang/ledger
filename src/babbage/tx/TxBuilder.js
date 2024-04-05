@@ -174,13 +174,23 @@ export class TxBuilder {
      */
     withdrawals
 
+    /**
+     * @private
+     */
     constructor() {
         this.reset()
     }
 
     /**
+     * @returns {TxBuilder}
+     */
+    static new() {
+        return new TxBuilder()
+    }
+
+    /**
      * @param {{
-     *   changeAddress: Address
+     *   changeAddress: AddressLike
      *   networkParams?: NetworkParams | NetworkParamsHelper
      *   spareUtxos?: TxInput[]
      * }} props
@@ -188,7 +198,7 @@ export class TxBuilder {
      */
     build(props) {
         // extract arguments
-        const changeAddress = props.changeAddress
+        const changeAddress = Address.fromAlike(props.changeAddress)
         const networkParams = NetworkParamsHelper.fromAlikeOrDefault(
             props.networkParams
         )
@@ -283,7 +293,7 @@ export class TxBuilder {
 
         // correct the change outputs
         tx.body.fee = finalFee
-        changeOutput.value.lovelace -= feeDiff
+        changeOutput.value.lovelace += feeDiff // return part of the fee by adding
 
         if (collateralChangeOutput) {
             const minCollateral = tx.calcMinCollateral(networkParams)
