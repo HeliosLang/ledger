@@ -9,6 +9,10 @@ export * from "./tx/index.js"
  */
 
 /**
+ * @typedef {import("./params/index.js").NetworkParams} NetworkParams
+ */
+
+/**
  * @template TRedeemerStrict
  * @template TRedeemerPermissive
  * @typedef {import("./tx/index.js").MintingContext<TRedeemerStrict, TRedeemerPermissive>} MintingContext

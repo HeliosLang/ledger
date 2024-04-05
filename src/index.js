@@ -7,6 +7,10 @@ export * from "./babbage/index.js"
 export * as conway from "./conway/index.js"
 
 /**
+ * @typedef {import("./babbage/index.js").NetworkParams} NetworkParams
+ */
+
+/**
  * @template TRedeemerStrict
  * @template TRedeemerPermissive
  * @typedef {import("./babbage/index.js").MintingContext<TRedeemerStrict, TRedeemerPermissive>} MintingContext
