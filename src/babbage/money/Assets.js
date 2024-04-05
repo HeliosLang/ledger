@@ -294,18 +294,17 @@ export class Assets {
     }
 
     /**
+     * Returns 0n if not found
+     *
      * @overload
      * @param {AssetClassLike} assetClass
-     */
-
-    /**
+     * @returns {bigint}
+     *
      * @overload
      * @param {MintingPolicyHashLike} mph
      * @param {ByteArrayLike} tokenName
-     */
-
-    /**
-     * Returns 0n if not found
+     * @returns {bigint}
+     *
      * @param {[AssetClassLike] | [MintingPolicyHashLike, ByteArrayLike]} args
      * @returns {bigint}
      */
@@ -365,15 +364,13 @@ export class Assets {
     /**
      * @overload
      * @param {AssetClassLike} args
-     */
-
-    /**
+     * @returns {boolean}
+     *
      * @overload
      * @param {MintingPolicyHashLike} mph
      * @param {ByteArrayLike} tokenName
-     */
-
-    /**
+     * @returns {boolean}
+     *
      * @param {[AssetClassLike] | [MintingPolicyHashLike, ByteArrayLike]} args
      * @returns {boolean}
      */
