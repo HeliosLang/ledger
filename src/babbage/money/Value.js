@@ -7,7 +7,7 @@ import {
 } from "@helios-lang/cbor"
 import { handleAssetClassArgsWithQty } from "./AssetClass.js"
 import { Assets } from "./Assets.js"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, hexToBytes } from "@helios-lang/codec-utils"
 import {
     ByteArrayData,
     IntData,
@@ -94,6 +94,27 @@ export class Value {
         const [mph, tokenName, qty] = handleAssetClassArgsWithQty(...args)
 
         return new Value(0n, new Assets([[mph, [[tokenName, qty]]]]))
+    }
+
+    /**
+     * Blockfrost has a special format for Value
+     * @param {{unit: string, quantity: string}[]} list
+     * @returns {Value}
+     */
+    static fromBlockfrost(list) {
+        return list.reduce((sum, { unit, quantity }) => {
+            const qty = BigInt(quantity)
+            if (unit == "lovelace") {
+                return sum.add(new Value(qty))
+            } else {
+                const mph = unit.substring(0, 56)
+                const tokenName = unit.substring(56)
+
+                return sum.add(
+                    new Value(0n, new Assets([[mph, [[tokenName, qty]]]]))
+                )
+            }
+        }, new Value())
     }
 
     /**
