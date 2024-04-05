@@ -1,6 +1,7 @@
 export { Address } from "./Address.js"
 export { SpendingCredential } from "./SpendingCredential.js"
 export { DCert } from "./DCert.js"
+export { Signature } from "./Signature.js"
 export { StakingCredential } from "./StakingCredential.js"
 export { StakingAddress } from "./StakingAddress.js"
 export { Tx } from "./Tx.js"
