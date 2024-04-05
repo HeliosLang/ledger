@@ -8,10 +8,10 @@ import {
     encodeMap,
     encodeString,
     isList,
+    isMap,
     isString
 } from "@helios-lang/cbor"
 import { ByteStream } from "@helios-lang/codec-utils"
-import { isMap } from "util/types"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
