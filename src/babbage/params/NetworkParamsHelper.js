@@ -1,4 +1,4 @@
-import { None, expectSome, isNone } from "@helios-lang/type-utils"
+import { None, expectSome } from "@helios-lang/type-utils"
 import { DEFAULT_NETWORK_PARAMS } from "./NetworkParams.js"
 
 /**
