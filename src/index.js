@@ -7,6 +7,7 @@ export * from "./babbage/index.js"
 export * as conway from "./conway/index.js"
 
 /**
+ * @typedef {import("./babbage/index.js").TimeLike} TimeLike
  * @typedef {import("./babbage/index.js").NetworkParams} NetworkParams
  */
 
