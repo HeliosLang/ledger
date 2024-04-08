@@ -1,6 +1,7 @@
 import {
     ByteStream,
     bytesToHex,
+    compareBytes,
     decodeUtf8,
     isValidUtf8,
     toBytes
@@ -122,6 +123,24 @@ export class Assets {
     }
 
     /**
+     * @type {AssetClass[]}
+     */
+    get assetClasses() {
+        /**
+         * @type {AssetClass[]}
+         */
+        const assetClasses = []
+
+        for (let [mph, tokens] of this.assets) {
+            for (let [tokenName] of tokens) {
+                assetClasses.push(new AssetClass(mph, tokenName))
+            }
+        }
+
+        return assetClasses
+    }
+
+    /**
      * @param {Assets} other
      * @returns {Assets}
      */
@@ -157,7 +176,7 @@ export class Assets {
 
         if (entry) {
             const token = entry[1].find(
-                (pair) => ByteArrayData.compare(pair[0], tokenName) == 0
+                (pair) => compareBytes(pair[0], tokenName) == 0
             )
 
             if (token) {
@@ -244,7 +263,7 @@ export class Assets {
                     if (j > 0) {
                         const aa = b[1][j - 1]
 
-                        if (ByteArrayData.compare(aa[0], bb[0], true) >= 0) {
+                        if (compareBytes(aa[0], bb[0], true) >= 0) {
                             throw new Error("tokens not sorted")
                         }
                     }
@@ -315,7 +334,7 @@ export class Assets {
 
         if (entry) {
             const token = entry[1].find(
-                (pair) => ByteArrayData.compare(pair[0], tokenName) == 0
+                (pair) => compareBytes(pair[0], tokenName) == 0
             )
             return token ? token[1] : 0n
         } else {
@@ -382,7 +401,7 @@ export class Assets {
         if (entry) {
             return (
                 entry[1].findIndex(
-                    (pair) => ByteArrayData.compare(pair[0], tokenName) == 0
+                    (pair) => compareBytes(pair[0], tokenName) == 0
                 ) != -1
             )
         } else {
@@ -588,7 +607,7 @@ export class Assets {
 
         this.assets.forEach(([_mph, tokens]) => {
             tokens.sort(([a], [b]) => {
-                return ByteArrayData.compare(a, b, true)
+                return compareBytes(a, b, true)
             })
         })
     }

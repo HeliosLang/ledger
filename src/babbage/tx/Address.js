@@ -434,7 +434,7 @@ export class Address {
      * @param {Address} other
      * @returns {boolean}
      */
-    equals(other) {
+    isEqual(other) {
         return ByteArrayData.compare(this.bytes, other.bytes) == 0
     }
 
