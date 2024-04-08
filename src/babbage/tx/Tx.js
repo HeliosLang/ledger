@@ -705,7 +705,10 @@ export class Tx {
 
         if (strict) {
             includedScriptHashes.forEach((key) => {
-                if (!requiredScriptHashes.findIndex((h) => h.toHex() == key)) {
+                if (
+                    requiredScriptHashes.findIndex((h) => h.toHex() == key) ==
+                    -1
+                ) {
                     throw new Error(`detected unused script ${key}`)
                 }
             })
