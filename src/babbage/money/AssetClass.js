@@ -6,7 +6,6 @@ import {
 } from "@helios-lang/cbor"
 import { ByteStream, bytesToHex, toBytes } from "@helios-lang/codec-utils"
 import { blake2b, encodeBech32 } from "@helios-lang/crypto"
-import { None } from "@helios-lang/type-utils"
 import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
 import { MintingPolicyHash } from "../hashes/index.js"
 
