@@ -24,7 +24,11 @@ export { TxWitnesses } from "./TxWitnesses.js"
  * @typedef {import("./StakingAddress.js").StakingAddressLike} StakingAddressLike
  * @typedef {import("./TxMetadataAttr.js").TxMetadataAttr} TxMetadataAttr
  * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
- 
+ */
+
+/**
+ * @template TDatumStrict
+ * @typedef {import("./SpendingContext.js").DatumPaymentContext<TDatumStrict>} DatumPaymentContext
  */
 
 /**
