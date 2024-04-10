@@ -146,7 +146,7 @@ export class SpendingCredential {
      * @returns {SpendingCredential}
      */
     static fromUplcData(data) {
-        ConstrData.assert(data, 0, 1)
+        ConstrData.assert(data, None, 1)
 
         switch (data.tag) {
             case 0:
