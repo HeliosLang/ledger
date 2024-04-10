@@ -4,7 +4,13 @@ import {
     encodeBytes,
     encodeConstr
 } from "@helios-lang/cbor"
-import { ByteStream, bytesToHex, toBytes } from "@helios-lang/codec-utils"
+import {
+    ByteStream,
+    bytesToHex,
+    compareBytes,
+    equalsBytes,
+    toBytes
+} from "@helios-lang/codec-utils"
 import { blake2b, encodeBech32 } from "@helios-lang/crypto"
 import { ByteArrayData, ConstrData, decodeUplcData } from "@helios-lang/uplc"
 import { MintingPolicyHash } from "../hashes/index.js"
@@ -147,6 +153,41 @@ export class AssetClass {
         const tokenName = ByteArrayData.expect(data.fields[1]).bytes
 
         return new AssetClass(mph, tokenName)
+    }
+
+    /**
+     *
+     * @param {AssetClass} a
+     * @param {AssetClass} b
+     */
+    static compare(a, b) {
+        const i = MintingPolicyHash.compare(a.mph, b.mph)
+
+        if (i != 0) {
+            return i
+        }
+
+        return compareBytes(a.tokenName, b.tokenName)
+    }
+
+    /**
+     * @param {AssetClass} other
+     * @returns {boolean}
+     */
+    isEqual(other) {
+        return (
+            this.mph.isEqual(other.mph) &&
+            equalsBytes(this.tokenName, other.tokenName)
+        )
+    }
+
+    /**
+     *
+     * @param {AssetClass} other
+     * @returns {boolean}
+     */
+    isGreaterThan(other) {
+        return AssetClass.compare(this, other) > 0
     }
 
     /**
