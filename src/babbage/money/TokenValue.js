@@ -44,7 +44,7 @@ export class TokenValue extends Value {
     /**
      * Multiplies a `TokenValue` by a whole number.
      * @param {bigint | number} scalar
-     * @returns {TokenValue}
+     * @returns {TokenValue<C>}
      */
     multiply(scalar) {
         const lovelace = this.lovelace // might've been mutated
