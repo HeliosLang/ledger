@@ -176,14 +176,14 @@ export class Value {
     }
 
     /**
-     * @param {Value[]} values
+     * @param {(Value | {value: Value})[]} values
      * @returns {Value}
      */
     static sum(values) {
         let s = new Value(0n)
 
         values.forEach((v) => {
-            s = s.add(v)
+            s = s.add(v instanceof Value ? v : v.value)
         })
 
         return s
