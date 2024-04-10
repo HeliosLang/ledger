@@ -40,4 +40,21 @@ export class TokenValue extends Value {
             this.context = assetClass.context
         }
     }
+
+    /**
+     * Multiplies a `TokenValue` by a whole number.
+     * @param {bigint | number} scalar
+     * @returns {TokenValue}
+     */
+    multiply(scalar) {
+        const lovelace = this.lovelace // might've been mutated
+        const s = BigInt(scalar)
+        const t = new TokenValue(this.assetClass, this.quantity * s)
+
+        if (lovelace != 0n) {
+            t.lovelace = lovelace * s
+        }
+
+        return t
+    }
 }
