@@ -421,6 +421,17 @@ export class Address {
     }
 
     /**
+     * @returns {Address<CSpending, CStaking>}
+     */
+    copy() {
+        return new Address(
+            this.bytes,
+            this.spendingContext,
+            this.stakingContext
+        )
+    }
+
+    /**
      * @returns {Object}
      */
     dump() {

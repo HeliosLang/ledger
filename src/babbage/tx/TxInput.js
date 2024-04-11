@@ -215,6 +215,14 @@ export class TxInput {
     }
 
     /**
+     * Deep copy of the TxInput so that Network interfaces don't allow accidental mutation of the underlying data
+     * @returns {TxInput<CSpending, CStaking>}
+     */
+    copy() {
+        return new TxInput(this.id, this.#output?.copy())
+    }
+
+    /**
      * @returns {Object}
      */
     dump() {

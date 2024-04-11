@@ -283,6 +283,13 @@ export class Assets {
     }
 
     /**
+     * @returns {Assets}
+     */
+    copy() {
+        return new Assets(this.assets.slice())
+    }
+
+    /**
      * @returns {Object}
      */
     dump() {

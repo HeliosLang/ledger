@@ -249,6 +249,13 @@ export class TxOutputDatum {
     }
 
     /**
+     * @returns {TxOutputDatum<T>}
+     */
+    copy() {
+        return new TxOutputDatum(this.kind, this.props)
+    }
+
+    /**
      * @returns {this is TxOutputDatum<"Hash">}
      */
     isHash() {

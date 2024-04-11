@@ -218,6 +218,14 @@ export class Value {
     }
 
     /**
+     * Deep copy
+     * @returns {Value}
+     */
+    copy() {
+        return new Value(this.lovelace, this.assets.copy())
+    }
+
+    /**
      * @returns {Object}
      */
     dump() {

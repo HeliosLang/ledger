@@ -183,6 +183,19 @@ export class TxOutput {
     }
 
     /**
+     * Deep copy of the TxInput so that Network interfaces don't allow accidental mutation of the underlying data
+     * @returns {TxOutput<CSpending, CStaking>}
+     */
+    copy() {
+        return new TxOutput(
+            this.address.copy(),
+            this.value.copy(),
+            this.datum?.copy(),
+            this.refScript
+        )
+    }
+
+    /**
      * @returns {Object}
      */
     dump() {

@@ -182,7 +182,6 @@ export class AssetClass {
     }
 
     /**
-     *
      * @param {AssetClass} other
      * @returns {boolean}
      */
