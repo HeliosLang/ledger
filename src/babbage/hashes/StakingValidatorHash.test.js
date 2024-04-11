@@ -15,7 +15,7 @@ describe(StakingValidatorHash.name, () => {
          * witnessed by NativeScript
          * @satisfies {StakingValidatorHash<null>}
          */
-        const unwitnessedCopy = StakingValidatorHash.fromAlike(unwitnessed)
+        const unwitnessedCopy = StakingValidatorHash.new(unwitnessed)
 
         /**
          * default, witnessed or unwitnessed

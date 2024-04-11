@@ -69,7 +69,7 @@ export class AssetClass {
      * @type {AssetClass}
      */
     static get ADA() {
-        return AssetClass.fromAlike(".")
+        return AssetClass.new(".")
     }
 
     /**
@@ -77,19 +77,16 @@ export class AssetClass {
      * @param {T} arg
      * @returns {T extends [MintingPolicyHash<infer C>, ByteArrayLike] ? AssetClass<C> : T extends AssetClass<infer C> ?  AssetClass<C> : AssetClass}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof AssetClass
                 ? arg
                 : typeof arg == "string"
                   ? AssetClass.fromString(arg)
                   : Array.isArray(arg)
-                    ? new AssetClass(
-                          MintingPolicyHash.fromAlike(arg[0]),
-                          arg[1]
-                      )
+                    ? new AssetClass(MintingPolicyHash.new(arg[0]), arg[1])
                     : new AssetClass(
-                          MintingPolicyHash.fromAlike(arg.mph),
+                          MintingPolicyHash.new(arg.mph),
                           arg.tokenName
                       )
         )
@@ -130,7 +127,7 @@ export class AssetClass {
             )
         }
 
-        return new AssetClass(MintingPolicyHash.fromAlike(parts[0]), parts[1])
+        return new AssetClass(MintingPolicyHash.new(parts[0]), parts[1])
     }
 
     /**
@@ -234,10 +231,10 @@ export class AssetClass {
  */
 export function handleAssetClassArgs(...args) {
     if (args.length == 1) {
-        const ac = AssetClass.fromAlike(args[0])
+        const ac = AssetClass.new(args[0])
         return [ac.mph, ac.tokenName]
     } else {
-        return [MintingPolicyHash.fromAlike(args[0]), toBytes(args[1])]
+        return [MintingPolicyHash.new(args[0]), toBytes(args[1])]
     }
 }
 
@@ -247,11 +244,11 @@ export function handleAssetClassArgs(...args) {
  */
 export function handleAssetClassArgsWithQty(...args) {
     if (args.length == 2) {
-        const ac = AssetClass.fromAlike(args[0])
+        const ac = AssetClass.new(args[0])
         return [ac.mph, ac.tokenName, BigInt(args[1])]
     } else {
         return [
-            MintingPolicyHash.fromAlike(args[0]),
+            MintingPolicyHash.new(args[0]),
             toBytes(args[1]),
             BigInt(args[2])
         ]

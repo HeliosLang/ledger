@@ -60,7 +60,7 @@ export class TxInput {
      * @param {Option<TxOutput<CSpending, CStaking>>} output - used during building/emulation, not part of serialization
      */
     constructor(outputId, output = None) {
-        this.id = TxOutputId.fromAlike(outputId)
+        this.id = TxOutputId.new(outputId)
         this.#output = output
     }
 

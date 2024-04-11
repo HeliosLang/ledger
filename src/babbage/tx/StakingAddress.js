@@ -78,7 +78,7 @@ export class StakingAddress {
      * @param {boolean} isTestnet
      * @returns {StakingAddress}
      */
-    static fromAlike(arg, isTestnet = config.IS_TESTNET) {
+    static new(arg, isTestnet = config.IS_TESTNET) {
         return arg instanceof StakingAddress
             ? arg
             : arg instanceof StakingCredential
@@ -124,8 +124,7 @@ export class StakingAddress {
      * @returns {StakingAddress}
      */
     static fromCredential(stakingCredential, isTestnet = config.IS_TESTNET) {
-        const sh =
-            StakingCredential.fromAlike(stakingCredential).expectStakingHash()
+        const sh = StakingCredential.new(stakingCredential).expectStakingHash()
         return StakingAddress.fromHash(sh, isTestnet)
     }
 
@@ -136,7 +135,7 @@ export class StakingAddress {
      * @returns {StakingAddress}
      */
     static fromHash(hash, isTestnet = config.IS_TESTNET) {
-        const hash_ = StakingHash.fromAlike(hash).hash
+        const hash_ = StakingHash.new(hash).hash
 
         if (hash_ instanceof PubKeyHash) {
             return StakingAddress.fromPubKeyHash(hash_, isTestnet)
@@ -245,7 +244,7 @@ export class StakingAddress {
      * @returns {StakingCredential}
      */
     toCredential() {
-        return StakingCredential.fromAlike(this.stakingHash)
+        return StakingCredential.new(this.stakingHash)
     }
 
     /**

@@ -35,7 +35,7 @@ export class PubKey {
      * @param {PubKeyLike} arg
      * @returns {PubKey}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof PubKey ? arg : new PubKey(arg)
     }
 

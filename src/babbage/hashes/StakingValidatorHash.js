@@ -59,7 +59,7 @@ export class StakingValidatorHash extends ScriptHash {
      * @param {T} arg
      * @returns {T extends StakingValidatorHash<infer C> ? StakingValidatorHash<C> : StakingValidatorHash}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof StakingValidatorHash
                 ? arg

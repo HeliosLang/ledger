@@ -61,7 +61,7 @@ describe(`basic ${Tx.name}`, () => {
         await signed.recover(
             async () =>
                 new TxOutput(
-                    Address.fromAlike(
+                    Address.new(
                         "addr_test1vzzcg26lxj3twnnx889lrn60pqn0z3km2yahhsz0fvpyxdcj5qp8w"
                     ),
                     new Value(10_000_000_000n)

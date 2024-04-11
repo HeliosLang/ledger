@@ -12,7 +12,7 @@ describe(StakingHash.name, () => {
          * unwitnessed
          * @satisfies {StakingHash<"PubKey", null>}
          */
-        const unwitnessed = StakingHash.fromAlike(unwitnessedPkh)
+        const unwitnessed = StakingHash.new(unwitnessedPkh)
 
         const dummyBytes = StakingValidatorHash.dummy().bytes
 
@@ -22,7 +22,7 @@ describe(StakingHash.name, () => {
          * witnessed by NativeScript
          * @satisfies {StakingHash<"Validator", null>}
          */
-        const witnessedByNative = StakingHash.fromAlike(unwitnessedVh)
+        const witnessedByNative = StakingHash.new(unwitnessedVh)
 
         const witnessedOrUnwitnessedVh = new StakingValidatorHash(dummyBytes)
 
@@ -30,9 +30,7 @@ describe(StakingHash.name, () => {
          * default, unwitnessed or witnessed
          * @satisfies {StakingHash<"Validator", unknown>}
          */
-        const witnessedOrUnwitnessed = StakingHash.fromAlike(
-            witnessedOrUnwitnessedVh
-        )
+        const witnessedOrUnwitnessed = StakingHash.new(witnessedOrUnwitnessedVh)
 
         const dummyProgram = new UplcProgramV2(new UplcConst(new UplcInt(0)))
         const witnessedVh = new StakingValidatorHash(dummyBytes, {
@@ -43,6 +41,6 @@ describe(StakingHash.name, () => {
          * StakingHash<{...}> (witnessed by UplcProgram)
          * @type {StakingHash<"Validator", {program: UplcProgramV2}>}
          */
-        const witnessed = StakingHash.fromAlike(witnessedVh)
+        const witnessed = StakingHash.new(witnessedVh)
     })
 })

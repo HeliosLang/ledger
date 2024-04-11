@@ -14,7 +14,7 @@ describe(ValidatorHash.name, () => {
         /**
          * @satisfies {ValidatorHash<null>}
          */
-        const unwitnessedCopy = ValidatorHash.fromAlike(unwitnessed)
+        const unwitnessedCopy = ValidatorHash.new(unwitnessed)
 
         /**
          * default, witnessed or unwitnessed

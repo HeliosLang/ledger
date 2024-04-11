@@ -49,16 +49,16 @@ export class Value {
      */
     constructor(lovelace = 0n, assets = []) {
         this.lovelace = BigInt(lovelace)
-        this.assets = Assets.fromAlike(assets)
+        this.assets = Assets.new(assets)
     }
 
     /**
      * @param {ValueLike} arg
      * @returns {Value}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         if (arg instanceof Value) {
-            return arg
+            return arg.copy()
         } else if (typeof arg == "bigint" || typeof arg == "number") {
             return new Value(arg, [])
         } else if (Array.isArray(arg)) {
@@ -67,7 +67,7 @@ export class Value {
             return new Value(arg.lovelace, arg?.assets ?? [])
         } else {
             throw new Error(
-                `unhandled Value.fromAlike argument ${JSON.stringify(arg)}`
+                `unhandled Value.new argument ${JSON.stringify(arg)}`
             )
         }
     }

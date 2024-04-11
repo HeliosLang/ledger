@@ -74,8 +74,8 @@ export class TxOutput {
      */
     constructor(address, value, datum = None, refScript = None) {
         this.address =
-            address instanceof Address ? address : Address.fromAlike(address)
-        this.value = Value.fromAlike(value)
+            address instanceof Address ? address : Address.new(address)
+        this.value = Value.new(value)
         this.datum = datum
         this.refScript = refScript
     }

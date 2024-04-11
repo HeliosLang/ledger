@@ -56,7 +56,7 @@ export class PubKeyHash {
      * @param {PubKeyHashLike} arg
      * @returns {PubKeyHash}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof PubKeyHash ? arg : new PubKeyHash(arg)
     }
 

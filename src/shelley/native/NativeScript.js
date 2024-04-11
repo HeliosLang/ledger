@@ -79,7 +79,7 @@ export class NativeScript {
      * @returns {NativeScript<"Sig">}
      */
     static Sig(hash) {
-        return new NativeScript("Sig", { hash: PubKeyHash.fromAlike(hash) })
+        return new NativeScript("Sig", { hash: PubKeyHash.new(hash) })
     }
 
     /**

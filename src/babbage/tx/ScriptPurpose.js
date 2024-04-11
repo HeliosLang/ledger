@@ -58,7 +58,7 @@ export class ScriptPurpose {
      */
     static Minting(redeemer, policy) {
         return new ScriptPurpose(redeemer, {
-            policy: MintingPolicyHash.fromAlike(policy)
+            policy: MintingPolicyHash.new(policy)
         })
     }
 
@@ -69,7 +69,7 @@ export class ScriptPurpose {
      */
     static Spending(redeemer, outputId) {
         return new ScriptPurpose(redeemer, {
-            outputId: TxOutputId.fromAlike(outputId)
+            outputId: TxOutputId.new(outputId)
         })
     }
 

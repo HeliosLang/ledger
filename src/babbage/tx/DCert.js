@@ -73,7 +73,7 @@ export class DCert {
      */
     static Register(credential) {
         return new DCert("Register", {
-            credential: StakingCredential.fromAlike(credential)
+            credential: StakingCredential.new(credential)
         })
     }
 
@@ -83,7 +83,7 @@ export class DCert {
      */
     static Deregister(credential) {
         return new DCert("Deregister", {
-            credential: StakingCredential.fromAlike(credential)
+            credential: StakingCredential.new(credential)
         })
     }
 
@@ -95,8 +95,8 @@ export class DCert {
      */
     static Delegate(credential, poolId) {
         return new DCert("Delegate", {
-            credential: StakingCredential.fromAlike(credential),
-            poolId: PubKeyHash.fromAlike(poolId)
+            credential: StakingCredential.new(credential),
+            poolId: PubKeyHash.new(poolId)
         })
     }
 
@@ -117,7 +117,7 @@ export class DCert {
      */
     static RetirePool(poolId, epoch) {
         return new DCert("RetirePool", {
-            poolId: PubKeyHash.fromAlike(poolId),
+            poolId: PubKeyHash.new(poolId),
             epoch: Math.round(Number(epoch))
         })
     }

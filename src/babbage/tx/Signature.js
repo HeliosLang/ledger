@@ -37,7 +37,7 @@ export class Signature {
      * @param {ByteArrayLike} bytes
      */
     constructor(pubKey, bytes) {
-        this.pubKey = PubKey.fromAlike(pubKey)
+        this.pubKey = PubKey.new(pubKey)
         this.bytes = toBytes(bytes)
     }
 

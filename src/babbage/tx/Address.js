@@ -94,7 +94,7 @@ export class Address {
      * @param {AddressLike} arg
      * @returns {Address}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof Address
             ? arg
             : typeof arg == "string" && arg.startsWith("addr")

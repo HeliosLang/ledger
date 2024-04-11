@@ -70,7 +70,7 @@ export class SpendingCredential {
      */
     static PubKey(hash) {
         return new SpendingCredential("PubKey", {
-            hash: PubKeyHash.fromAlike(hash)
+            hash: PubKeyHash.new(hash)
         })
     }
 
@@ -84,7 +84,7 @@ export class SpendingCredential {
             new SpendingCredential(
                 "Validator",
                 {
-                    hash: ValidatorHash.fromAlike(hash)
+                    hash: ValidatorHash.new(hash)
                 },
                 hash instanceof ValidatorHash ? hash.context : None
             )
@@ -130,7 +130,7 @@ export class SpendingCredential {
      *   SpendingCredential
      * )}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof SpendingCredential
                 ? arg

@@ -39,7 +39,7 @@ export class ScriptHash {
      * @param {ScriptHashLike} arg
      * @returns {ScriptHash}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof ScriptHash ? arg : new ScriptHash(arg)
     }
 

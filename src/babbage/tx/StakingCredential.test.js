@@ -11,7 +11,7 @@ describe(StakingCredential.name, () => {
          * unwitnessed
          * @satisfies {StakingCredential<"PubKey", null>}
          */
-        const unwitnessed = StakingCredential.fromAlike(unwitnessedPkh)
+        const unwitnessed = StakingCredential.new(unwitnessedPkh)
 
         const dummyBytes = StakingValidatorHash.dummy().bytes
         const unwitnessedVh = new StakingValidatorHash(dummyBytes, null)
@@ -20,7 +20,7 @@ describe(StakingCredential.name, () => {
          * witnessed by NativeScript
          * @satisfies {StakingCredential<"Validator", null>}
          */
-        const witnessedByNative = StakingCredential.fromAlike(unwitnessedVh)
+        const witnessedByNative = StakingCredential.new(unwitnessedVh)
 
         const witnessedOrUnwitnessedVh = new StakingValidatorHash(dummyBytes)
 
@@ -28,7 +28,7 @@ describe(StakingCredential.name, () => {
          * default, unwitnessed or witnessed
          * @satisfies {StakingCredential<"Validator", unknown>}
          */
-        const witnessedOrUnwitnessed = StakingCredential.fromAlike(
+        const witnessedOrUnwitnessed = StakingCredential.new(
             witnessedOrUnwitnessedVh
         )
 
@@ -41,6 +41,6 @@ describe(StakingCredential.name, () => {
          * StakingCredential<{...}> (witnessed by UplcProgram)
          * @satisfies {StakingCredential<"Validator", {program: UplcProgramV2}>}
          */
-        const witnessed = StakingCredential.fromAlike(witnessedVh)
+        const witnessed = StakingCredential.new(witnessedVh)
     })
 })

@@ -15,7 +15,7 @@ describe(SpendingCredential.name, () => {
          * unwitnessed
          * @satisfies {SpendingCredential<"PubKey", null>}
          */
-        const unwitnessed = SpendingCredential.fromAlike(unwitnessedPkh)
+        const unwitnessed = SpendingCredential.new(unwitnessedPkh)
 
         const dummyBytes = ValidatorHash.dummy().bytes
         const unwitnessedVh = new ValidatorHash(dummyBytes, null)
@@ -24,7 +24,7 @@ describe(SpendingCredential.name, () => {
          * witnessed by NativeScript
          * @satisfies {SpendingCredential<"Validator", null>}
          */
-        const witnessedByNative = SpendingCredential.fromAlike(unwitnessedVh)
+        const witnessedByNative = SpendingCredential.new(unwitnessedVh)
 
         const witnessedOrUnwitnessedVh = new ValidatorHash(dummyBytes)
 
@@ -32,7 +32,7 @@ describe(SpendingCredential.name, () => {
          * default, unwitnessed or witnessed
          * @satisfies {SpendingCredential<"Validator", unknown>}
          */
-        const witnessedOrUnwitnessed = SpendingCredential.fromAlike(
+        const witnessedOrUnwitnessed = SpendingCredential.new(
             witnessedOrUnwitnessedVh
         )
 
@@ -45,11 +45,11 @@ describe(SpendingCredential.name, () => {
          * SpendingCredential<{...}> (witnessed by UplcProgram)
          * @satisfies {SpendingCredential<"Validator", {program: UplcProgramV2}>}
          */
-        const witnessed = SpendingCredential.fromAlike(witnessedVh)
+        const witnessed = SpendingCredential.new(witnessedVh)
 
         /**
          * @satisfies {SpendingCredential<"Validator", {program: UplcProgramV2}>}
          */
-        const witnessedCopy = SpendingCredential.fromAlike(witnessed)
+        const witnessedCopy = SpendingCredential.new(witnessed)
     })
 })

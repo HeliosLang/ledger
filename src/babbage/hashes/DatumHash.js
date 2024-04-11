@@ -46,7 +46,7 @@ export class DatumHash {
      * @param {DatumHashLike} arg
      * @returns {DatumHash}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof DatumHash ? arg : new DatumHash(arg)
     }
 

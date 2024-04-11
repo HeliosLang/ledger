@@ -77,7 +77,7 @@ export class TimeRange {
      * @param {TimeRangeLike} arg
      * @returns {TimeRange}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         if (arg instanceof TimeRange) {
             return arg
         } else if (Array.isArray(arg)) {

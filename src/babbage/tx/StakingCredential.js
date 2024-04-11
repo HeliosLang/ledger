@@ -80,11 +80,11 @@ export class StakingCredential {
      *   StakingCredential
      * )}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof StakingCredential
                 ? arg
-                : new StakingCredential(StakingHash.fromAlike(arg))
+                : new StakingCredential(StakingHash.new(arg))
         )
     }
 

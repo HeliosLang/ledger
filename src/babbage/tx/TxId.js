@@ -50,7 +50,7 @@ export class TxId {
      * @param {TxIdLike} arg
      * @returns {TxId}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof TxId ? arg : new TxId(arg)
     }
 

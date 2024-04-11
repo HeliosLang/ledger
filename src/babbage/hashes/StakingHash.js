@@ -76,7 +76,7 @@ export class StakingHash {
      * @returns {StakingHash<"PubKey", null>}
      */
     static PubKey(hash) {
-        return new StakingHash("PubKey", { hash: PubKeyHash.fromAlike(hash) })
+        return new StakingHash("PubKey", { hash: PubKeyHash.new(hash) })
     }
 
     /**
@@ -89,7 +89,7 @@ export class StakingHash {
             new StakingHash(
                 "Validator",
                 {
-                    hash: StakingValidatorHash.fromAlike(hash)
+                    hash: StakingValidatorHash.new(hash)
                 },
                 hash instanceof StakingValidatorHash ? hash.context : None
             )
@@ -106,7 +106,7 @@ export class StakingHash {
      *   StakingHash
      * )}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof PubKeyHash
                 ? StakingHash.PubKey(arg)

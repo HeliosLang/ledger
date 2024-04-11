@@ -68,7 +68,7 @@ export class Assets {
         this.assets = (Array.isArray(arg) ? arg : Object.entries(arg)).map(
             ([mph, tokens]) => {
                 return [
-                    MintingPolicyHash.fromAlike(mph),
+                    MintingPolicyHash.new(mph),
                     (Array.isArray(tokens)
                         ? tokens
                         : Object.entries(tokens)
@@ -87,7 +87,7 @@ export class Assets {
      * @param {AssetsLike} arg
      * @returns {Assets}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return arg instanceof Assets ? arg : new Assets(arg)
     }
 
@@ -98,7 +98,7 @@ export class Assets {
     static fromAssetClasses(arg) {
         return new Assets(
             arg.map(([acl, qty]) => {
-                const ac = AssetClass.fromAlike(acl)
+                const ac = AssetClass.new(acl)
 
                 return /** @type {[MintingPolicyHash, [number[], bigint][]]} */ ([
                     ac.mph,
@@ -198,7 +198,7 @@ export class Assets {
      * @param {[ByteArrayLike, bigint | number][]} tokens
      */
     addTokens(mph, tokens) {
-        const mph_ = MintingPolicyHash.fromAlike(mph)
+        const mph_ = MintingPolicyHash.new(mph)
 
         for (let asset of this.assets) {
             if (asset[0].isEqual(mph_)) {
@@ -363,7 +363,7 @@ export class Assets {
      * @returns {[number[], bigint][]}
      */
     getPolicyTokens(policy) {
-        const mph = MintingPolicyHash.fromAlike(policy)
+        const mph = MintingPolicyHash.new(policy)
 
         const entry = this.assets.find((entry) => entry[0].isEqual(mph))
 
@@ -376,7 +376,7 @@ export class Assets {
      * @returns {number[][]}
      */
     getPolicyTokenNames(policy) {
-        const mph = MintingPolicyHash.fromAlike(policy)
+        const mph = MintingPolicyHash.new(policy)
 
         for (let [otherMph, tokens] of this.assets) {
             if (otherMph.isEqual(mph)) {
@@ -583,7 +583,7 @@ export class Assets {
             const tokens = Array.from(rawTokens.entries())
 
             return [
-                MintingPolicyHash.fromAlike(rawMph),
+                MintingPolicyHash.new(rawMph),
                 tokens.map(([rawTokenName, rawQty]) => [
                     toBytes(rawTokenName),
                     rawQty

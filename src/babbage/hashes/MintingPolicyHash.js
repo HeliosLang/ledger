@@ -64,7 +64,7 @@ export class MintingPolicyHash extends ScriptHash {
      * @param {T} arg
      * @returns {T extends MintingPolicyHash<infer C> ? MintingPolicyHash<C> : MintingPolicyHash}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof MintingPolicyHash ? arg : new MintingPolicyHash(arg)
         )

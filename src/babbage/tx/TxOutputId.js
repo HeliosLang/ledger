@@ -43,7 +43,7 @@ export class TxOutputId {
      * @param {bigint | number} utxoIdx
      */
     constructor(txId, utxoIdx) {
-        this.txId = TxId.fromAlike(txId)
+        this.txId = TxId.new(txId)
         this.utxoIdx = Number(utxoIdx)
     }
 
@@ -58,7 +58,7 @@ export class TxOutputId {
      * @param {TxOutputIdLike} arg
      * @returns {TxOutputId}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         if (arg instanceof TxOutputId) {
             return arg
         } else if (typeof arg == "string") {
@@ -80,7 +80,7 @@ export class TxOutputId {
             return new TxOutputId(arg.txId, arg.utxoIdx)
         } else {
             throw new Error(
-                `unhandled TxOutputId.fromAlike arguments ${JSON.stringify(arg)}`
+                `unhandled TxOutputId.new arguments ${JSON.stringify(arg)}`
             )
         }
     }

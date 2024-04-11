@@ -122,7 +122,7 @@ export class TxOutputDatum {
      * @param {TxOutputDatumLike} arg
      * @returns {Option<TxOutputDatum>}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         if (arg instanceof TxOutputDatum) {
             return arg
         } else if (arg instanceof DatumHash) {

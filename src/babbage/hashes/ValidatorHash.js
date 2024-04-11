@@ -56,7 +56,7 @@ export class ValidatorHash extends ScriptHash {
      * @param {T} arg
      * @returns {arg extends ValidatorHash<infer C> ? ValidatorHash<C> : ValidatorHash}
      */
-    static fromAlike(arg) {
+    static new(arg) {
         return /** @type {any} */ (
             arg instanceof ValidatorHash ? arg : new ValidatorHash(arg)
         )
