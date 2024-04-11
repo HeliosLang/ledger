@@ -1,4 +1,4 @@
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import { None } from "@helios-lang/type-utils"
 import { PubKeyHash } from "../hashes/index.js"
 import {
@@ -12,6 +12,7 @@ import {
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("../hashes/index.js").PubKeyHashLike} PubKeyHashLike
  * @typedef {import("./NativeContext.js").NativeContext} NativeContext
  */
@@ -99,7 +100,7 @@ export class NativeScript {
     }
 
     /**
-     * @param {number | bigint} nRequired
+     * @param {IntLike} nRequired
      * @param {NativeScriptI[]} scripts
      * @returns {NativeScript<"AtLeast">}
      */
@@ -110,7 +111,7 @@ export class NativeScript {
 
         return new NativeScript("AtLeast", {
             scripts,
-            nRequired: Number(nRequired)
+            nRequired: toInt(nRequired)
         })
     }
 

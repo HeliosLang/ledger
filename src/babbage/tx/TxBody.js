@@ -10,9 +10,9 @@ import {
     encodeMap,
     encodeObjectIKey
 } from "@helios-lang/cbor"
-import { bytesToHex } from "@helios-lang/codec-utils"
+import { bytesToHex, toInt } from "@helios-lang/codec-utils"
 import { blake2b } from "@helios-lang/crypto"
-import { expectSome, isSome } from "@helios-lang/type-utils"
+import { None, expectSome, isSome } from "@helios-lang/type-utils"
 import {
     ByteArrayData,
     ConstrData,
@@ -42,6 +42,7 @@ import { ScriptPurpose } from "./ScriptPurpose.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../hashes/index.js").Hash} Hash
  */
@@ -51,8 +52,8 @@ import { ScriptPurpose } from "./ScriptPurpose.js"
  *   inputs: TxInput[]
  *   outputs: TxOutput[]
  *   fee: bigint
- *   firstValidSlot: Option<bigint>
- *   lastValidSlot: Option<bigint>
+ *   firstValidSlot: Option<number>
+ *   lastValidSlot: Option<number>
  *   dcerts: DCert[]
  *   withdrawals: [StakingAddress, bigint][]
  *   minted: Assets
@@ -92,13 +93,13 @@ export class TxBody {
 
     /**
      * @readonly
-     * @type {Option<bigint>}
+     * @type {Option<number>}
      */
     firstValidSlot
 
     /**
      * @readonly
-     * @type {Option<bigint>}
+     * @type {Option<number>}
      */
     lastValidSlot
 
@@ -248,8 +249,10 @@ export class TxBody {
             inputs: expectSome(inputs),
             outputs: expectSome(outputs),
             fee: expectSome(fee),
-            firstValidSlot,
-            lastValidSlot,
+            firstValidSlot: isSome(firstValidSlot)
+                ? Number(firstValidSlot)
+                : None,
+            lastValidSlot: isSome(lastValidSlot) ? Number(lastValidSlot) : None,
             dcerts: dcerts ?? [],
             withdrawals: withdrawals ?? [],
             metadataHash,
@@ -371,18 +374,18 @@ export class TxBody {
     /**
      * Used by (indirectly) by emulator to check if slot range is valid.
      * Note: firstValidSlot == lastValidSlot is allowed
-     * @param {bigint} slot
+     * @param {IntLike} slot
      * @returns {boolean}
      */
     isValidSlot(slot) {
         if (this.lastValidSlot != null) {
-            if (slot > this.lastValidSlot) {
+            if (toInt(slot) > this.lastValidSlot) {
                 return false
             }
         }
 
         if (this.firstValidSlot != null) {
-            if (slot < this.firstValidSlot) {
+            if (toInt(slot) < this.firstValidSlot) {
                 return false
             }
         }

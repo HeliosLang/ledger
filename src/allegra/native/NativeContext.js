@@ -4,7 +4,7 @@
 
 /**
  * @typedef {ShelleyNativeContext & {
- *   isAfter: (slot: bigint) => boolean
- *   isBefore: (slot: bigint) => boolean
+ *   isAfter: (slot: number) => boolean
+ *   isBefore: (slot: number) => boolean
  * }} NativeContext
  */

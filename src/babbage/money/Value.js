@@ -18,6 +18,7 @@ import { MintingPolicyHash } from "../hashes/MintingPolicyHash.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Assets.js").AssetsLike} AssetsLike
  * @typedef {import("./AssetClass.js").AssetClassLike} AssetClassLike
@@ -25,7 +26,7 @@ import { MintingPolicyHash } from "../hashes/MintingPolicyHash.js"
  */
 
 /**
- * @typedef {Value | bigint | number | [bigint | number, AssetsLike] | {lovelace: bigint | number, assets?: AssetsLike}} ValueLike
+ * @typedef {Value | IntLike | [IntLike, AssetsLike] | {lovelace: IntLike, assets?: AssetsLike}} ValueLike
  */
 
 /**
@@ -44,7 +45,7 @@ export class Value {
     assets
 
     /**
-     * @param {bigint | number} lovelace
+     * @param {IntLike} lovelace
      * @param {AssetsLike} assets
      */
     constructor(lovelace = 0n, assets = []) {
@@ -75,19 +76,19 @@ export class Value {
     /**
      * @overload
      * @param {AssetClassLike} assetClass
-     * @param {bigint | number} qty
+     * @param {IntLike} qty
      */
 
     /**
      * @overload
      * @param {MintingPolicyHashLike} mph
      * @param {ByteArrayLike} tokenName
-     * @param {bigint | number} qty
+     * @param {IntLike} qty
      */
 
     /**
      * TODO: should this be moved into Assets?
-     * @param {[AssetClassLike, bigint | number] | [MintingPolicyHashLike, ByteArrayLike, bigint | number]} args
+     * @param {[AssetClassLike, IntLike] | [MintingPolicyHashLike, ByteArrayLike, IntLike]} args
      * @returns {Value}
      */
     static fromAsset(...args) {
@@ -271,7 +272,7 @@ export class Value {
 
     /**
      * Multiplies a `Value` by a whole number.
-     * @param {bigint | number} scalar
+     * @param {IntLike} scalar
      * @returns {Value}
      */
     multiply(scalar) {

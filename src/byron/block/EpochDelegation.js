@@ -6,21 +6,22 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 export class EpochDelegation {
     /**
-     * @param {number | bigint} epoch
+     * @param {IntLike} epoch
      * @param {number[]} issuer
      * @param {number[]} delegate
      * @param {number[]} certificate
      */
     constructor(epoch, issuer, delegate, certificate) {
-        this.epoch = Number(epoch)
+        this.epoch = toInt(epoch)
         this.issuer = issuer
         this.delegate = delegate
         this.certificate = certificate

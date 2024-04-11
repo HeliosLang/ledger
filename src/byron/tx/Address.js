@@ -12,12 +12,13 @@ import { ByteStream } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 export class Address {
     /**
      * @param {number[]} bytes
-     * @param {number | bigint} a - what is this?
+     * @param {IntLike} a - what is this?
      */
     constructor(bytes, a) {
         this.bytes = bytes

@@ -17,6 +17,7 @@ import { MintingPolicyHash } from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../hashes/index.js").MintingPolicyHashLike} MintingPolicyHashLike
  */
@@ -239,7 +240,7 @@ export function handleAssetClassArgs(...args) {
 }
 
 /**
- * @param {[AssetClassLike, bigint | number] | [MintingPolicyHashLike, ByteArrayLike, bigint | number]} args
+ * @param {[AssetClassLike, IntLike] | [MintingPolicyHashLike, ByteArrayLike, IntLike]} args
  * @returns {[MintingPolicyHash, number[], bigint]}
  */
 export function handleAssetClassArgsWithQty(...args) {

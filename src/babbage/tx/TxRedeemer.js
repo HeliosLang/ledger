@@ -4,12 +4,13 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { bytesToHex } from "@helios-lang/codec-utils"
+import { bytesToHex, toInt } from "@helios-lang/codec-utils"
 import { decodeCost, decodeUplcData, encodeCost } from "@helios-lang/uplc"
 import { NetworkParamsHelper } from "../params/NetworkParamsHelper.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("@helios-lang/uplc").Cost} Cost
  */
@@ -59,13 +60,13 @@ export class TxRedeemer {
     }
 
     /**
-     * @param {number | bigint} inputIndex
+     * @param {IntLike} inputIndex
      * @param {UplcData} data
      * @param {Cost} cost - defaults to zero so cost can be calculated after construction
      * @returns {TxRedeemer<"Spending">}
      */
     static Spending(inputIndex, data, cost = { mem: 0n, cpu: 0n }) {
-        const index = Number(inputIndex)
+        const index = toInt(inputIndex)
 
         if (index < 0) {
             throw new Error("negative TxRedeemer spending index not allowed")
@@ -79,13 +80,13 @@ export class TxRedeemer {
     }
 
     /**
-     * @param {number | bigint} policyIndex
+     * @param {IntLike} policyIndex
      * @param {UplcData} data
      * @param {Cost} cost - defaults to zero so cost can be calculated after construction
      * @returns {TxRedeemer<"Minting">}
      */
     static Minting(policyIndex, data, cost = { mem: 0n, cpu: 0n }) {
-        const index = Number(policyIndex)
+        const index = toInt(policyIndex)
 
         if (index < 0) {
             throw new Error("negative TxRedeemer minting index not allowed")

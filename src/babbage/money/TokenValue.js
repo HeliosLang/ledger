@@ -3,6 +3,10 @@ import { Assets } from "./Assets.js"
 import { Value } from "./Value.js"
 
 /**
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
+ */
+
+/**
  * Single asset class value (quantity can be more than 1)
  * For this special case we can preserve the context
  * @template [C=unknown]
@@ -28,7 +32,7 @@ export class TokenValue extends Value {
 
     /**
      * @param {AssetClass<C>} assetClass
-     * @param {bigint | number} qty
+     * @param {IntLike} qty
      */
     constructor(assetClass, qty) {
         super(0, Assets.fromAssetClasses([[assetClass, qty]]))
@@ -43,7 +47,7 @@ export class TokenValue extends Value {
 
     /**
      * Multiplies a `TokenValue` by a whole number.
-     * @param {bigint | number} scalar
+     * @param {IntLike} scalar
      * @returns {TokenValue<C>}
      */
     multiply(scalar) {

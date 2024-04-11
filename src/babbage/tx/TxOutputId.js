@@ -10,17 +10,18 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import { TxId } from "./TxId.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./TxId.js").TxIdLike} TxIdLike
  */
 
 /**
- * @typedef {TxOutputId | string | [TxId | ByteArrayLike, number | bigint] | {txId: TxId | ByteArrayLike, utxoIdx: number | bigint}} TxOutputIdLike
+ * @typedef {TxOutputId | string | [TxId | ByteArrayLike, IntLike] | {txId: TxId | ByteArrayLike, utxoIdx: IntLike}} TxOutputIdLike
  */
 /**
  * Id of a Utxo
@@ -40,11 +41,11 @@ export class TxOutputId {
 
     /**
      * @param {TxIdLike} txId
-     * @param {bigint | number} utxoIdx
+     * @param {IntLike} utxoIdx
      */
     constructor(txId, utxoIdx) {
         this.txId = TxId.new(txId)
-        this.utxoIdx = Number(utxoIdx)
+        this.utxoIdx = toInt(utxoIdx)
     }
 
     /**

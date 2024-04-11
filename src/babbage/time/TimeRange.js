@@ -5,7 +5,7 @@ import {
     decodeBoolData,
     encodeBoolData
 } from "@helios-lang/uplc"
-import { timeToNumber } from "./Time.js"
+import { toTime } from "./Time.js"
 
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
@@ -63,8 +63,8 @@ export class TimeRange {
      * @param {TimeRangeOptions} options
      */
     constructor(start, end, options = {}) {
-        this.start = timeToNumber(start)
-        this.end = timeToNumber(end)
+        this.start = toTime(start)
+        this.end = toTime(end)
         this.includeStart = !(options.excludeStart ?? false)
         this.includeEnd = !(options.excludeEnd ?? false)
     }

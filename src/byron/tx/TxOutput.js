@@ -9,12 +9,13 @@ import { Address } from "./Address.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 export class TxOutput {
     /**
      * @param {Address} address
-     * @param {number | bigint} lovelace
+     * @param {IntLike} lovelace
      */
     constructor(address, lovelace) {
         this.address = address

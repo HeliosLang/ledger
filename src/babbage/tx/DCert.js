@@ -4,7 +4,7 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import { ConstrData, IntData } from "@helios-lang/uplc"
 import { PubKeyHash, StakingHash } from "../hashes/index.js"
 import { PoolParameters } from "../pool/index.js"
@@ -13,6 +13,7 @@ import { None } from "@helios-lang/type-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("../hashes/index.js").PubKeyHashLike} PubKeyHashLike
  * @typedef {import("./StakingCredential.js").StakingCredentialLike} StakingCredentialLike
  */
@@ -112,13 +113,13 @@ export class DCert {
 
     /**
      * @param {PubKeyHashLike} poolId
-     * @param {number | bigint} epoch
+     * @param {IntLike} epoch
      * @returns {DCert<"RetirePool">}
      */
     static RetirePool(poolId, epoch) {
         return new DCert("RetirePool", {
             poolId: PubKeyHash.new(poolId),
-            epoch: Math.round(Number(epoch))
+            epoch: toInt(epoch)
         })
     }
 

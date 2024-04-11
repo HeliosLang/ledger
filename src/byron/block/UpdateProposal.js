@@ -17,13 +17,14 @@ import { ByteStream } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
  * @typedef {{
- *   blockVersion: [number | bigint, number | bigint, number| bigint],
+ *   blockVersion: [IntLike, IntLike, IntLike],
  *   parameters: UpdateParametersProposal,
- *   softwareVersion: [string, number | bigint]
+ *   softwareVersion: [string, IntLike]
  *   data: [string, [number[], number[], number[], number[]]]
  *   proposer: number[]
  *   signature: number[]

@@ -8,16 +8,17 @@ import {
     encodeList,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import { EpochBoundaryConsensus } from "./EpochBoundaryConsensus.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
  * @typedef {{
- *   protocolMagic: number | bigint
+ *   protocolMagic: IntLike
  *   prevBlock: number[]
  *   bodyProof: number[]
  *   consensusData: EpochBoundaryConsensus
@@ -53,7 +54,7 @@ export class EpochBoundaryHeader {
      * @param {EpochBoundaryHeaderProps} props
      */
     constructor({ protocolMagic, prevBlock, bodyProof, consensusData }) {
-        this.protocolMagic = Number(protocolMagic)
+        this.protocolMagic = toInt(protocolMagic)
         this.prevBlock = prevBlock
         this.bodyProof = bodyProof
         this.consensusData = consensusData

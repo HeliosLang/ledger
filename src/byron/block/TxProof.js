@@ -6,10 +6,11 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
@@ -18,12 +19,12 @@ import { ByteStream } from "@helios-lang/codec-utils"
 export class TxProof {
     /**
      * Creates an instance of TxProof.
-     * @param {number | bigint} index - The transaction index.
+     * @param {IntLike} index - The transaction index.
      * @param {number[]} merkleRoot - The Merkle root hash.
      * @param {number[]} witnessHash - The hash of the witness.
      */
     constructor(index, merkleRoot, witnessHash) {
-        this.index = Number(index)
+        this.index = toInt(index)
         this.merkleRoot = merkleRoot
         this.witnessHash = witnessHash
     }

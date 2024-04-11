@@ -4,10 +4,11 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 export class EpochBoundaryConsensus {
@@ -24,11 +25,11 @@ export class EpochBoundaryConsensus {
     difficulty
 
     /**
-     * @param {bigint | number} epochId
-     * @param {bigint | number} difficulty
+     * @param {IntLike} epochId
+     * @param {IntLike} difficulty
      */
     constructor(epochId, difficulty) {
-        this.epochId = Number(epochId)
+        this.epochId = toInt(epochId)
         this.difficulty = BigInt(difficulty)
     }
 

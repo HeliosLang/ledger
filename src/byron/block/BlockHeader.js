@@ -12,11 +12,12 @@ import { BlockProof } from "./BlockProof.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
  * @typedef {{
- *   protocolMagic: number | bigint
+ *   protocolMagic: IntLike
  *   prevBlock: number[]
  *   bodyProof: BlockProof
  *   consensusData: BlockConsensus

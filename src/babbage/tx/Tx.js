@@ -168,6 +168,7 @@ export class Tx {
         }
 
         const [a, b] = networkParams.txFeeParams
+
         const sizeFee = BigInt(a) + BigInt(this.size) * BigInt(b)
 
         // clean up the dummy signatures

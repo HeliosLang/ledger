@@ -1,7 +1,9 @@
 import { None, expectSome } from "@helios-lang/type-utils"
 import { DEFAULT_NETWORK_PARAMS } from "./NetworkParams.js"
+import { toInt } from "@helios-lang/codec-utils"
 
 /**
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("./NetworkParams.js").NetworkParams} NetworkParams
  */
 
@@ -216,27 +218,23 @@ export class NetworkParamsHelper {
 
     /**
      * @private
-     * @type {bigint}
+     * @type {number}
      */
     get latestTipSlot() {
-        return BigInt(
-            expectSome(
-                this.params?.latestTip?.slot,
-                "'networkParams.latestTip.slot' undefined"
-            )
+        return expectSome(
+            this.params?.latestTip?.slot,
+            "'networkParams.latestTip.slot' undefined"
         )
     }
 
     /**
      * @private
-     * @type {bigint}
+     * @type {number}
      */
     get latestTipTime() {
-        return BigInt(
-            expectSome(
-                this.params?.latestTip?.time,
-                "'networkParams.latestTip.time' undefined"
-            )
+        return expectSome(
+            this.params?.latestTip?.time,
+            "'networkParams.latestTip.time' undefined"
         )
     }
 
@@ -255,28 +253,26 @@ export class NetworkParamsHelper {
 
     /**
      * Calculates the time (in milliseconds in 01/01/1970) associated with a given slot number.
-     * @param {bigint} slot
+     * @param {IntLike} slot
      * @returns {number}
      */
     slotToTime(slot) {
-        const slotDiff = slot - this.latestTipSlot
+        const slotDiff = toInt(slot) - this.latestTipSlot
 
-        return Number(
-            this.latestTipTime + slotDiff * BigInt(this.secondsPerSlot * 1000)
-        )
+        return this.latestTipTime + slotDiff * this.secondsPerSlot * 1000
     }
 
     /**
      * Calculates the slot number associated with a given time. Time is specified as milliseconds since 01/01/1970.
-     * @param {number} time Milliseconds since 1970
-     * @returns {bigint}
+     * @param {IntLike} time Milliseconds since 1970
+     * @returns {number}
      */
     timeToSlot(time) {
-        const timeDiff = BigInt(time) - this.latestTipTime
+        const timeDiff = toInt(time) - this.latestTipTime
 
         return (
             this.latestTipSlot +
-            BigInt(Math.round(Number(timeDiff) / (1000 * this.secondsPerSlot)))
+            Math.round(timeDiff / (1000 * this.secondsPerSlot))
         )
     }
 }

@@ -25,6 +25,7 @@ import { MintingPolicyHash, ScriptHash } from "../hashes/index.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("./AssetClass.js").AssetClassLike} AssetClassLike
  * @typedef {import("../hashes/MintingPolicyHash.js").MintingPolicyHashLike} MintingPolicyHashLike
  */
@@ -32,8 +33,8 @@ import { MintingPolicyHash, ScriptHash } from "../hashes/index.js"
 /**
  * @typedef {[
  *     ByteArrayLike,
- *     bigint | number
- * ][] | Record<string, bigint | number>} TokensLike
+ *     IntLike
+ * ][] | Record<string, IntLike>} TokensLike
  */
 
 /**
@@ -92,7 +93,7 @@ export class Assets {
     }
 
     /**
-     * @param {[AssetClassLike, bigint | number][]} arg
+     * @param {[AssetClassLike, IntLike][]} arg
      * @returns {Assets}
      */
     static fromAssetClasses(arg) {
@@ -151,19 +152,19 @@ export class Assets {
     /**
      * @overload
      * @param {AssetClassLike} assetClass
-     * @param {bigint | number} qty
+     * @param {IntLike} qty
      */
 
     /**
      * @overload
      * @param {MintingPolicyHashLike} mph
      * @param {ByteArrayLike} tokenName
-     * @param {bigint | number} qty
+     * @param {IntLike} qty
      */
 
     /**
      * Mutates 'this'.
-     * @param {[AssetClassLike, bigint | number] | [MintingPolicyHashLike, ByteArrayLike, bigint | number]} args
+     * @param {[AssetClassLike, IntLike] | [MintingPolicyHashLike, ByteArrayLike, IntLike]} args
      */
     addComponent(...args) {
         const [mph, tokenName, qty] = handleAssetClassArgsWithQty(...args)
@@ -195,7 +196,7 @@ export class Assets {
      * Mutates 'this'.
      * Throws error if mph is already contained in 'this'.
      * @param {MintingPolicyHashLike} mph
-     * @param {[ByteArrayLike, bigint | number][]} tokens
+     * @param {[ByteArrayLike, IntLike][]} tokens
      */
     addTokens(mph, tokens) {
         const mph_ = MintingPolicyHash.new(mph)
@@ -528,7 +529,7 @@ export class Assets {
     }
 
     /**
-     * @param {number | bigint} scalar
+     * @param {IntLike} scalar
      * @returns {Assets}
      */
     multiply(scalar) {

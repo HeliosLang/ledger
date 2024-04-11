@@ -10,13 +10,14 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import { NativeScript as ShelleyNativeScript } from "../../shelley/index.js"
 import { PubKeyHash, ScriptHash } from "../hashes/index.js"
 import { blake2b } from "@helios-lang/crypto"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("../../shelley/index.js").NativeContext} ShelleyNativeContext
  * @typedef {import("../../shelley/index.js").NativeScriptKind} ShelleyNativeScriptKind
  * @typedef {import("../hashes/index.js").PubKeyHashLike} PubKeyHashLike
@@ -35,9 +36,9 @@ import { blake2b } from "@helios-lang/crypto"
 /**
  * @template {NativeScriptKind} T
  * @typedef {T extends "After" ? {
- *   slot: bigint
+ *   slot: number
  * } : T extends "Before" ? {
- *   slot: bigint
+ *   slot: number
  * } : T extends ShelleyNativeScriptKind ? {
  *   shelleyScript: ShelleyNativeScript<ShelleyNativeScriptKind, NativeContext>
  * } : never} NativeScriptProps
@@ -113,19 +114,19 @@ export class NativeScript {
     }
 
     /**
-     * @param {number | bigint} slot
+     * @param {IntLike} slot
      * @returns {NativeScript<"After">}
      */
     static After(slot) {
-        return new NativeScript("After", { slot: BigInt(slot) })
+        return new NativeScript("After", { slot: toInt(slot) })
     }
 
     /**
-     * @param {number | bigint} slot
+     * @param {IntLike} slot
      * @returns {NativeScript<"Before">}
      */
     static Before(slot) {
-        return new NativeScript("Before", { slot: BigInt(slot) })
+        return new NativeScript("Before", { slot: toInt(slot) })
     }
 
     /**
@@ -300,24 +301,12 @@ export class NativeScript {
         } else if (this.isAfter()) {
             const slot = this.props.slot
 
-            if (slot != BigInt(Number(slot))) {
-                console.error(
-                    "Warning: slot overflow (not representable by Number in Native script Json)"
-                )
-            }
-
             return {
                 type: "after",
                 slot
             }
         } else if (this.isBefore()) {
             const slot = this.props.slot
-
-            if (slot != BigInt(Number(slot))) {
-                console.error(
-                    "Warning: slot overflow (not representable by Number in Native script Json)"
-                )
-            }
 
             return {
                 type: "before",

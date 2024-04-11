@@ -1,4 +1,4 @@
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import {
     decodeBytes,
     decodeInt,
@@ -13,6 +13,7 @@ import {
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
@@ -78,15 +79,15 @@ export class TxWitness {
 
     /**
      * TODO: figure out what this fields are for, and think of better names
-     * @param {number | bigint} i0
+     * @param {IntLike} i0
      * @param {number[]} h0
-     * @param {number | bigint} i1
+     * @param {IntLike} i1
      * @param {number[]} h1
      * @returns {TxWitness<"Unknown1">}
      */
     static Unknown1(i0, h0, i1, h1) {
         return new TxWitness({
-            Unknown1: { i0: Number(i0), h0, i1: Number(i1), h1 }
+            Unknown1: { i0: toInt(i0), h0, i1: toInt(i1), h1 }
         })
     }
 

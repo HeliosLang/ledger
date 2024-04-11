@@ -10,6 +10,7 @@ import { ByteStream } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 export class SscCertificate {
@@ -17,7 +18,7 @@ export class SscCertificate {
      *
      * @param {number[]} vssPubKey - Verifiable secret sharing Public Key
      * @param {number[]} pubKey
-     * @param {number | bigint} epoch
+     * @param {IntLike} epoch
      * @param {number[]} signature
      */
     constructor(vssPubKey, pubKey, epoch, signature) {

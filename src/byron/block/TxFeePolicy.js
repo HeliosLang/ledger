@@ -13,6 +13,7 @@ import { ByteStream } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
@@ -53,8 +54,8 @@ export class TxFeePolicy {
     }
 
     /**
-     * @param {number | bigint} a
-     * @param {number | bigint} b
+     * @param {IntLike} a
+     * @param {IntLike} b
      * @returns {TxFeePolicy<"Regular">}
      */
     static Regular(a, b) {
@@ -62,7 +63,7 @@ export class TxFeePolicy {
     }
 
     /**
-     * @param {number | bigint} tag
+     * @param {IntLike} tag
      * @param {number[]} data
      * @returns {TxFeePolicy<"Other">}
      */

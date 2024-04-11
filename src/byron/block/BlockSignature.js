@@ -7,11 +7,12 @@ import {
     encodeInt,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 import { EpochDelegation } from "./EpochDelegation.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
@@ -66,7 +67,7 @@ export class BlockSignature {
     }
 
     /**
-     * @param {[number | bigint, number | bigint]} epochRange
+     * @param {[IntLike, IntLike]} epochRange
      * @param {number[]} issuer
      * @param {number[]} delegate
      * @param {number[]} certificate
@@ -82,7 +83,7 @@ export class BlockSignature {
     ) {
         return new BlockSignature({
             EpochRangeDelegation: {
-                epochRange: [Number(epochRange[0]), Number(epochRange[1])],
+                epochRange: [toInt(epochRange[0]), toInt(epochRange[1])],
                 issuer,
                 delegate,
                 certificate,

@@ -9,10 +9,11 @@ import {
     encodeTag,
     encodeTuple
 } from "@helios-lang/cbor"
-import { ByteStream } from "@helios-lang/codec-utils"
+import { ByteStream, toInt } from "@helios-lang/codec-utils"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
+ * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  */
 
 /**
@@ -53,20 +54,20 @@ export class TxInput {
 
     /**
      * @param {number[]} txId
-     * @param {number | bigint} utxoIdx
+     * @param {IntLike} utxoIdx
      * @returns {TxInput<"Regular">}
      */
     static Regular(txId, utxoIdx) {
-        return new TxInput({ Regular: { txId, utxoIdx: Number(utxoIdx) } })
+        return new TxInput({ Regular: { txId, utxoIdx: toInt(utxoIdx) } })
     }
 
     /**
-     * @param {number | bigint} tag
+     * @param {IntLike} tag
      * @param {number[]} data
      * @returns {TxInput<"Other">}
      */
     static Other(tag, data) {
-        return new TxInput({ Other: { tag: Number(tag), data } })
+        return new TxInput({ Other: { tag: toInt(tag), data } })
     }
 
     /**
