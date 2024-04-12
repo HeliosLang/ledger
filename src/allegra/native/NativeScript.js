@@ -103,7 +103,7 @@ export class NativeScript {
     }
 
     /**
-     * @param {number | bigint} nRequired
+     * @param {IntLike} nRequired
      * @param {NativeScriptI[]} scripts
      * @returns {NativeScript<"AtLeast">}
      */

@@ -153,6 +153,23 @@ export class TimeRange {
     }
 
     /**
+     * @returns {string}
+     */
+    toString() {
+        if (
+            this.end == Number.NEGATIVE_INFINITY ||
+            this.start == Number.POSITIVE_INFINITY
+        ) {
+            return "<never>"
+        } else {
+            return [
+                `${this.includeStart ? "[" : "("}${this.start == Number.NEGATIVE_INFINITY ? "-inf" : this.start.toString()}`,
+                `${this.end == Number.POSITIVE_INFINITY ? "+inf" : this.end.toString()}${this.includeEnd ? "]" : ")"}`
+            ].join(", ")
+        }
+    }
+
+    /**
      * @returns {ConstrData}
      */
     toUplcData() {
