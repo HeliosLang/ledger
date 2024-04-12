@@ -191,20 +191,15 @@ export class Value {
     }
 
     /**
-     * Only include AssetClass.ADA if there are not other assets
+     * Only include AssetClass.ADA if lovelace != 0n
      * @type {AssetClass[]}
      */
     get assetClasses() {
-        if (this.assets.isZero() && this.lovelace != 0n) {
-            if (this.lovelace != 0n) {
-                return [AssetClass.ADA]
-            } else {
-                return []
-            }
-        } else {
-            return this.assets.assetClasses
-        }
+        return (this.lovelace == 0n ? [] : [AssetClass.ADA]).concat(
+            this.assets.assetClasses
+        )
     }
+
     /**
      * Adds two `Value` instances together. Returns a new `Value` instance.
      * @param {Value} other
