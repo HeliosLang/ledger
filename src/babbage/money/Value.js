@@ -5,7 +5,7 @@ import {
     encodeTuple,
     isTuple
 } from "@helios-lang/cbor"
-import { handleAssetClassArgsWithQty } from "./AssetClass.js"
+import { handleAssetClassArgsWithQty, AssetClass } from "./AssetClass.js"
 import { Assets } from "./Assets.js"
 import { ByteStream, hexToBytes } from "@helios-lang/codec-utils"
 import {
@@ -190,6 +190,21 @@ export class Value {
         return s
     }
 
+    /**
+     * Only include AssetClass.ADA if there are not other assets
+     * @type {AssetClass[]}
+     */
+    get assetClasses() {
+        if (this.assets.isZero() && this.lovelace != 0n) {
+            if (this.lovelace != 0n) {
+                return [AssetClass.ADA]
+            } else {
+                return []
+            }
+        } else {
+            return this.assets.assetClasses
+        }
+    }
     /**
      * Adds two `Value` instances together. Returns a new `Value` instance.
      * @param {Value} other
