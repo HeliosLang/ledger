@@ -311,7 +311,7 @@ export class Tx {
 
         this.validateRedeemersExBudget(params)
 
-        this.validateTotalExBudget(params)
+        this.validateTotalExBudget(params, strict)
 
         this.validateOutputs(params, strict)
 
@@ -731,8 +731,9 @@ export class Tx {
      * Throws error if execution budget is exceeded
      * @private
      * @param {NetworkParamsHelper} networkParams
+     * @param {boolean} verbose - if true -> warn if ex budget >= 50% max budget
      */
-    validateTotalExBudget(networkParams) {
+    validateTotalExBudget(networkParams, verbose = false) {
         let totalMem = 0n
         let totalCpu = 0n
 
@@ -747,11 +748,19 @@ export class Tx {
             throw new Error(
                 `execution budget exceeded for mem (${totalMem.toString()} > ${maxMem.toString()})\n`
             )
+        } else if (verbose && totalMem > BigInt(maxMem) / 2n) {
+            console.error(
+                `Warning: mem usage >= 50% of max mem budget (${totalMem.toString()}/${maxMem.toString()} >= 0.5)`
+            )
         }
 
         if (totalCpu > BigInt(maxCpu)) {
             throw new Error(
                 `execution budget exceeded for cpu (${totalCpu.toString()} > ${maxCpu.toString()})\n`
+            )
+        } else if (verbose && totalCpu > BigInt(maxCpu) / 2n) {
+            console.error(
+                `Warning: cpu usage >= 50% of max cpu budget (${totalCpu.toString()}/${maxCpu.toString()} >= 0.5)`
             )
         }
     }
