@@ -8,6 +8,8 @@ import { MintingPolicyHash } from "../index.js"
 import { deepEqual, strictEqual } from "node:assert"
 import { bytesToHex } from "@helios-lang/codec-utils"
 
+const IS_MAINNET = false
+
 describe(Value.name, () => {
     it("adds values of TxInput[] together correctly", () => {
         /**
@@ -17,7 +19,7 @@ describe(Value.name, () => {
         const makeInput = (value) => {
             return new TxInput(
                 TxOutputId.dummy(),
-                new TxOutput(Address.dummy(), value)
+                new TxOutput(Address.dummy(IS_MAINNET), value)
             )
         }
 

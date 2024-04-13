@@ -10,13 +10,13 @@ import { blake2b } from "@helios-lang/crypto"
 import { decodeUplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
 import { MintingPolicyHash, ValidatorHash } from "../hashes/index.js"
 import { NativeScript } from "../native/index.js"
-import { NetworkParamsHelper } from "../params/index.js"
 import { Signature } from "./Signature.js"
 import { TxRedeemer } from "./TxRedeemer.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  */
 
 /**
@@ -170,12 +170,12 @@ export class TxWitnesses {
     }
 
     /**
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @returns {bigint}
      */
-    calcExFee(networkParams) {
+    calcExFee(params) {
         return this.redeemers.reduce(
-            (sum, redeemer) => sum + redeemer.calcExFee(networkParams),
+            (sum, redeemer) => sum + redeemer.calcExFee(params),
             0n
         )
     }

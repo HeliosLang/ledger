@@ -13,7 +13,6 @@ import {
     StakingValidatorHash,
     ValidatorHash
 } from "../hashes/index.js"
-import { config } from "./config.js"
 import { Address } from "./Address.js"
 import { StakingCredential } from "./StakingCredential.js"
 
@@ -67,26 +66,26 @@ export class StakingAddress {
         const sh = addr.stakingHash
 
         if (sh) {
-            return StakingAddress.fromHash(sh, addr.isForTestnet())
+            return StakingAddress.fromHash(addr.isForMainnet(), sh)
         } else {
             throw new Error("address doesn't have a staking part")
         }
     }
 
     /**
+     * @param {boolean} isMainnet
      * @param {StakingAddressLike} arg
-     * @param {boolean} isTestnet
      * @returns {StakingAddress}
      */
-    static new(arg, isTestnet = config.IS_TESTNET) {
+    static new(isMainnet, arg) {
         return arg instanceof StakingAddress
             ? arg
             : arg instanceof StakingCredential
-              ? StakingAddress.fromCredential(arg)
+              ? StakingAddress.fromCredential(isMainnet, arg)
               : arg instanceof PubKeyHash
-                ? StakingAddress.fromPubKeyHash(arg, isTestnet)
+                ? StakingAddress.fromPubKeyHash(isMainnet, arg)
                 : arg instanceof ValidatorHash
-                  ? StakingAddress.fromStakingValidatorHash(arg, isTestnet)
+                  ? StakingAddress.fromStakingValidatorHash(isMainnet, arg)
                   : arg instanceof Address
                     ? StakingAddress.fromAddress(arg)
                     : new StakingAddress(arg)
@@ -101,9 +100,7 @@ export class StakingAddress {
 
         const result = new StakingAddress(bytes)
 
-        const expectedPrefix = result.isForTestnet() ? "stake_test" : "stake"
-
-        if (prefix != expectedPrefix) {
+        if (prefix != result.bech32Prefix) {
             throw new Error("invalid StakingAddress prefix")
         }
 
@@ -119,61 +116,62 @@ export class StakingAddress {
     }
 
     /**
+     * @param {boolean} isMainnet
      * @param {StakingCredentialLike} stakingCredential
-     * @param {boolean} isTestnet
      * @returns {StakingAddress}
      */
-    static fromCredential(stakingCredential, isTestnet = config.IS_TESTNET) {
+    static fromCredential(isMainnet, stakingCredential) {
         const sh = StakingCredential.new(stakingCredential).expectStakingHash()
-        return StakingAddress.fromHash(sh, isTestnet)
+        return StakingAddress.fromHash(isMainnet, sh)
     }
 
     /**
      * Converts a `PubKeyHash` or `StakingValidatorHash` into `StakingAddress`.
+     * @param {boolean} isMainnet
      * @param {StakingHashLike} hash
-     * @param {boolean} isTestnet
      * @returns {StakingAddress}
      */
-    static fromHash(hash, isTestnet = config.IS_TESTNET) {
+    static fromHash(isMainnet, hash) {
         const hash_ = StakingHash.new(hash).hash
 
         if (hash_ instanceof PubKeyHash) {
-            return StakingAddress.fromPubKeyHash(hash_, isTestnet)
+            return StakingAddress.fromPubKeyHash(isMainnet, hash_)
         } else {
-            return StakingAddress.fromStakingValidatorHash(hash_, isTestnet)
+            return StakingAddress.fromStakingValidatorHash(isMainnet, hash_)
         }
     }
 
     /**
      * Address with only staking part (regular PubKeyHash)
      * @private
+     * @param {boolean} isMainnet
      * @param {PubKeyHash} hash
-     * @param {boolean} isTestnet
      * @returns {StakingAddress}
      */
-    static fromPubKeyHash(hash, isTestnet = config.IS_TESTNET) {
-        return new StakingAddress([isTestnet ? 0xe0 : 0xe1].concat(hash.bytes))
+    static fromPubKeyHash(isMainnet, hash) {
+        return new StakingAddress([isMainnet ? 0xe1 : 0xe0].concat(hash.bytes))
     }
 
     /**
      * Address with only staking part (script StakingValidatorHash)
      * @private
+     * @param {boolean} isMainnet
      * @param {StakingValidatorHash} hash
-     * @param {boolean} isTestnet
      * @returns {StakingAddress}
      */
-    static fromStakingValidatorHash(hash, isTestnet = config.IS_TESTNET) {
-        return new StakingAddress([isTestnet ? 0xf0 : 0xf1].concat(hash.bytes))
+    static fromStakingValidatorHash(isMainnet, hash) {
+        return new StakingAddress([isMainnet ? 0xf1 : 0xf0].concat(hash.bytes))
     }
 
     /**
      * On-chain a StakingAddress is represented as a StakingCredential
+     * @param {boolean} isMainnet
      * @param {UplcData} data
      * @returns {StakingAddress}
      */
-    static fromUplcData(data) {
+    static fromUplcData(isMainnet, data) {
         const stakingCredential = StakingCredential.fromUplcData(data)
-        return StakingAddress.fromCredential(stakingCredential)
+        return StakingAddress.fromCredential(isMainnet, stakingCredential)
     }
 
     /**
@@ -184,6 +182,13 @@ export class StakingAddress {
      */
     static compare(a, b) {
         return compareBytes(a.stakingHash.bytes, b.stakingHash.bytes)
+    }
+
+    /**
+     * @type {string}
+     */
+    get bech32Prefix() {
+        return this.isForMainnet() ? "stake" : "stake_test"
     }
 
     /**
@@ -213,11 +218,11 @@ export class StakingAddress {
     }
 
     /**
-     * Returns `true` if the given `StakingAddress` is a testnet address.
+     * Returns `true` if the given `StakingAddress` is a mainnet address.
      * @returns {boolean}
      */
-    isForTestnet() {
-        return new Address(this.bytes).isForTestnet()
+    isForMainnet() {
+        return new Address(this.bytes).isForMainnet()
     }
 
     /**
@@ -225,10 +230,7 @@ export class StakingAddress {
      * @returns {string}
      */
     toBech32() {
-        return encodeBech32(
-            this.isForTestnet() ? "stake_test" : "stake",
-            this.bytes
-        )
+        return encodeBech32(this.bech32Prefix, this.bytes)
     }
 
     /**

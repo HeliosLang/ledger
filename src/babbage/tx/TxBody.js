@@ -45,6 +45,8 @@ import { ScriptPurpose } from "./ScriptPurpose.js"
  * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../hashes/index.js").Hash} Hash
+ * @typedef {import("../params/index.js").EncodingConfig} EncodingConfig
+ * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  */
 
 /**
@@ -354,15 +356,17 @@ export class TxBody {
     }
 
     /**
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @returns {TimeRange}
      */
-    getValidityTimeRange(networkParams) {
+    getValidityTimeRange(params) {
+        const helper = NetworkParamsHelper.new(params)
+
         const start = this.firstValidSlot
-            ? networkParams.slotToTime(this.firstValidSlot)
+            ? helper.slotToTime(this.firstValidSlot)
             : Number.NEGATIVE_INFINITY
         const end = this.lastValidSlot
-            ? networkParams.slotToTime(this.lastValidSlot)
+            ? helper.slotToTime(this.lastValidSlot)
             : Number.POSITIVE_INFINITY
 
         return new TimeRange(start, end, {
@@ -453,16 +457,23 @@ export class TxBody {
     }
 
     /**
+     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    toCbor() {
+    toCbor(config) {
         /**
          * @type {Map<number, number[]>}
          */
         const m = new Map()
 
-        m.set(0, encodeDefList(this.inputs))
-        m.set(1, encodeDefList(this.outputs))
+        m.set(
+            0,
+            encodeDefList(this.inputs.map((input) => input.toCbor(config)))
+        )
+        m.set(
+            1,
+            encodeDefList(this.outputs.map((output) => output.toCbor(config)))
+        )
         m.set(2, encodeInt(this.fee))
 
         if (isSome(this.lastValidSlot)) {
@@ -502,7 +513,10 @@ export class TxBody {
         }
 
         if (this.collateral.length != 0) {
-            m.set(13, encodeDefList(this.collateral))
+            m.set(
+                13,
+                encodeDefList(this.collateral.map((c) => c.toCbor(config)))
+            )
         }
 
         if (this.signers.length != 0) {
@@ -513,7 +527,7 @@ export class TxBody {
         // object.set(15, encodeInt(2n));
 
         if (isSome(this.collateralReturn)) {
-            m.set(16, this.collateralReturn.toCbor())
+            m.set(16, this.collateralReturn.toCbor(config))
         }
 
         if (this.totalCollateral > 0n) {
@@ -521,7 +535,10 @@ export class TxBody {
         }
 
         if (this.refInputs.length != 0) {
-            m.set(18, encodeDefList(this.refInputs))
+            m.set(
+                18,
+                encodeDefList(this.refInputs.map((r) => r.toCbor(config)))
+            )
         }
 
         return encodeObjectIKey(m)
@@ -529,13 +546,13 @@ export class TxBody {
 
     /**
      * Returns the on-chain Tx representation
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @param {TxRedeemer[]} redeemers
      * @param {UplcData[]} datums
      * @param {TxId} txId
      * @returns {ConstrData}
      */
-    toTxUplcData(networkParams, redeemers, datums, txId) {
+    toTxUplcData(params, redeemers, datums, txId) {
         return new ConstrData(0, [
             new ListData(this.inputs.map((input) => input.toUplcData())),
             new ListData(this.refInputs.map((input) => input.toUplcData())),
@@ -550,7 +567,7 @@ export class TxBody {
                     new IntData(q)
                 ])
             ),
-            this.getValidityTimeRange(networkParams).toUplcData(),
+            this.getValidityTimeRange(params).toUplcData(),
             new ListData(this.signers.map((signer) => signer.toUplcData())),
             new MapData(
                 redeemers.map((redeemer) => {
@@ -595,9 +612,10 @@ export class TxBody {
     }
 
     /**
+     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    hash() {
-        return blake2b(this.toCbor())
+    hash(config) {
+        return blake2b(this.toCbor(config))
     }
 }

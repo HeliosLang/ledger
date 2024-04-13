@@ -8,7 +8,7 @@ import { toInt } from "@helios-lang/codec-utils"
  */
 
 /**
- * @typedef {() => bigint} LiveSlotGetter
+ * @typedef {NetworkParamsHelper | NetworkParams} NetworkParamsLike
  */
 
 /**
@@ -24,19 +24,10 @@ export class NetworkParamsHelper {
     params
 
     /**
-     * Should only be set by the network emulator
-     * @private
-     * @type {Option<LiveSlotGetter>}
-     */
-    liveSlotGetter
-
-    /**
      * @param {NetworkParams} params
-     * @param {Option<LiveSlotGetter>} liveSlotGetter
      */
-    constructor(params, liveSlotGetter = None) {
+    constructor(params) {
         this.params = params
-        this.liveSlotGetter = liveSlotGetter
     }
 
     /**
@@ -47,11 +38,11 @@ export class NetworkParamsHelper {
     }
 
     /**
-     *
-     * @param {Option<NetworkParams | NetworkParamsHelper>} params
+     * Returns default if called without args
+     * @param {Option<NetworkParamsLike>} params
      * @returns {NetworkParamsHelper}
      */
-    static fromAlikeOrDefault(params = None) {
+    static new(params = None) {
         if (!params) {
             return new NetworkParamsHelper(DEFAULT_NETWORK_PARAMS)
         } else if (params instanceof NetworkParamsHelper) {
@@ -74,17 +65,6 @@ export class NetworkParamsHelper {
         }
 
         return model
-    }
-
-    /**
-     * @type {Option<bigint>}
-     */
-    get liveSlot() {
-        if (this.liveSlotGetter) {
-            return this.liveSlotGetter()
-        } else {
-            return None
-        }
     }
 
     /**

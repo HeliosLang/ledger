@@ -1,7 +1,10 @@
 import { describe, it } from "node:test"
 import { deepEqual, strictEqual, throws } from "node:assert"
 import { Value } from "../money/index.js"
-import { NetworkParamsHelper } from "../params/index.js"
+import {
+    DEFAULT_ENCODING_CONFIG,
+    NetworkParamsHelper
+} from "../params/index.js"
 import { Address } from "./Address.js"
 import { Tx } from "./Tx.js"
 import { TxOutput } from "./TxOutput.js"
@@ -54,7 +57,10 @@ describe(`basic ${Tx.name}`, () => {
     })
 
     it("signed tx id is equal to unsigned tx id", () => {
-        deepEqual(signed.id().bytes, unsigned.id().bytes)
+        deepEqual(
+            signed.id(DEFAULT_ENCODING_CONFIG).bytes,
+            unsigned.id(DEFAULT_ENCODING_CONFIG).bytes
+        )
     })
 
     it("recovered signed doesn't fail regular validations", async () => {

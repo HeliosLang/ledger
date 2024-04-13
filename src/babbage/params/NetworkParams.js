@@ -3,10 +3,12 @@ import {
     DEFAULT_COST_MODEL_PARAMS_V2,
     ALONZO_GENESIS_COST_MODEL_PARAMS
 } from "@helios-lang/uplc"
+import { DEFAULT_ENCODING_CONFIG } from "./EncodingConfig.js"
 
 /**
  * @typedef {import("@helios-lang/uplc").CostModelParamsV1} CostModelParamsV1
  * @typedef {import("@helios-lang/uplc").CostModelParamsV2} CostModelParamsV2
+ * @typedef {import("./EncodingConfig.js").EncodingConfig} EncodingConfig
  */
 
 /**
@@ -19,6 +21,7 @@ import {
  * These JSONs are updated every 15 minutes.
  *
  * @typedef {{
+ *   encodingConfig: EncodingConfig
  *   shelleyGenesis: {
  *     activeSlotsCoeff: number
  *     protocolParams: typeof SHELLEY_GENESIS_PROTOCOL_PARAMS
@@ -136,11 +139,10 @@ const SHELLEY_GENESIS_PROTOCOL_PARAMS = {
 }
 
 /**
-
- * 
  * @type {NetworkParams}
  */
 export const DEFAULT_NETWORK_PARAMS = {
+    encodingConfig: DEFAULT_ENCODING_CONFIG,
     shelleyGenesis: {
         activeSlotsCoeff: 0.05,
         protocolParams: SHELLEY_GENESIS_PROTOCOL_PARAMS,

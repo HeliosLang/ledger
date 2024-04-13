@@ -6,9 +6,7 @@ import {
     ByteArrayData,
     ConstrData,
     decodeUplcData,
-    encodeOptionData,
-    UplcProgramV1,
-    UplcProgramV2
+    encodeOptionData
 } from "@helios-lang/uplc"
 import {
     PubKeyHash,
@@ -16,7 +14,6 @@ import {
     StakingValidatorHash,
     ValidatorHash
 } from "../hashes/index.js"
-import { config } from "./config.js"
 import { SpendingCredential } from "./SpendingCredential.js"
 import { StakingCredential } from "./StakingCredential.js"
 
@@ -83,11 +80,11 @@ export class Address {
 
     /**
      * Returns a dummy address (based on a PubKeyHash with all null bytes)
-     * @param {boolean} isTestnet
+     * @param {boolean} isMainnet
      * @returns {Address}
      */
-    static dummy(isTestnet = config.IS_TESTNET) {
-        return Address.fromPubKeyHash(PubKeyHash.dummy(), None, isTestnet)
+    static dummy(isMainnet) {
+        return Address.fromPubKeyHash(isMainnet, PubKeyHash.dummy(), None)
     }
 
     /**
@@ -113,7 +110,7 @@ export class Address {
 
         let result = new Address(bytes)
 
-        if (prefix != (result.isForTestnet() ? "addr_test" : "addr")) {
+        if (prefix != result.bech32Prefix) {
             throw new Error("invalid Address prefix")
         }
 
@@ -130,20 +127,16 @@ export class Address {
     }
 
     /**
+     * @param {boolean} isMainnet
      * @param {SpendingCredential} paymentCredential
      * @param {Option<StakingCredential>} stakingCredential
-     * @param {boolean} isTestnet
      * @return {Address}
      */
-    static fromCredentials(
-        paymentCredential,
-        stakingCredential,
-        isTestnet = config.IS_TESTNET
-    ) {
+    static fromCredentials(isMainnet, paymentCredential, stakingCredential) {
         return this.fromHashes(
+            isMainnet,
             paymentCredential.hash,
-            stakingCredential?.hash?.hash ?? None,
-            isTestnet
+            stakingCredential?.hash?.hash ?? None
         )
     }
 
@@ -152,16 +145,16 @@ export class Address {
      * or `ValidatorHash` (i.e. script address),
      * without a staking hash.
      * @template {PubKeyHash | ValidatorHash} [TSpending=PubKeyHash | ValidatorHash]
+     * @param {boolean} isMainnet
      * @param {TSpending} hash
-     * @param {boolean} isTestnet
      * @returns {(
      *   TSpending extends PubKeyHash ? Address<null, null> :
      *   TSpending extends ValidatorHash<infer CSpending> ? Address<CSpending, null> :
      *   Address<unknown, null>
      * )}
      */
-    static fromHash(hash, isTestnet = config.IS_TESTNET) {
-        return Address.fromHashes(hash, null, isTestnet)
+    static fromHash(isMainnet, hash) {
+        return Address.fromHashes(isMainnet, hash, null)
     }
 
     /**
@@ -170,9 +163,9 @@ export class Address {
      * in combination with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @template {PubKeyHash | ValidatorHash} [TSpending=PubKeyHash | ValidatorHash]
      * @template {PubKeyHash | StakingValidatorHash} [TStaking=PubKeyHash | StakingValidatorHash]
+     * @param {boolean} isMainnet
      * @param {TSpending} spendingHash
      * @param {Option<TStaking>} stakingHash
-     * @param {boolean} isTestnet
      * @returns {(
      *   TSpending extends PubKeyHash ? (
      *     TStaking extends PubKeyHash ? Address<null, null> :
@@ -185,18 +178,14 @@ export class Address {
      *   ) : Address
      * )}
      */
-    static fromHashes(
-        spendingHash,
-        stakingHash,
-        isTestnet = config.IS_TESTNET
-    ) {
+    static fromHashes(isMainnet, spendingHash, stakingHash) {
         if (spendingHash instanceof PubKeyHash) {
             return /** @type {any} */ (
-                Address.fromPubKeyHash(spendingHash, stakingHash, isTestnet)
+                Address.fromPubKeyHash(isMainnet, spendingHash, stakingHash)
             )
         } else if (spendingHash instanceof ValidatorHash) {
             return /** @type {any} */ (
-                Address.fromValidatorHash(spendingHash, stakingHash, isTestnet)
+                Address.fromValidatorHash(isMainnet, spendingHash, stakingHash)
             )
         } else {
             throw new Error("invalid Spending hash")
@@ -207,21 +196,21 @@ export class Address {
      * Simple payment address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
      * @template {PubKeyHash | StakingValidatorHash} [TStaking=PubKeyHash | StakingValidatorHash]
+     * @param {boolean} isMainnet
      * @param {PubKeyHash} paymentHash
      * @param {Option<TStaking>} stakingHash
-     * @param {boolean} isTestnet
      * @returns {(
      *   TStaking extends PubKeyHash ? Address<null, null> :
      *   TStaking extends StakingValidatorHash<infer C> ? Address<null, C> :
      *   Address<null, unknown>
      * )}
      */
-    static fromPubKeyHash(paymentHash, stakingHash, isTestnet) {
+    static fromPubKeyHash(isMainnet, paymentHash, stakingHash) {
         if (stakingHash) {
             if (stakingHash instanceof PubKeyHash) {
                 return /** @type {any} */ (
                     new Address(
-                        [isTestnet ? 0x00 : 0x01]
+                        [isMainnet ? 0x01 : 0x00]
                             .concat(paymentHash.bytes)
                             .concat(stakingHash.bytes),
                         None,
@@ -231,7 +220,7 @@ export class Address {
             } else if (stakingHash instanceof StakingValidatorHash) {
                 return /** @type {any} */ (
                     new Address(
-                        [isTestnet ? 0x20 : 0x21]
+                        [isMainnet ? 0x21 : 0x20]
                             .concat(paymentHash.bytes)
                             .concat(stakingHash.bytes),
                         None,
@@ -244,7 +233,7 @@ export class Address {
         } else {
             return /** @type {any} */ (
                 new Address(
-                    [isTestnet ? 0x60 : 0x61].concat(paymentHash.bytes),
+                    [isMainnet ? 0x61 : 0x60].concat(paymentHash.bytes),
                     None,
                     None
                 )
@@ -253,20 +242,11 @@ export class Address {
     }
 
     /**
-     * @param {ByteArrayLike} bytes
-     * @param {boolean} isTestnet
-     * @returns {Address}
-     */
-    static fromUplcCbor(bytes, isTestnet = config.IS_TESTNET) {
-        return Address.fromUplcData(decodeUplcData(bytes), isTestnet)
-    }
-
-    /**
+     * @param {boolean} isMainnet
      * @param {UplcData} data
-     * @param {boolean} isTestnet
      * @returns {Address}
      */
-    static fromUplcData(data, isTestnet = config.IS_TESTNET) {
+    static fromUplcData(isMainnet, data) {
         ConstrData.assert(data, 0, 2)
 
         const paymentCredential = SpendingCredential.fromUplcData(
@@ -299,9 +279,9 @@ export class Address {
         }
 
         return Address.fromCredentials(
+            isMainnet,
             paymentCredential,
-            stakingCredential,
-            isTestnet
+            stakingCredential
         )
     }
 
@@ -309,22 +289,22 @@ export class Address {
      * Simple script address with an optional staking hash (`PubKeyHash` or `StakingValidatorHash`).
      * @private
      * @template [CSpending=unknown]
+     * @param {boolean} isMainnet
      * @param {ValidatorHash<CSpending>} spendingHash
      * @template {PubKeyHash | StakingValidatorHash} [TStaking=PubKeyHash | StakingValidatorHash]pytho
      * @param {Option<TStaking>} stakingHash
-     * @param {boolean} isTestnet
      * @returns {(
      *   TStaking extends (null | undefined | PubKeyHash) ? Address<CSpending, null> :
      *   TStaking extends StakingValidatorHash<infer CStaking> ? Address<CSpending, CStaking> :
      *   Address<CSpending, unknown>
      * )}
      */
-    static fromValidatorHash(spendingHash, stakingHash, isTestnet) {
+    static fromValidatorHash(isMainnet, spendingHash, stakingHash) {
         if (isSome(stakingHash)) {
             if (stakingHash instanceof PubKeyHash) {
                 return /** @type {any} */ (
                     new Address(
-                        [isTestnet ? 0x10 : 0x11]
+                        [isMainnet ? 0x11 : 0x10]
                             .concat(spendingHash.bytes)
                             .concat(stakingHash.bytes),
                         spendingHash.context,
@@ -334,7 +314,7 @@ export class Address {
             } else if (stakingHash instanceof StakingValidatorHash) {
                 return /** @type {any} */ (
                     new Address(
-                        [isTestnet ? 0x30 : 0x31]
+                        [isMainnet ? 0x31 : 0x30]
                             .concat(spendingHash.bytes)
                             .concat(stakingHash.bytes),
                         spendingHash.context,
@@ -347,7 +327,7 @@ export class Address {
         } else {
             return /** @type {any} */ (
                 new Address(
-                    [isTestnet ? 0x70 : 0x71].concat(spendingHash.bytes),
+                    [isMainnet ? 0x71 : 0x70].concat(spendingHash.bytes),
                     spendingHash.context,
                     null
                 )
@@ -378,13 +358,10 @@ export class Address {
     }
 
     /**
-     * @type {SpendingCredential<SpendingCredentialKind, CSpending>}
+     * @type {string}
      */
-    get spendingCredential() {
-        return SpendingCredential.fromAddressBytes(
-            this.bytes,
-            this.spendingContext
-        )
+    get bech32Prefix() {
+        return this.isForMainnet() ? "addr" : "addr_test"
     }
 
     /**
@@ -393,6 +370,16 @@ export class Address {
      */
     get pubKeyHash() {
         return this.spendingCredential.pubKeyHash
+    }
+
+    /**
+     * @type {SpendingCredential<SpendingCredentialKind, CSpending>}
+     */
+    get spendingCredential() {
+        return SpendingCredential.fromAddressBytes(
+            this.bytes,
+            this.spendingContext
+        )
     }
 
     /**
@@ -450,13 +437,13 @@ export class Address {
     }
 
     /**
-     * Returns `true` if the given `Address` is a testnet address.
+     * Returns `true` if the given `Address` is a mainnet address.
      * @returns {boolean}
      */
-    isForTestnet() {
+    isForMainnet() {
         let type = this.bytes[0] & 0b00001111
 
-        return type == 0
+        return type != 0
     }
 
     /**
@@ -464,10 +451,7 @@ export class Address {
      * @returns {string}
      */
     toBech32() {
-        return encodeBech32(
-            this.isForTestnet() ? "addr_test" : "addr",
-            this.bytes
-        )
+        return encodeBech32(this.bech32Prefix, this.bytes)
     }
 
     /**

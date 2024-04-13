@@ -35,6 +35,8 @@ import { blake2b } from "@helios-lang/crypto"
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
+ * @typedef {import("../params/index.js").EncodingConfig} EncodingConfig
+ * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  */
 
 /**
@@ -98,26 +100,28 @@ export class Tx {
 
     /**
      * Number of bytes
-     * @type {number}
+     * @param {EncodingConfig} config
+     * @returns {number}
      */
-    get size() {
-        return this.toCbor().length
+    calcSize(config) {
+        return this.toCbor(config).length
     }
 
     /**
      * Adds a signature created by a wallet. Only available after the transaction has been finalized.
      * Optionally verifies that the signature is correct.
      * @param {Signature} signature
+     * @param {EncodingConfig} config
      * @param {boolean} verify Defaults to `true`
      * @returns {Tx}
      */
-    addSignature(signature, verify = true) {
+    addSignature(signature, config, verify = true) {
         if (!this.valid) {
             throw new Error("invalid Tx")
         }
 
         if (verify) {
-            signature.verify(this.body.hash())
+            signature.verify(this.body.hash(config))
         }
 
         this.witnesses.addSignature(signature)
@@ -129,12 +133,13 @@ export class Tx {
      * Adds multiple signatures at once. Only available after the transaction has been finalized.
      * Optionally verifies each signature is correct.
      * @param {Signature[]} signatures
+     * @param {EncodingConfig} config
      * @param {boolean} verify
      * @returns {Tx}
      */
-    addSignatures(signatures, verify = true) {
+    addSignatures(signatures, config, verify = true) {
         for (let s of signatures) {
-            this.addSignature(s, verify)
+            this.addSignature(s, config, verify)
         }
 
         return this
@@ -158,25 +163,29 @@ export class Tx {
     }
 
     /**
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @returns {bigint} - a quantity of lovelace
      */
-    calcMinFee(networkParams) {
+    calcMinFee(params) {
+        const helper = NetworkParamsHelper.new(params)
+
         // add dummy signatures to make sure the tx has the correct size
         if (!this.valid) {
             this.witnesses.addDummySignatures(this.body.countUniqueSigners())
         }
 
-        const [a, b] = networkParams.txFeeParams
+        const [a, b] = helper.txFeeParams
 
-        const sizeFee = BigInt(a) + BigInt(this.size) * BigInt(b)
+        const sizeFee =
+            BigInt(a) +
+            BigInt(this.calcSize(helper.params.encodingConfig)) * BigInt(b)
 
         // clean up the dummy signatures
         if (!this.valid) {
             this.witnesses.removeDummySignatures()
         }
 
-        const exFee = this.witnesses.calcExFee(networkParams)
+        const exFee = this.witnesses.calcExFee(params)
 
         return sizeFee + exFee
     }
@@ -190,22 +199,24 @@ export class Tx {
     }
 
     /**
+     * @param {EncodingConfig} config
      * @returns {Object}
      */
-    dump() {
+    dump(config) {
         return {
             body: this.body.dump(),
             witnesses: this.witnesses.dump(),
             metadata: this.metadata ? this.metadata.dump() : null,
-            id: this.id().toString()
+            id: this.id(config).toString()
         }
     }
 
     /**
+     * @param {EncodingConfig} config
      * @returns {TxId}
      */
-    id() {
-        return new TxId(this.body.hash())
+    id(config) {
+        return new TxId(this.body.hash(config))
     }
 
     /**
@@ -257,11 +268,12 @@ export class Tx {
 
     /**
      * Serialize a transaction.
+     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    toCbor() {
+    toCbor(config) {
         return encodeTuple([
-            this.body.toCbor(),
+            this.body.toCbor(config),
             this.witnesses.toCbor(),
             encodeBool(true),
             encodeNullOption(this.metadata)
@@ -295,7 +307,7 @@ export class Tx {
      *   * all necessary signatures are included (must done after tx has been signed)
      *   * validity time range, which can only be checked upon submission
      *
-     * @param {NetworkParamsHelper} params
+     * @param {NetworkParamsLike} params
      * @param {boolean} strict - can be left when trying to inspect general transactions, the TxBuilder should however always set strict=true
      */
     validate(params, strict = false) {
@@ -364,15 +376,17 @@ export class Tx {
      * Throws an error if there isn't enough collateral
      * Also throws an error if the script doesn't require collateral, but collateral was actually included
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      */
-    validateCollateral(networkParams) {
-        if (this.body.collateral.length > networkParams.maxCollateralInputs) {
+    validateCollateral(params) {
+        const helper = NetworkParamsHelper.new(params)
+
+        if (this.body.collateral.length > helper.maxCollateralInputs) {
             throw new Error("too many collateral inputs")
         }
 
         if (this.isSmart()) {
-            let minCollateralPct = networkParams.minCollateralPct
+            let minCollateralPct = helper.minCollateralPct
 
             // only use the exBudget
 
@@ -418,10 +432,12 @@ export class Tx {
      * Validate that value is conserved, minus what is burned and plus what is minted
      * Throws an error if value isn't conserved
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      */
-    validateConservation(networkParams) {
-        const stakeAddrDeposit = new Value(networkParams.stakeAddressDeposit)
+    validateConservation(params) {
+        const helper = NetworkParamsHelper.new(params)
+
+        const stakeAddrDeposit = new Value(helper.stakeAddressDeposit)
         let v = new Value(0n)
 
         v = this.body.inputs.reduce((prev, inp) => inp.value.add(prev), v)
@@ -454,10 +470,12 @@ export class Tx {
      * Final check that fee is big enough
      * Throws an error if not
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      */
-    validateFee(networkParams) {
-        const minFee = this.calcMinFee(networkParams)
+    validateFee(params) {
+        const helper = NetworkParamsHelper.new(params)
+
+        const minFee = this.calcMinFee(helper)
 
         if (minFee > this.body.fee) {
             throw new Error(
@@ -525,12 +543,14 @@ export class Tx {
      * Checks that each output contains enough lovelace,
      *   and that the contained assets are correctly sorted
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @param {boolean} strict
      */
-    validateOutputs(networkParams, strict) {
+    validateOutputs(params, strict) {
+        const helper = NetworkParamsHelper.new(params)
+
         this.body.outputs.forEach((output) => {
-            const minLovelace = output.calcDeposit(networkParams)
+            const minLovelace = output.calcDeposit(helper)
 
             if (minLovelace > output.value.lovelace) {
                 throw new Error(
@@ -546,14 +566,16 @@ export class Tx {
 
     /**
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      */
-    validateRedeemersExBudget(networkParams) {
+    validateRedeemersExBudget(params) {
+        const helper = NetworkParamsHelper.new(params)
+
         const txData = this.body.toTxUplcData(
-            networkParams,
+            helper,
             this.witnesses.redeemers,
             this.witnesses.datums,
-            this.id()
+            this.id(helper.params.encodingConfig)
         )
 
         this.witnesses.redeemers.forEach((redeemer) => {
@@ -645,13 +667,13 @@ export class Tx {
     /**
      * Throws an error if the script data hash is incorrect
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      */
-    validateScriptDataHash(networkParams) {
+    validateScriptDataHash(params) {
         if (this.witnesses.redeemers.length > 0) {
             if (this.body.scriptDataHash) {
                 const scriptDataHash = calcScriptDataHash(
-                    networkParams,
+                    params,
                     this.witnesses.datums,
                     this.witnesses.redeemers
                 )
@@ -719,10 +741,12 @@ export class Tx {
     /**
      * Throws error if tx is too big
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      */
-    validateSize(networkParams) {
-        if (this.size > networkParams.maxTxSize) {
+    validateSize(params) {
+        const helper = NetworkParamsHelper.new(params)
+
+        if (this.calcSize(helper.params.encodingConfig) > helper.maxTxSize) {
             throw new Error("tx too big")
         }
     }
@@ -730,10 +754,12 @@ export class Tx {
     /**
      * Throws error if execution budget is exceeded
      * @private
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @param {boolean} verbose - if true -> warn if ex budget >= 50% max budget
      */
-    validateTotalExBudget(networkParams, verbose = false) {
+    validateTotalExBudget(params, verbose = false) {
+        const helper = NetworkParamsHelper.new(params)
+
         let totalMem = 0n
         let totalCpu = 0n
 
@@ -742,7 +768,7 @@ export class Tx {
             totalCpu += redeemer.cost.cpu
         }
 
-        let [maxMem, maxCpu] = networkParams.maxTxExecutionBudget
+        let [maxMem, maxCpu] = helper.maxTxExecutionBudget
 
         if (totalMem > BigInt(maxMem)) {
             throw new Error(
@@ -783,12 +809,14 @@ export class Tx {
 }
 
 /**
- * @param {NetworkParamsHelper} networkParams
+ * @param {NetworkParamsLike} params
  * @param {UplcData[]} datums
  * @param {TxRedeemer[]} redeemers
  * @returns {number[]}
  */
-export function calcScriptDataHash(networkParams, datums, redeemers) {
+export function calcScriptDataHash(params, datums, redeemers) {
+    const helper = NetworkParamsHelper.new(params)
+
     if (redeemers.length == 0) {
         throw new Error(
             "expected at least 1 redeemer to be able to create the script data hash"
@@ -802,7 +830,7 @@ export function calcScriptDataHash(networkParams, datums, redeemers) {
     }
 
     // language view encodings?
-    const sortedCostParams = networkParams.sortedV2CostParams
+    const sortedCostParams = helper.sortedV2CostParams
 
     bytes = bytes.concat(
         encodeMap([

@@ -24,7 +24,6 @@ import {
 import { DatumHash } from "../hashes/index.js"
 import { Value } from "../money/index.js"
 import { NetworkParamsHelper } from "../params/index.js"
-import { config } from "./config.js"
 import { Address } from "./Address.js"
 import { TxOutputDatum } from "./TxOutputDatum.js"
 
@@ -32,6 +31,8 @@ import { TxOutputDatum } from "./TxOutputDatum.js"
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../money/index.js").ValueLike} ValueLike
+ * @typedef {import("../params/index.js").EncodingConfig}  EncodingConfig
+ * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  * @typedef {import("./Address.js").AddressLike} AddressLike
  * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
  */
@@ -154,14 +155,15 @@ export class TxOutput {
     }
 
     /**
+     * @param {boolean} isMainnet
      * @param {UplcData} data
      * @returns {TxOutput}
      */
-    static fromUplcData(data) {
+    static fromUplcData(isMainnet, data) {
         ConstrData.assert(data, 0, 4)
 
         return new TxOutput(
-            Address.fromUplcData(data.fields[0]),
+            Address.fromUplcData(isMainnet, data.fields[0]),
             Value.fromUplcData(data.fields[1]),
             TxOutputDatum.fromUplcData(data.fields[2])
             // The refScript hash isn't very useful
@@ -210,13 +212,14 @@ export class TxOutput {
     }
 
     /**
+     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    toCbor() {
+    toCbor(config) {
         if (
             (!this.datum || this.datum.isHash()) &&
             !this.refScript &&
-            !config.STRICT_BABBAGE
+            !config.strictBabbage
         ) {
             // this is needed to match eternl wallet (de)serialization (annoyingly eternl deserializes the tx and then signs its own serialization)
             // hopefully cardano-cli signs whatever serialization we choose (so we use the eternl variant in order to be compatible with both)
@@ -277,13 +280,16 @@ export class TxOutput {
 
     /**
      * Each UTxO must contain some minimum quantity of lovelace to avoid that the blockchain is used for data storage.
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsLike} params
      * @returns {bigint}
      */
-    calcDeposit(networkParams) {
-        let lovelacePerByte = networkParams.lovelacePerUTXOByte
+    calcDeposit(params) {
+        const helper = NetworkParamsHelper.new(params)
 
-        let correctedSize = this.toCbor().length + 160 // 160 accounts for some database overhead?
+        const lovelacePerByte = helper.lovelacePerUTXOByte
+
+        const correctedSize =
+            this.toCbor(helper.params.encodingConfig).length + 160 // 160 accounts for some database overhead?
 
         return BigInt(correctedSize) * BigInt(lovelacePerByte)
     }
@@ -293,11 +299,13 @@ export class TxOutput {
      * The network requires this to avoid the creation of unusable dust UTxOs.
      *
      * Optionally an update function can be specified that allows mutating the datum of the `TxOutput` to account for an increase of the lovelace quantity contained in the value.
-     * @param {NetworkParamsHelper} networkParams
+     * @param {NetworkParamsHelper} params
      * @param {Option<(output: TxOutput) => void>} updater
      */
-    correctLovelace(networkParams, updater = null) {
-        let minLovelace = this.calcDeposit(networkParams)
+    correctLovelace(params, updater = null) {
+        const helper = NetworkParamsHelper.new(params)
+
+        let minLovelace = this.calcDeposit(params)
 
         while (this.value.lovelace < minLovelace) {
             this.value.lovelace = minLovelace
@@ -306,7 +314,7 @@ export class TxOutput {
                 updater(this)
             }
 
-            minLovelace = this.calcDeposit(networkParams)
+            minLovelace = this.calcDeposit(params)
         }
     }
 }
