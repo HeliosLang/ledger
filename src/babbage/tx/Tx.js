@@ -10,6 +10,7 @@ import {
     encodeTuple
 } from "@helios-lang/cbor"
 import { bytesToHex, compareBytes } from "@helios-lang/codec-utils"
+import { blake2b } from "@helios-lang/crypto"
 import { None, expectSome } from "@helios-lang/type-utils"
 import {
     ListData,
@@ -19,23 +20,21 @@ import {
 } from "@helios-lang/uplc"
 import { Value } from "../money/index.js"
 import { NetworkParamsHelper } from "../params/index.js"
+import { ScriptPurpose } from "./ScriptPurpose.js"
+import { Signature } from "./Signature.js"
+import { StakingAddress } from "./StakingAddress.js"
 import { TxBody } from "./TxBody.js"
+import { TxId } from "./TxId.js"
+import { TxInput } from "./TxInput.js"
 import { TxMetadata } from "./TxMetadata.js"
 import { TxOutput } from "./TxOutput.js"
 import { TxOutputId } from "./TxOutputId.js"
-import { TxWitnesses } from "./TxWitnesses.js"
-import { Signature } from "./Signature.js"
-import { TxId } from "./TxId.js"
-import { ScriptPurpose } from "./ScriptPurpose.js"
-import { TxInput } from "./TxInput.js"
-import { StakingAddress } from "./StakingAddress.js"
 import { TxRedeemer } from "./TxRedeemer.js"
-import { blake2b } from "@helios-lang/crypto"
+import { TxWitnesses } from "./TxWitnesses.js"
 
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- * @typedef {import("../params/index.js").EncodingConfig} EncodingConfig
  * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  */
 
@@ -100,28 +99,27 @@ export class Tx {
 
     /**
      * Number of bytes
-     * @param {EncodingConfig} config
+     * @param {boolean} forFeeCalculation - see comment in `this.toCbor()`
      * @returns {number}
      */
-    calcSize(config) {
-        return this.toCbor(config).length
+    calcSize(forFeeCalculation = false) {
+        return this.toCbor(forFeeCalculation).length
     }
 
     /**
      * Adds a signature created by a wallet. Only available after the transaction has been finalized.
      * Optionally verifies that the signature is correct.
      * @param {Signature} signature
-     * @param {EncodingConfig} config
      * @param {boolean} verify Defaults to `true`
      * @returns {Tx}
      */
-    addSignature(signature, config, verify = true) {
+    addSignature(signature, verify = true) {
         if (!this.valid) {
             throw new Error("invalid Tx")
         }
 
         if (verify) {
-            signature.verify(this.body.hash(config))
+            signature.verify(this.id().bytes)
         }
 
         this.witnesses.addSignature(signature)
@@ -133,13 +131,12 @@ export class Tx {
      * Adds multiple signatures at once. Only available after the transaction has been finalized.
      * Optionally verifies each signature is correct.
      * @param {Signature[]} signatures
-     * @param {EncodingConfig} config
      * @param {boolean} verify
      * @returns {Tx}
      */
-    addSignatures(signatures, config, verify = true) {
+    addSignatures(signatures, verify = true) {
         for (let s of signatures) {
-            this.addSignature(s, config, verify)
+            this.addSignature(s, verify)
         }
 
         return this
@@ -176,9 +173,7 @@ export class Tx {
 
         const [a, b] = helper.txFeeParams
 
-        const sizeFee =
-            BigInt(a) +
-            BigInt(this.calcSize(helper.params.encodingConfig)) * BigInt(b)
+        const sizeFee = BigInt(a) + BigInt(this.calcSize(true)) * BigInt(b)
 
         // clean up the dummy signatures
         if (!this.valid) {
@@ -199,24 +194,22 @@ export class Tx {
     }
 
     /**
-     * @param {EncodingConfig} config
      * @returns {Object}
      */
-    dump(config) {
+    dump() {
         return {
             body: this.body.dump(),
             witnesses: this.witnesses.dump(),
             metadata: this.metadata ? this.metadata.dump() : null,
-            id: this.id(config).toString()
+            id: this.id().toString()
         }
     }
 
     /**
-     * @param {EncodingConfig} config
      * @returns {TxId}
      */
-    id(config) {
-        return new TxId(this.body.hash(config))
+    id() {
+        return new TxId(this.body.hash())
     }
 
     /**
@@ -268,16 +261,29 @@ export class Tx {
 
     /**
      * Serialize a transaction.
-     * @param {EncodingConfig} config
+     *
+     * Note: Babbage still follows Alonzo for the Tx size fee.
+     *   According to https://github.com/IntersectMBO/cardano-ledger/blob/cardano-ledger-spec-2023-04-03/eras/alonzo/impl/src/Cardano/Ledger/Alonzo/Tx.hs#L316,
+     *   the `isValid` field is omitted when calculating the size of the tx for fee calculation. This is to stay compatible with Mary (?why though, the txFeeFixed could've been changed instead?)
+     *
+     * @param {boolean} forFeeCalculation - set this to true if you want to calculate the size needed for the Tx fee, another great little Cardano quirk, pffff.
      * @returns {number[]}
      */
-    toCbor(config) {
-        return encodeTuple([
-            this.body.toCbor(config),
-            this.witnesses.toCbor(),
-            encodeBool(true),
-            encodeNullOption(this.metadata)
-        ])
+    toCbor(forFeeCalculation = false) {
+        if (forFeeCalculation) {
+            return encodeTuple([
+                this.body.toCbor(),
+                this.witnesses.toCbor(),
+                encodeNullOption(this.metadata)
+            ])
+        } else {
+            return encodeTuple([
+                this.body.toCbor(),
+                this.witnesses.toCbor(),
+                encodeBool(true),
+                encodeNullOption(this.metadata)
+            ])
+        }
     }
 
     /**
@@ -575,7 +581,7 @@ export class Tx {
             helper,
             this.witnesses.redeemers,
             this.witnesses.datums,
-            this.id(helper.params.encodingConfig)
+            this.id()
         )
 
         this.witnesses.redeemers.forEach((redeemer) => {
@@ -746,7 +752,8 @@ export class Tx {
     validateSize(params) {
         const helper = NetworkParamsHelper.new(params)
 
-        if (this.calcSize(helper.params.encodingConfig) > helper.maxTxSize) {
+        if (this.calcSize() > helper.maxTxSize) {
+            // TODO: should we also use the fee calculation size instead of the real size for this? (i.e. 1 byte difference)
             throw new Error("tx too big")
         }
     }

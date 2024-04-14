@@ -20,13 +20,7 @@ import {
     ListData,
     MapData
 } from "@helios-lang/uplc"
-import {
-    DatumHash,
-    MintingPolicyHash,
-    PubKeyHash,
-    ScriptHash,
-    ValidatorHash
-} from "../hashes/index.js"
+import { DatumHash, PubKeyHash, ScriptHash } from "../hashes/index.js"
 import { Assets, Value } from "../money/index.js"
 import { NetworkParamsHelper } from "../params/index.js"
 import { TimeRange } from "../time/index.js"
@@ -37,7 +31,6 @@ import { TxInput } from "./TxInput.js"
 import { TxOutput } from "./TxOutput.js"
 import { TxOutputId } from "./TxOutputId.js"
 import { TxRedeemer } from "./TxRedeemer.js"
-import { Signature } from "./Signature.js"
 import { ScriptPurpose } from "./ScriptPurpose.js"
 
 /**
@@ -45,7 +38,6 @@ import { ScriptPurpose } from "./ScriptPurpose.js"
  * @typedef {import("@helios-lang/codec-utils").IntLike} IntLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../hashes/index.js").Hash} Hash
- * @typedef {import("../params/index.js").EncodingConfig} EncodingConfig
  * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  */
 
@@ -457,23 +449,16 @@ export class TxBody {
     }
 
     /**
-     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    toCbor(config) {
+    toCbor() {
         /**
          * @type {Map<number, number[]>}
          */
         const m = new Map()
 
-        m.set(
-            0,
-            encodeDefList(this.inputs.map((input) => input.toCbor(config)))
-        )
-        m.set(
-            1,
-            encodeDefList(this.outputs.map((output) => output.toCbor(config)))
-        )
+        m.set(0, encodeDefList(this.inputs))
+        m.set(1, encodeDefList(this.outputs))
         m.set(2, encodeInt(this.fee))
 
         if (isSome(this.lastValidSlot)) {
@@ -513,10 +498,7 @@ export class TxBody {
         }
 
         if (this.collateral.length != 0) {
-            m.set(
-                13,
-                encodeDefList(this.collateral.map((c) => c.toCbor(config)))
-            )
+            m.set(13, encodeDefList(this.collateral))
         }
 
         if (this.signers.length != 0) {
@@ -527,7 +509,7 @@ export class TxBody {
         // object.set(15, encodeInt(2n));
 
         if (isSome(this.collateralReturn)) {
-            m.set(16, this.collateralReturn.toCbor(config))
+            m.set(16, this.collateralReturn.toCbor())
         }
 
         if (this.totalCollateral > 0n) {
@@ -535,10 +517,7 @@ export class TxBody {
         }
 
         if (this.refInputs.length != 0) {
-            m.set(
-                18,
-                encodeDefList(this.refInputs.map((r) => r.toCbor(config)))
-            )
+            m.set(18, encodeDefList(this.refInputs))
         }
 
         return encodeObjectIKey(m)
@@ -612,10 +591,9 @@ export class TxBody {
     }
 
     /**
-     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    hash(config) {
-        return blake2b(this.toCbor(config))
+    hash() {
+        return blake2b(this.toCbor())
     }
 }

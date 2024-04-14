@@ -17,7 +17,6 @@ import { TxOutputId } from "./TxOutputId.js"
 /**
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
- * @typedef {import("../params/index.js").EncodingConfig} EncodingConfig
  * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
  * @typedef {import("./TxOutputId.js").TxOutputIdLike} TxOutputIdLike
  */
@@ -245,13 +244,12 @@ export class TxInput {
     /**
      * Ledger format is without original output (so full = false)
      * full = true is however useful for complete deserialization of the TxInput (and then eg. using it in off-chain applications)
-     * @param {EncodingConfig} config
      * @param {boolean} full
      * @returns {number[]}
      */
-    toCbor(config, full = false) {
+    toCbor(full = false) {
         if (full) {
-            return encodeTuple([this.id.toCbor(), this.output.toCbor(config)])
+            return encodeTuple([this.id.toCbor(), this.output.toCbor()])
         } else {
             return this.id.toCbor()
         }

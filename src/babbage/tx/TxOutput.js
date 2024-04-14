@@ -31,11 +31,24 @@ import { TxOutputDatum } from "./TxOutputDatum.js"
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("../money/index.js").ValueLike} ValueLike
- * @typedef {import("../params/index.js").EncodingConfig}  EncodingConfig
  * @typedef {import("../params/index.js").NetworkParamsLike} NetworkParamsLike
  * @typedef {import("./Address.js").AddressLike} AddressLike
  * @typedef {import("./TxOutputDatum.js").TxOutputDatumKind} TxOutputDatumKind
+
+/**
+ * Sadly the cbor encoding can be done in a variety of ways, for which a config must be passed around `toCbor()` calls
+ *   - strictBabbage: if true -> slighly more verbose TxOutput encoding
+ * @typedef {{
+ *   strictBabbage?: boolean
+ * }} TxOutputEncodingConfig
  */
+
+/**
+ * @type {TxOutputEncodingConfig}
+ */
+export const DEFAULT_TX_OUTPUT_ENCODING_CONFIG = {
+    strictBabbage: true
+}
 
 /**
  * Represents a transaction output that is used when building a transaction.
@@ -67,18 +80,30 @@ export class TxOutput {
     refScript
 
     /**
+     * @type {TxOutputEncodingConfig}
+     */
+    encodingConfig
+
+    /**
      * Constructs a `TxOutput` instance using an `Address`, a `Value`, an optional `Datum`, and optional `UplcProgram` reference script.
      * @param {Address<CSpending, CStaking> | AddressLike} address
      * @param {ValueLike} value
      * @param {Option<TxOutputDatum>} datum
      * @param {Option<UplcProgramV1 | UplcProgramV2>} refScript - plutus v2 script for now
      */
-    constructor(address, value, datum = None, refScript = None) {
+    constructor(
+        address,
+        value,
+        datum = None,
+        refScript = None,
+        encodingConfig = DEFAULT_TX_OUTPUT_ENCODING_CONFIG
+    ) {
         this.address =
             address instanceof Address ? address : Address.new(address)
         this.value = Value.new(value)
         this.datum = datum
         this.refScript = refScript
+        this.encodingConfig = encodingConfig
     }
 
     /**
@@ -136,7 +161,9 @@ export class TxOutput {
                 }
             })()
 
-            return new TxOutput(address, value, datum, refScript)
+            return new TxOutput(address, value, datum, refScript, {
+                strictBabbage: true
+            })
         } else if (isTuple(bytes)) {
             const [address, value, datumHash] = decodeTuple(
                 bytes,
@@ -157,16 +184,22 @@ export class TxOutput {
     /**
      * @param {boolean} isMainnet
      * @param {UplcData} data
+     * @param {TxOutputEncodingConfig} encodingConfig
      * @returns {TxOutput}
      */
-    static fromUplcData(isMainnet, data) {
+    static fromUplcData(
+        isMainnet,
+        data,
+        encodingConfig = DEFAULT_TX_OUTPUT_ENCODING_CONFIG
+    ) {
         ConstrData.assert(data, 0, 4)
 
         return new TxOutput(
             Address.fromUplcData(isMainnet, data.fields[0]),
             Value.fromUplcData(data.fields[1]),
-            TxOutputDatum.fromUplcData(data.fields[2])
-            // The refScript hash isn't very useful
+            TxOutputDatum.fromUplcData(data.fields[2]),
+            None, // The refScript hash isn't very useful
+            encodingConfig
         )
     }
 
@@ -193,7 +226,8 @@ export class TxOutput {
             this.address.copy(),
             this.value.copy(),
             this.datum?.copy(),
-            this.refScript
+            this.refScript,
+            this.encodingConfig
         )
     }
 
@@ -212,14 +246,13 @@ export class TxOutput {
     }
 
     /**
-     * @param {EncodingConfig} config
      * @returns {number[]}
      */
-    toCbor(config) {
+    toCbor() {
         if (
             (!this.datum || this.datum.isHash()) &&
             !this.refScript &&
-            !config.strictBabbage
+            !this.encodingConfig.strictBabbage
         ) {
             // this is needed to match eternl wallet (de)serialization (annoyingly eternl deserializes the tx and then signs its own serialization)
             // hopefully cardano-cli signs whatever serialization we choose (so we use the eternl variant in order to be compatible with both)
@@ -288,8 +321,7 @@ export class TxOutput {
 
         const lovelacePerByte = helper.lovelacePerUTXOByte
 
-        const correctedSize =
-            this.toCbor(helper.params.encodingConfig).length + 160 // 160 accounts for some database overhead?
+        const correctedSize = this.toCbor().length + 160 // 160 accounts for some database overhead?
 
         return BigInt(correctedSize) * BigInt(lovelacePerByte)
     }
