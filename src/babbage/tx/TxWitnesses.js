@@ -187,7 +187,7 @@ export class TxWitnesses {
         return {
             signatures: this.signatures.map((pkw) => pkw.dump()),
             datums: this.datums.map((datum) => datum.toString()),
-            redeemers: "TODO",
+            redeemers: this.redeemers.map((r) => r.dump()),
             nativeScripts: this.nativeScripts.map((script) => script.toJson()),
             scripts: this.v2Scripts.map((script) =>
                 bytesToHex(script.toCbor())
