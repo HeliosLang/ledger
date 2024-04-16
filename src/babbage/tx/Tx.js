@@ -201,7 +201,8 @@ export class Tx {
             body: this.body.dump(),
             witnesses: this.witnesses.dump(),
             metadata: this.metadata ? this.metadata.dump() : null,
-            id: this.id().toString()
+            id: this.id().toString(),
+            size: this.calcSize()
         }
     }
 
