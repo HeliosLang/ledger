@@ -144,12 +144,14 @@ export class TxWitnesses {
 
     /**
      * Used to calculate the correct min fee
-     * @param {number} n
+     * @param {number} n - number of dummy signatures to add
      */
     addDummySignatures(n) {
-        const n0 = this.signatures.length
+        if (n == 0) {
+            return
+        }
 
-        for (let i = n0; i < n; i++) {
+        for (let i = 0; i < n; i++) {
             this.signatures.push(Signature.dummy())
         }
     }
@@ -178,6 +180,13 @@ export class TxWitnesses {
             (sum, redeemer) => sum + redeemer.calcExFee(params),
             0n
         )
+    }
+
+    /**
+     * @returns {number}
+     */
+    countNonDummySignatures() {
+        return this.signatures.reduce((n, s) => (s.isDummy() ? n : n + 1), 0)
     }
 
     /**
@@ -260,11 +269,36 @@ export class TxWitnesses {
 
     /**
      * Used to removed any dummy signatures added while calculating the tx fee
+     * @param {number} n
      */
-    removeDummySignatures() {
-        this.signatures = this.signatures.filter(
-            (signature) => !signature.isDummy()
-        )
+    removeDummySignatures(n) {
+        if (n == 0) {
+            return
+        }
+
+        /**
+         * @type {Signature[]}
+         */
+        const res = []
+
+        let j = 0
+        for (let i = 0; i < this.signatures.length; i++) {
+            const signature = this.signatures[i]
+
+            if (signature.isDummy() && j < n) {
+                j++
+            } else {
+                res.push(signature)
+            }
+        }
+
+        if (j != n) {
+            throw new Error(
+                `internal error: unable to remove ${n} dummy signatures`
+            )
+        }
+
+        this.signatures = res
     }
 
     /**

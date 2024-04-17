@@ -293,17 +293,23 @@ export class TxBody {
          */
         let set = new Set()
 
-        this.inputs.concat(this.collateral).forEach((utxo) => {
-            const pubKeyHash = utxo.output.address.pubKeyHash
+        let nWorstCase = 0
 
-            if (pubKeyHash) {
-                set.add(pubKeyHash.toHex())
+        this.inputs.concat(this.collateral).forEach((utxo) => {
+            try {
+                const pubKeyHash = utxo.output.address.pubKeyHash
+
+                if (pubKeyHash) {
+                    set.add(pubKeyHash.toHex())
+                }
+            } catch (_e) {
+                nWorstCase += 1
             }
         })
 
         this.signers.forEach((signer) => set.add(signer.toHex()))
 
-        return set.size
+        return set.size + nWorstCase
     }
 
     /**

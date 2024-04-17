@@ -98,12 +98,31 @@ export class Tx {
     }
 
     /**
-     * Number of bytes
+     * Number of bytes of CBOR encoding of Tx
+     *
+     * Is used for two things:
+     *   - tx fee calculation
+     *   - tx size validation
+     *
      * @param {boolean} forFeeCalculation - see comment in `this.toCbor()`
      * @returns {number}
      */
     calcSize(forFeeCalculation = false) {
-        return this.toCbor(forFeeCalculation).length
+        // add dummy signatures to make sure the tx has the correct size
+        let nDummy = 0
+
+        if (forFeeCalculation) {
+            nDummy = this.countMissingSignatures()
+            this.witnesses.addDummySignatures(nDummy)
+        }
+
+        const s = this.toCbor(forFeeCalculation).length
+
+        if (forFeeCalculation) {
+            this.witnesses.removeDummySignatures(nDummy)
+        }
+
+        return s
     }
 
     /**
@@ -166,19 +185,9 @@ export class Tx {
     calcMinFee(params) {
         const helper = NetworkParamsHelper.new(params)
 
-        // add dummy signatures to make sure the tx has the correct size
-        if (!this.valid) {
-            this.witnesses.addDummySignatures(this.body.countUniqueSigners())
-        }
-
         const [a, b] = helper.txFeeParams
 
         const sizeFee = BigInt(a) + BigInt(this.calcSize(true)) * BigInt(b)
-
-        // clean up the dummy signatures
-        if (!this.valid) {
-            this.witnesses.removeDummySignatures()
-        }
 
         const exFee = this.witnesses.calcExFee(params)
 
@@ -377,6 +386,17 @@ export class Tx {
         })
 
         this.valid = true
+    }
+
+    /**
+     * @private
+     * @returns {number}
+     */
+    countMissingSignatures() {
+        return (
+            this.body.countUniqueSigners() -
+            this.witnesses.countNonDummySignatures()
+        )
     }
 
     /**
