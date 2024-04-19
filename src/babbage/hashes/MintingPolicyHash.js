@@ -1,11 +1,6 @@
 import { decodeBytes } from "@helios-lang/cbor"
 import { blake2b, encodeBech32 } from "@helios-lang/crypto"
-import {
-    ByteArrayData,
-    UplcProgramV1,
-    UplcProgramV2,
-    decodeUplcData
-} from "@helios-lang/uplc"
+import { ByteArrayData, decodeUplcData } from "@helios-lang/uplc"
 import { ScriptHash } from "./ScriptHash.js"
 import { compareBytes, equalsBytes } from "@helios-lang/codec-utils"
 import { None, isSome } from "@helios-lang/type-utils"
@@ -14,7 +9,6 @@ import { None, isSome } from "@helios-lang/type-utils"
  * @typedef {import("@helios-lang/codec-utils").ByteArrayLike} ByteArrayLike
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData
  * @typedef {import("./Hash.js").Hash} Hash
- * @typedef {import("./MintingContext.js").MintingContext} MintingContext
  */
 
 /**
