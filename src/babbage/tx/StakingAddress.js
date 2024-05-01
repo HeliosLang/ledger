@@ -185,6 +185,19 @@ export class StakingAddress {
     }
 
     /**
+     * @param {string} str
+     * @returns {boolean}
+     */
+    static isValidBech32(str) {
+        try {
+            StakingAddress.fromBech32(str)
+            return true
+        } catch (_e) {
+            return false
+        }
+    }
+
+    /**
      * @type {string}
      */
     get bech32Prefix() {

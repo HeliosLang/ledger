@@ -145,6 +145,25 @@ export class TxInput {
     }
 
     /**
+     * @param {ByteArrayLike} bytes
+     * @param {boolean} expectFull
+     * @returns {boolean}
+     */
+    static isValidCbor(bytes, expectFull = false) {
+        const stream = ByteStream.from(bytes).copy()
+
+        try {
+            const input = TxInput.fromCbor(stream)
+            if (expectFull) {
+                input.output
+            }
+            return true
+        } catch (_e) {
+            return false
+        }
+    }
+
+    /**
      * @param {TxInput[]} inputs
      * @returns {Value}
      */
