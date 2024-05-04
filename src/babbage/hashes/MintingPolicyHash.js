@@ -98,6 +98,19 @@ export class MintingPolicyHash extends ScriptHash {
     }
 
     /**
+     * @param {MintingPolicyHashLike} arg
+     * @returns {boolean}
+     */
+    static isValid(arg) {
+        try {
+            MintingPolicyHash.new(arg)
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    /**
      * @param {MintingPolicyHash} other
      * @returns {boolean}
      */

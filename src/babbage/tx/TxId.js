@@ -81,6 +81,19 @@ export class TxId {
     }
 
     /**
+     * @param {ByteArrayLike} bytes
+     * @returns {boolean}
+     */
+    static isValid(bytes) {
+        try {
+            TxId.new(bytes)
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    /**
      * @param {TxId} other
      * @returns {boolean}
      */

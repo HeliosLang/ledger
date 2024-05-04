@@ -101,6 +101,19 @@ export class StakingValidatorHash extends ScriptHash {
     }
 
     /**
+     * @param {StakingValidatorHashLike} arg
+     * @returns {boolean}
+     */
+    static isValid(arg) {
+        try {
+            StakingValidatorHash.new(arg)
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    /**
      * @param {StakingValidatorHash} other
      * @returns {boolean}
      */

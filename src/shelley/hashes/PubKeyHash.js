@@ -94,6 +94,19 @@ export class PubKeyHash {
     }
 
     /**
+     * @param {PubKeyHashLike} arg
+     * @returns {boolean}
+     */
+    static isValid(arg) {
+        try {
+            PubKeyHash.new(arg)
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    /**
      * Diagnostic representation
      * @returns {string}
      */

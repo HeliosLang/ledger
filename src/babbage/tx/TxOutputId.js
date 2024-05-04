@@ -155,6 +155,19 @@ export class TxOutputId {
     }
 
     /**
+     * @param {TxOutputIdLike} arg
+     * @returns {boolean}
+     */
+    static isValid(arg) {
+        try {
+            TxOutputId.new(arg)
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    /**
      * @param {TxOutputId} other
      * @returns {boolean}
      */

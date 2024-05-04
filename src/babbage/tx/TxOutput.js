@@ -204,6 +204,21 @@ export class TxOutput {
     }
 
     /**
+     * @param {ByteArrayLike} bytes
+     * @returns {boolean}
+     */
+    static isValidCbor(bytes) {
+        const stream = ByteStream.from(bytes).copy()
+
+        try {
+            TxOutput.fromCbor(stream)
+            return true
+        } catch (_e) {
+            return false
+        }
+    }
+
+    /**
      * @type {CSpending}
      */
     get spendingContext() {

@@ -145,21 +145,41 @@ export class TxInput {
     }
 
     /**
+     * @overload
+     * @param {boolean} expectFull
+     * @returns {(bytes: ByteArrayLike) => boolean}
+     *
+     * @overload
      * @param {ByteArrayLike} bytes
      * @param {boolean} expectFull
      * @returns {boolean}
+     *
+     * @param {[boolean] | [ByteArrayLike, boolean]} args
      */
-    static isValidCbor(bytes, expectFull = false) {
-        const stream = ByteStream.from(bytes).copy()
+    static isValidCbor(...args) {
+        if (args.length == 1) {
+            const [expectFull] = args
 
-        try {
-            const input = TxInput.fromCbor(stream)
-            if (expectFull) {
-                input.output
+            /**
+             * @type {(bytes: ByteArrayLike) => boolean}
+             */
+            return (bytes) => {
+                return TxInput.isValidCbor(bytes, expectFull)
             }
-            return true
-        } catch (_e) {
-            return false
+        } else {
+            const [bytes, expectFull] = args
+
+            const stream = ByteStream.from(bytes).copy()
+
+            try {
+                const input = TxInput.fromCbor(stream)
+                if (expectFull) {
+                    input.output
+                }
+                return true
+            } catch (_e) {
+                return false
+            }
         }
     }
 

@@ -96,6 +96,19 @@ export class ValidatorHash extends ScriptHash {
     }
 
     /**
+     * @param {ValidatorHashLike} arg
+     * @returns {boolean}
+     */
+    static isValid(arg) {
+        try {
+            ValidatorHash.new(arg)
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    /**
      * @param {ValidatorHash} other
      * @returns {boolean}
      */
