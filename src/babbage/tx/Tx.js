@@ -248,10 +248,10 @@ export class Tx {
     /**
      * A serialized tx throws away input information
      * This must be refetched from the network if the tx needs to be analyzed
-     * @param {(id: TxOutputId) => Promise<TxOutput>} fn
+     * @param {{getUtxo(id: TxOutputId): Promise<TxInput>}} network - the TxInput returned by the network must itself be fully recovered
      */
-    async recover(fn) {
-        await this.body.recover(fn)
+    async recover(network) {
+        await this.body.recover(network)
 
         const refScriptsInRefInputs = this.body.refInputs.reduce(
             (refScripts, input) => {

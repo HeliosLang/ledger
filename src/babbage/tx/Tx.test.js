@@ -6,6 +6,7 @@ import { Address } from "./Address.js"
 import { Tx } from "./Tx.js"
 import { TxOutput } from "./TxOutput.js"
 import { bytesToHex, hexToBytes } from "@helios-lang/codec-utils"
+import { TxInput } from "./TxInput.js"
 
 describe(`basic ${Tx.name}`, () => {
     /**
@@ -72,15 +73,18 @@ describe(`basic ${Tx.name}`, () => {
     })
 
     it("recovered signed doesn't fail regular validations", async () => {
-        await signed.recover(
-            async () =>
-                new TxOutput(
-                    Address.new(
-                        "addr_test1vzzcg26lxj3twnnx889lrn60pqn0z3km2yahhsz0fvpyxdcj5qp8w"
-                    ),
-                    new Value(10_000_000_000n)
+        await signed.recover({
+            getUtxo: async (id) =>
+                new TxInput(
+                    id,
+                    new TxOutput(
+                        Address.new(
+                            "addr_test1vzzcg26lxj3twnnx889lrn60pqn0z3km2yahhsz0fvpyxdcj5qp8w"
+                        ),
+                        new Value(10_000_000_000n)
+                    )
                 )
-        )
+        })
         signed.validate(params)
     })
 })

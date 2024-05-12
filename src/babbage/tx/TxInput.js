@@ -246,11 +246,11 @@ export class TxInput {
 
     /**
      * The output itself isn't stored in the ledger, so must be recovered after deserializing blocks/transactions
-     * @param {(id: TxOutputId) => Promise<TxOutput>} fn
+     * @param {{getUtxo(id: TxOutputId): Promise<TxInput>}} network
      */
-    async recover(fn) {
+    async recover(network) {
         if (!this.#output) {
-            this.#output = await fn(this.id)
+            this.#output = (await network.getUtxo(this.id)).output
         }
     }
 

@@ -398,13 +398,24 @@ export class TxBody {
     /**
      * A serialized tx throws away input information
      * This must be refetched from the network if the tx needs to be analyzed
-     * @param {(id: TxOutputId) => Promise<TxOutput>} fn
+     *
+     * This must be done for the regular inputs because the datums are needed for correct budget calculation and min required signatures determination
+     * This must be done for the reference inputs because they impact the budget calculation
+     * This must be done for the collateral inputs as well, so that the minium required signatures can be determined correctly
+     * @param {{getUtxo(id: TxOutputId): Promise<TxInput>}} network
      */
-    async recover(fn) {
+    async recover(network) {
         await Promise.all(
             this.inputs
-                .map((input) => input.recover(fn))
-                .concat(this.refInputs.map((refInput) => refInput.recover(fn)))
+                .map((input) => input.recover(network))
+                .concat(
+                    this.refInputs.map((refInput) => refInput.recover(network))
+                )
+                .concat(
+                    this.collateral.map((collateral) =>
+                        collateral.recover(network)
+                    )
+                )
         )
     }
 
