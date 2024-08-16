@@ -18,29 +18,20 @@ import { None, isSome } from "@helios-lang/type-utils"
  * Represents a blake2b-224 hash of a spending validator script (first encoded as a CBOR byte-array and prepended by a script version byte).
  * @template [C=unknown]
  * @implements {Hash}
+ * @extends {ScriptHash<C>}
  */
 export class ValidatorHash extends ScriptHash {
-    /**
-     * @readonly
-     * @type {C}
-     */
-    context
-
     /**
      * @param {ByteArrayLike} bytes
      * @param {Option<C>} context
      */
     constructor(bytes, context = None) {
-        super(bytes)
+        super(bytes, context)
 
         if (this.bytes.length != 28) {
             throw new Error(
                 `expected 28 bytes for ValidatorHash, got ${this.bytes.length}`
             )
-        }
-
-        if (isSome(context)) {
-            this.context = context
         }
     }
 

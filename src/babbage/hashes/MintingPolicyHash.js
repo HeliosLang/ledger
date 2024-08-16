@@ -26,30 +26,21 @@ import { None, isSome } from "@helios-lang/type-utils"
  *   {program: ..., redeemer: ...}: witnessed by UplcProgram
  * @template [C=unknown]
  * @implements {Hash}
+ * @extends {ScriptHash<C>}
  */
 export class MintingPolicyHash extends ScriptHash {
-    /**
-     * @readonly
-     * @type {C}
-     */
-    context
-
     /**
      * Can be 0 bytes in case of Ada
      * @param {ByteArrayLike} bytes
      * @param {Option<C>} context - not recommended to set this manually
      */
     constructor(bytes, context = None) {
-        super(bytes)
+        super(bytes, context)
 
         if (!(this.bytes.length == 28 || this.bytes.length == 0)) {
             throw new Error(
                 `expected 0 or 28 bytes for MintingPolicyHash, got ${this.bytes.length}`
             )
-        }
-
-        if (isSome(context)) {
-            this.context = context
         }
     }
 

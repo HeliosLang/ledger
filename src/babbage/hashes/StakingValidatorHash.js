@@ -21,29 +21,20 @@ import { ScriptHash } from "./ScriptHash.js"
  * **Note**: before hashing, the staking script is first encoded as a CBOR byte-array and then prepended by a script version byte.
  * @template [C=unknown]
  * @implements {Hash}
+ * @extends {ScriptHash<C>}
  */
 export class StakingValidatorHash extends ScriptHash {
-    /**
-     * @readonly
-     * @type {C}
-     */
-    context
-
     /**
      * @param {ByteArrayLike} bytes
      * @param {Option<C>} context
      */
     constructor(bytes, context = None) {
-        super(bytes)
+        super(bytes, context)
 
         if (this.bytes.length != 28) {
             throw new Error(
                 `expected 28 bytes for StakingValidatorHash, got ${this.bytes.length}`
             )
-        }
-
-        if (isSome(context)) {
-            this.context = context
         }
     }
 
