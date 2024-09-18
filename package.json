@@ -23,7 +23,7 @@
         "typescript": "^5.3.2"
     },
     "dependencies": {
-        "@helios-lang/ledger-conway": "^0.1.10"
+        "@helios-lang/ledger-conway": "^0.1.11"
     },
     "prettier": {
         "trailingComma": "none",
