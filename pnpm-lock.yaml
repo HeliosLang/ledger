@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@helios-lang/ledger-conway':
-        specifier: ^0.1.11
-        version: 0.1.11
+        specifier: ^0.1.12
+        version: 0.1.12
     devDependencies:
       '@types/node':
         specifier: ^20.11.24
@@ -45,11 +45,11 @@ packages:
   '@helios-lang/ledger-alonzo@0.1.5':
     resolution: {integrity: sha512-zN+fs+xoHifQqJ0QXYz6qGMFR2hoMGsxuYzlgrXvb1uDfQlJqVDB4ktLtazDy92hfUW+d21z7rJItv5eV5uH5A==}
 
-  '@helios-lang/ledger-babbage@0.2.11':
-    resolution: {integrity: sha512-n+I+J7XadTXYaEkOV6UG8Fs5fN/75MH3jkiGRc1CYvXqYh+Qk+5hbYDMyiP9Cql2zcK55/HoWepRHT814e5fUg==}
+  '@helios-lang/ledger-babbage@0.2.12':
+    resolution: {integrity: sha512-+GJzPzpKKJBRkBZG9dboHtf/foNW5+EP2cF9fznvHlqDeZhet3iArWIeb+neaWsh4u0gT9/qUh8f7VtqzGb8eg==}
 
-  '@helios-lang/ledger-conway@0.1.11':
-    resolution: {integrity: sha512-BeqwBUlO5IePUR0to+BKitbHWNuEn8HwW7WpNwdn38+WsCznD/syUHlgRIUSfyHXeIyX4+9g5PR4SZ2J4n9GEA==}
+  '@helios-lang/ledger-conway@0.1.12':
+    resolution: {integrity: sha512-Sv/ZLxkH8Gqq22X7XKNFkbY1dOt7eyqpfPi344dUlWuIWXDNEzNPeWs8XyMsfodX50weo5s+hOqCufnaToYEew==}
 
   '@helios-lang/ledger-shelley@0.1.4':
     resolution: {integrity: sha512-A86U4pVs7gqAc7Y/Um8EkAc/jEDen3I64hYOkA88wfc28gx360foW1F/bBidA7GM4fSBSwnvm5pn26AhLzHrMw==}
@@ -111,7 +111,7 @@ snapshots:
     dependencies:
       '@helios-lang/uplc': 0.1.38
 
-  '@helios-lang/ledger-babbage@0.2.11':
+  '@helios-lang/ledger-babbage@0.2.12':
     dependencies:
       '@helios-lang/cbor': 0.1.21
       '@helios-lang/codec-utils': 0.1.35
@@ -122,13 +122,13 @@ snapshots:
       '@helios-lang/type-utils': 0.1.21
       '@helios-lang/uplc': 0.3.6
 
-  '@helios-lang/ledger-conway@0.1.11':
+  '@helios-lang/ledger-conway@0.1.12':
     dependencies:
       '@helios-lang/cbor': 0.1.21
       '@helios-lang/codec-utils': 0.1.35
       '@helios-lang/crypto': 0.1.14
       '@helios-lang/ledger-alonzo': 0.1.5
-      '@helios-lang/ledger-babbage': 0.2.11
+      '@helios-lang/ledger-babbage': 0.2.12
       '@helios-lang/ledger-shelley': 0.1.4
       '@helios-lang/type-utils': 0.1.21
       '@helios-lang/uplc': 0.3.6
