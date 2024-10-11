@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@helios-lang/ledger-conway':
-        specifier: ^0.2.8
-        version: 0.2.8
+        specifier: ^0.2.9
+        version: 0.2.9
     devDependencies:
       '@types/node':
         specifier: ^20.11.24
@@ -45,11 +45,11 @@ packages:
   '@helios-lang/ledger-alonzo@0.1.6':
     resolution: {integrity: sha512-iTu5uiFR2iEwN3LiM8ewarMEkvmyLSaf1zAFBHetxxmrZs3W7Tn0W5qpx8XjIaKwX7k5r+5Y4TqvIiiuAxIf8Q==}
 
-  '@helios-lang/ledger-babbage@0.3.9':
-    resolution: {integrity: sha512-GC/T/hcENroRiXaw0MD++8pnegwAiMzCukFOqQHN16hlFA2qe5pnmNES3desjv2mReuQbRd/cIyQDKDZMEEOiQ==}
+  '@helios-lang/ledger-babbage@0.3.10':
+    resolution: {integrity: sha512-a5Bfw2LRwLxOXrstYqg6WIDtNYAXBoM5dwFeQLWKBJpk0a9RuWHvCA8BgDnKxRI8ateO51yKtV8rcE09dIZiBg==}
 
-  '@helios-lang/ledger-conway@0.2.8':
-    resolution: {integrity: sha512-RkSIluF4ouUjeOG1vRY0odMFEdrn8XDaSvYMTF0EAeNP4lSMLLwzc5Ym8J3SSkXAGG9HLfCylYeVhQCBFZC87A==}
+  '@helios-lang/ledger-conway@0.2.9':
+    resolution: {integrity: sha512-3PeMs6EILplndGYfocngoJeu6Bz/e+QNvHJHPVMEwVHa8/BHsfuV8BOaVqbXwzhm7GjptWbT9BvHMN8k/Cn37w==}
 
   '@helios-lang/ledger-shelley@0.1.5':
     resolution: {integrity: sha512-Ey2xqpFnCKNUmoKi6rB1gJhdf0H8yigMA0RnWzZRgoTAlJy+73csoHePvHzD1oZB4Cwtp3RaVE5MTX9OsSy1Rg==}
@@ -107,7 +107,7 @@ snapshots:
 
   '@helios-lang/ledger-alonzo@0.1.6': {}
 
-  '@helios-lang/ledger-babbage@0.3.9':
+  '@helios-lang/ledger-babbage@0.3.10':
     dependencies:
       '@helios-lang/cbor': 0.2.1
       '@helios-lang/codec-utils': 0.2.1
@@ -118,13 +118,13 @@ snapshots:
       '@helios-lang/type-utils': 0.1.25
       '@helios-lang/uplc': 0.6.1
 
-  '@helios-lang/ledger-conway@0.2.8':
+  '@helios-lang/ledger-conway@0.2.9':
     dependencies:
       '@helios-lang/cbor': 0.2.1
       '@helios-lang/codec-utils': 0.2.1
       '@helios-lang/crypto': 0.1.17
       '@helios-lang/ledger-alonzo': 0.1.6
-      '@helios-lang/ledger-babbage': 0.3.9
+      '@helios-lang/ledger-babbage': 0.3.10
       '@helios-lang/ledger-shelley': 0.1.5
       '@helios-lang/type-utils': 0.1.25
       '@helios-lang/uplc': 0.6.1
