@@ -7,6 +7,7 @@
  * @typedef {{
  *   kind: string
  *   era: string
+ *   isEqual(other: Address): boolean
  *   toCbor(): number[]
  *   toString(): string
  * }} CommonAddressProps

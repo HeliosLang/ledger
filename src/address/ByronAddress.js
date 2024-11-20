@@ -13,12 +13,13 @@ import {
     decodeIntBE,
     encodeBase58,
     encodeIntBE,
+    equalsBytes,
     makeByteStream
 } from "@helios-lang/codec-utils"
 
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
- * @import { ByronAddress } from "src/index.js"
+ * @import { Address, ByronAddress } from "src/index.js"
  */
 
 /**
@@ -107,6 +108,18 @@ class ByronAddressImpl {
      */
     get era() {
         return "Byron"
+    }
+
+    /**
+     * @param {Address} other
+     * @returns {boolean}
+     */
+    isEqual(other) {
+        if (other.era == "Byron") {
+            return equalsBytes(this.bytes, other.bytes)
+        } else {
+            return false
+        }
     }
 
     /**

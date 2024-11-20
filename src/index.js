@@ -169,6 +169,7 @@ export {
  * @prop {"Byron"} era
  * @prop {number[]} bytes
  * @prop {bigint} checksum
+ * @prop {(other: Address) => boolean} isEqual
  * @prop {() => string} toBase58
  * @prop {() => number[]} toCbor
  *
