@@ -89,8 +89,14 @@ export {
     parseNativeScript
 } from "./native/index.js"
 export {
-    COST_MODEL_PARAMS_V2,
+    BABBAGE_COST_MODEL_PARAMS_V1,
+    BABBAGE_COST_MODEL_PARAMS_V2,
+    BABBAGE_PARAMS,
+    BABBAGE_NETWORK_PARAMS,
+    CONWAY_GENESIS_PARAMS,
     DEFAULT_NETWORK_PARAMS,
+    DEFAULT_CONWAY_PARAMS,
+    SHELLEY_GENESIS_PARAMS,
     makeDefaultNetworkParamsHelper,
     makeNetworkParamsHelper
 } from "./params/index.js"
@@ -103,7 +109,11 @@ export {
     makePubKey,
     makeSignature
 } from "./signature/index.js"
-export { toTime } from "./time/index.js"
+export {
+    convertUplcDataToTimeRange,
+    makeTimeRange,
+    toTime
+} from "./time/index.js"
 export {
     DEFAULT_TX_OUTPUT_ENCODING_CONFIG,
     appendTxInput,
