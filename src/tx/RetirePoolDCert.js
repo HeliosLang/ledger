@@ -77,9 +77,9 @@ class RetirePoolDCertImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 4,
-            fields: [this.poolId.toUplcData(), makeIntData(this.epoch)]
-        })
+        return makeConstrData(4, [
+            this.poolId.toUplcData(),
+            makeIntData(this.epoch)
+        ])
     }
 }

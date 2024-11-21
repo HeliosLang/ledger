@@ -82,6 +82,6 @@ class HashedTxOutputDatumImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({ tag: 1, fields: [this.hash.toUplcData()] })
+        return makeConstrData(1, [this.hash.toUplcData()])
     }
 }

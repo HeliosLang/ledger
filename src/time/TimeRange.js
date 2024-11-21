@@ -192,25 +192,16 @@ class TimeRangeImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 0,
-            fields: [
-                makeConstrData({
-                    tag: 0,
-                    fields: [
-                        encodeTimeRangeTimeData(this.start),
-                        boolToUplcData(this.includeStart)
-                    ]
-                }),
-                makeConstrData({
-                    tag: 0,
-                    fields: [
-                        encodeTimeRangeTimeData(this.end),
-                        boolToUplcData(this.includeEnd)
-                    ]
-                })
-            ]
-        })
+        return makeConstrData(0, [
+            makeConstrData(0, [
+                encodeTimeRangeTimeData(this.start),
+                boolToUplcData(this.includeStart)
+            ]),
+            makeConstrData(0, [
+                encodeTimeRangeTimeData(this.end),
+                boolToUplcData(this.includeEnd)
+            ])
+        ])
     }
 }
 
@@ -265,14 +256,11 @@ function decodeTimeRangeTimeData(data, strict = false) {
 function encodeTimeRangeTimeData(t) {
     switch (t) {
         case Number.NEGATIVE_INFINITY:
-            return makeConstrData({ tag: 0, fields: [] })
+            return makeConstrData(0, [])
         case Number.POSITIVE_INFINITY:
-            return makeConstrData({ tag: 2, fields: [] })
+            return makeConstrData(2, [])
         default:
-            return makeConstrData({
-                tag: 1,
-                fields: [makeIntData(Math.round(t))]
-            })
+            return makeConstrData(1, [makeIntData(Math.round(t))])
     }
 }
 

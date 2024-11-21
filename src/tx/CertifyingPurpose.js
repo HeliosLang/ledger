@@ -41,7 +41,7 @@ class CertifyingPurposeImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({ tag: 3, fields: [this.dcert.toUplcData()] })
+        return makeConstrData(3, [this.dcert.toUplcData()])
     }
 
     /**
@@ -49,6 +49,6 @@ class CertifyingPurposeImpl {
      * @returns {UplcData}
      */
     toScriptContextUplcData(txData) {
-        return makeConstrData({ tag: 0, fields: [txData, this.toUplcData()] })
+        return makeConstrData(0, [txData, this.toUplcData()])
     }
 }

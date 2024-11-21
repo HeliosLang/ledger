@@ -73,9 +73,8 @@ class DeregistrationDCertImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 1,
-            fields: [convertStakingCredentialToUplcData(this.credential)]
-        })
+        return makeConstrData(1, [
+            convertStakingCredentialToUplcData(this.credential)
+        ])
     }
 }

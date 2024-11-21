@@ -248,10 +248,10 @@ class AssetClassImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 0,
-            fields: [this.mph.toUplcData(), makeByteArrayData(this.tokenName)]
-        })
+        return makeConstrData(0, [
+            this.mph.toUplcData(),
+            makeByteArrayData(this.tokenName)
+        ])
     }
 }
 

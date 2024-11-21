@@ -48,15 +48,11 @@ export function convertUplcDataToStakingCredential(data) {
  * @returns {ConstrData}
  */
 export function convertStakingCredentialToUplcData(hash) {
-    return makeConstrData({
-        tag: 0,
-        fields: [
-            makeConstrData({
-                tag: hash.kind == "StakingValidatorHash" ? 1 : 0,
-                fields: [hash.toUplcData()]
-            })
-        ]
-    })
+    return makeConstrData(0, [
+        makeConstrData(hash.kind == "StakingValidatorHash" ? 1 : 0, [
+            hash.toUplcData()
+        ])
+    ])
 }
 
 /**

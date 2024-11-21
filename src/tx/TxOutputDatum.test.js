@@ -11,9 +11,7 @@ import { convertUplcDataToTxOutputDatum } from "./TxOutputDatum.js"
 describe("TxOutputDatum", () => {
     describe("fromUplcData", () => {
         it("handles None correctly", () => {
-            const datum = convertUplcDataToTxOutputDatum(
-                makeConstrData({ tag: 0, fields: [] })
-            )
+            const datum = convertUplcDataToTxOutputDatum(makeConstrData(0, []))
 
             strictEqual(datum, undefined)
         })
@@ -21,7 +19,7 @@ describe("TxOutputDatum", () => {
         it("handles Hash correctly", () => {
             const bytes = dummyBytes(32)
             const datum = convertUplcDataToTxOutputDatum(
-                makeConstrData({ tag: 1, fields: [makeByteArrayData(bytes)] })
+                makeConstrData(1, [makeByteArrayData(bytes)])
             )
 
             deepEqual(
@@ -35,7 +33,7 @@ describe("TxOutputDatum", () => {
         it("handles Inline correctly", () => {
             const payload = makeIntData(0)
             const datum = convertUplcDataToTxOutputDatum(
-                makeConstrData({ tag: 2, fields: [payload] })
+                makeConstrData(2, [payload])
             )
 
             strictEqual(
@@ -49,45 +47,35 @@ describe("TxOutputDatum", () => {
         it("fails if more than zero None fields", () => {
             throws(() => {
                 convertUplcDataToTxOutputDatum(
-                    makeConstrData({ tag: 0, fields: [makeIntData(0)] })
+                    makeConstrData(0, [makeIntData(0)])
                 )
             })
         })
 
         it("fails if no Hash fields", () => {
             throws(() => {
-                convertUplcDataToTxOutputDatum(
-                    makeConstrData({ tag: 1, fields: [] })
-                )
+                convertUplcDataToTxOutputDatum(makeConstrData(1, []))
             })
         })
 
         it("fails if too many Hash fields", () => {
             throws(() => {
                 convertUplcDataToTxOutputDatum(
-                    makeConstrData({
-                        tag: 1,
-                        fields: [makeIntData(0), makeIntData(0)]
-                    })
+                    makeConstrData(1, [makeIntData(0), makeIntData(0)])
                 )
             })
         })
 
         it("fails if no Inline fields", () => {
             throws(() => {
-                convertUplcDataToTxOutputDatum(
-                    makeConstrData({ tag: 2, fields: [] })
-                )
+                convertUplcDataToTxOutputDatum(makeConstrData(2, []))
             })
         })
 
         it("fails if too many Inline fields", () => {
             throws(() => {
                 convertUplcDataToTxOutputDatum(
-                    makeConstrData({
-                        tag: 2,
-                        fields: [makeIntData(0), makeIntData(0)]
-                    })
+                    makeConstrData(2, [makeIntData(0), makeIntData(0)])
                 )
             })
         })

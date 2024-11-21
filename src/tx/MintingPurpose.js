@@ -42,7 +42,7 @@ class MintingPurposeImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({ tag: 0, fields: [this.policy.toUplcData()] })
+        return makeConstrData(0, [this.policy.toUplcData()])
     }
 
     /**
@@ -50,6 +50,6 @@ class MintingPurposeImpl {
      * @returns {UplcData}
      */
     toScriptContextUplcData(txData) {
-        return makeConstrData({ tag: 0, fields: [txData, this.toUplcData()] })
+        return makeConstrData(0, [txData, this.toUplcData()])
     }
 }

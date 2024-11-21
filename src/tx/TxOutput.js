@@ -338,21 +338,16 @@ class TxOutputImpl {
             throw new Error("not yet implemented")
         }
 
-        return makeConstrData({
-            tag: 0,
-            fields: [
-                address.toUplcData(),
-                this.value.toUplcData(),
-                this.datum
-                    ? this.datum.toUplcData()
-                    : makeConstrData({ tag: 0, fields: [] }),
-                wrapUplcDataOption(
-                    this.refScript
-                        ? makeByteArrayData(this.refScript.hash())
-                        : undefined
-                )
-            ]
-        })
+        return makeConstrData(0, [
+            address.toUplcData(),
+            this.value.toUplcData(),
+            this.datum ? this.datum.toUplcData() : makeConstrData(0, []),
+            wrapUplcDataOption(
+                this.refScript
+                    ? makeByteArrayData(this.refScript.hash())
+                    : undefined
+            )
+        ])
     }
 
     /**

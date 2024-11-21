@@ -405,18 +405,13 @@ class ShelleyAddressImpl {
      * @returns {UplcData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 0,
-            fields: [
-                this.spendingCredential.toUplcData(),
-                wrapUplcDataOption(
-                    this.stakingCredential
-                        ? convertStakingCredentialToUplcData(
-                              this.stakingCredential
-                          )
-                        : undefined
-                )
-            ]
-        })
+        return makeConstrData(0, [
+            this.spendingCredential.toUplcData(),
+            wrapUplcDataOption(
+                this.stakingCredential
+                    ? convertStakingCredentialToUplcData(this.stakingCredential)
+                    : undefined
+            )
+        ])
     }
 }

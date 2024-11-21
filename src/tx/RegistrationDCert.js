@@ -72,9 +72,8 @@ class RegistrationDCertImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 0,
-            fields: [convertStakingCredentialToUplcData(this.credential)]
-        })
+        return makeConstrData(0, [
+            convertStakingCredentialToUplcData(this.credential)
+        ])
     }
 }

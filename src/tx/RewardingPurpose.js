@@ -43,10 +43,9 @@ class RewardingPurposeImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 2,
-            fields: [convertStakingCredentialToUplcData(this.credential)]
-        })
+        return makeConstrData(2, [
+            convertStakingCredentialToUplcData(this.credential)
+        ])
     }
 
     /**
@@ -54,6 +53,6 @@ class RewardingPurposeImpl {
      * @returns {UplcData}
      */
     toScriptContextUplcData(txData) {
-        return makeConstrData({ tag: 0, fields: [txData, this.toUplcData()] })
+        return makeConstrData(0, [txData, this.toUplcData()])
     }
 }

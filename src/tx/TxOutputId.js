@@ -6,7 +6,7 @@ import {
 } from "@helios-lang/cbor"
 import { compareBytes, makeByteStream, toInt } from "@helios-lang/codec-utils"
 import {
-    expectConstrData,
+    assertConstrData,
     expectIntData,
     makeConstrData,
     makeIntData
@@ -151,11 +151,11 @@ export function compareTxOutputIds(a, b) {
  * @returns {TxOutputId}
  */
 export function convertUplcDataToTxOutputId(data) {
-    const cData = expectConstrData(data, 0, 2)
+    assertConstrData(data, 0, 2)
 
     return new TxOutputIdImpl(
-        convertUplcDataToTxId(cData.fields[0]),
-        expectIntData(cData.fields[1]).value
+        convertUplcDataToTxId(data.fields[0]),
+        toInt(expectIntData(data.fields[1]).value)
     )
 }
 
@@ -217,9 +217,9 @@ class TxOutputIdImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 0,
-            fields: [this.txId.toUplcData(), makeIntData(this.index)]
-        })
+        return makeConstrData(0, [
+            this.txId.toUplcData(),
+            makeIntData(this.index)
+        ])
     }
 }

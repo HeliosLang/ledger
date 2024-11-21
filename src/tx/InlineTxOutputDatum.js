@@ -85,6 +85,6 @@ class InlineTxOutputDatumImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({ tag: 2, fields: [this.data] })
+        return makeConstrData(2, [this.data])
     }
 }

@@ -272,10 +272,10 @@ class TxInputImpl {
      */
     toUplcData() {
         if (this._output) {
-            return makeConstrData({
-                tag: 0,
-                fields: [this.id.toUplcData(), this._output.toUplcData()]
-            })
+            return makeConstrData(0, [
+                this.id.toUplcData(),
+                this._output.toUplcData()
+            ])
         } else {
             throw new Error("TxInput original output not synced")
         }

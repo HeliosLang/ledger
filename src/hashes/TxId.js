@@ -137,9 +137,6 @@ class TxIdImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 0,
-            fields: [makeByteArrayData(this.bytes)]
-        })
+        return makeConstrData(0, [makeByteArrayData(this.bytes)])
     }
 }

@@ -41,7 +41,7 @@ class SpendingPurposeImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({ tag: 1, fields: [this.utxoId.toUplcData()] })
+        return makeConstrData(1, [this.utxoId.toUplcData()])
     }
 
     /**
@@ -49,6 +49,6 @@ class SpendingPurposeImpl {
      * @returns {UplcData}
      */
     toScriptContextUplcData(txData) {
-        return makeConstrData({ tag: 0, fields: [txData, this.toUplcData()] })
+        return makeConstrData(0, [txData, this.toUplcData()])
     }
 }

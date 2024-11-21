@@ -14,10 +14,9 @@ import {
  * @returns {UplcData}
  */
 export function convertSpendingCredentialToUplcData(hash) {
-    return makeConstrData({
-        tag: hash.kind == "ValidatorHash" ? 1 : 0,
-        fields: [hash.toUplcData()]
-    })
+    return makeConstrData(hash.kind == "ValidatorHash" ? 1 : 0, [
+        hash.toUplcData()
+    ])
 }
 
 /**

@@ -83,12 +83,9 @@ class DelegationDCertImpl {
      * @returns {ConstrData}
      */
     toUplcData() {
-        return makeConstrData({
-            tag: 2,
-            fields: [
-                convertStakingCredentialToUplcData(this.credential),
-                this.poolId.toUplcData()
-            ]
-        })
+        return makeConstrData(2, [
+            convertStakingCredentialToUplcData(this.credential),
+            this.poolId.toUplcData()
+        ])
     }
 }

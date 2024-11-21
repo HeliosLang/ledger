@@ -32,7 +32,9 @@ describe("ValidatorHash", () => {
          */
         const _witnessedOrUnwitnessed = makeValidatorHash(dummyBytes)
 
-        const dummyProgram = makeUplcProgramV2(makeUplcConst(makeUplcInt(0)))
+        const dummyProgram = makeUplcProgramV2(
+            makeUplcConst({ value: makeUplcInt(0) })
+        )
 
         /**
          * witnessed by UplcProgram

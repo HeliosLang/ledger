@@ -76,71 +76,59 @@ class ScriptContextV2Impl {
         const datums = this.txInfo.datums ?? []
         const txId = this.txInfo.id ?? makeDummyTxId()
 
-        const txData = makeConstrData({
-            tag: 0,
-            fields: [
-                makeListData(inputs.map((input) => input.toUplcData())),
-                makeListData(refInputs.map((input) => input.toUplcData())),
-                makeListData(outputs.map((output) => output.toUplcData())),
-                makeValue(fee).toUplcData(),
-                // NOTE: all other Value instances in ScriptContext contain some lovelace, but `minted` can never contain any lovelace, yet cardano-node always prepends 0 lovelace to the `minted` MapData
-                makeValue(0n, minted).toUplcData(true),
-                makeListData(dcerts.map((cert) => cert.toUplcData())),
-                makeMapData(
-                    withdrawals.map(([sa, q]) => [
-                        sa.toUplcData(),
-                        makeIntData(q)
-                    ])
-                ),
-                validityTimerange.toUplcData(),
-                makeListData(signers.map((signer) => signer.toUplcData())),
-                makeMapData(
-                    redeemers.map((redeemer) => {
-                        if (redeemer.kind == "TxMintingRedeemer") {
-                            return [
-                                makeMintingPurpose(
-                                    minted.getPolicies()[redeemer.policyIndex]
-                                ).toUplcData(),
-                                redeemer.data
-                            ]
-                        } else if (redeemer.kind == "TxSpendingRedeemer") {
-                            return [
-                                makeSpendingPurpose(
-                                    inputs[redeemer.inputIndex].id
-                                ).toUplcData(),
-                                redeemer.data
-                            ]
-                        } else if (redeemer.kind == "TxRewardingRedeemer") {
-                            return [
-                                makeRewardingPurpose(
-                                    withdrawals[redeemer.withdrawalIndex][0]
-                                        .stakingCredential
-                                ).toUplcData(),
-                                redeemer.data
-                            ]
-                        } else if (redeemer.kind == "TxCertifyingRedeemer") {
-                            return [
-                                makeCertifyingPurpose(
-                                    dcerts[redeemer.dcertIndex]
-                                ).toUplcData(),
-                                redeemer.data
-                            ]
-                        } else {
-                            throw new Error(`unhandled TxRedeemer kind`)
-                        }
-                    })
-                ),
-                makeMapData(datums.map((d) => [hashDatum(d).toUplcData(), d])),
-                makeConstrData({
-                    tag: 0,
-                    fields: [makeByteArrayData(txId.bytes)]
+        const txData = makeConstrData(0, [
+            makeListData(inputs.map((input) => input.toUplcData())),
+            makeListData(refInputs.map((input) => input.toUplcData())),
+            makeListData(outputs.map((output) => output.toUplcData())),
+            makeValue(fee).toUplcData(),
+            // NOTE: all other Value instances in ScriptContext contain some lovelace, but `minted` can never contain any lovelace, yet cardano-node always prepends 0 lovelace to the `minted` MapData
+            makeValue(0n, minted).toUplcData(true),
+            makeListData(dcerts.map((cert) => cert.toUplcData())),
+            makeMapData(
+                withdrawals.map(([sa, q]) => [sa.toUplcData(), makeIntData(q)])
+            ),
+            validityTimerange.toUplcData(),
+            makeListData(signers.map((signer) => signer.toUplcData())),
+            makeMapData(
+                redeemers.map((redeemer) => {
+                    if (redeemer.kind == "TxMintingRedeemer") {
+                        return [
+                            makeMintingPurpose(
+                                minted.getPolicies()[redeemer.policyIndex]
+                            ).toUplcData(),
+                            redeemer.data
+                        ]
+                    } else if (redeemer.kind == "TxSpendingRedeemer") {
+                        return [
+                            makeSpendingPurpose(
+                                inputs[redeemer.inputIndex].id
+                            ).toUplcData(),
+                            redeemer.data
+                        ]
+                    } else if (redeemer.kind == "TxRewardingRedeemer") {
+                        return [
+                            makeRewardingPurpose(
+                                withdrawals[redeemer.withdrawalIndex][0]
+                                    .stakingCredential
+                            ).toUplcData(),
+                            redeemer.data
+                        ]
+                    } else if (redeemer.kind == "TxCertifyingRedeemer") {
+                        return [
+                            makeCertifyingPurpose(
+                                dcerts[redeemer.dcertIndex]
+                            ).toUplcData(),
+                            redeemer.data
+                        ]
+                    } else {
+                        throw new Error(`unhandled TxRedeemer kind`)
+                    }
                 })
-            ]
-        })
+            ),
+            makeMapData(datums.map((d) => [hashDatum(d).toUplcData(), d])),
+            makeConstrData(0, [makeByteArrayData(txId.bytes)])
+        ])
 
-        return makeConstrData({
-            tag: 0,
-            fields: [txData, this.purpose.toUplcData()]
-        })
+        return makeConstrData(0, [txData, this.purpose.toUplcData()])
     }
 }
