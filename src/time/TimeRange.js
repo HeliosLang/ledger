@@ -10,7 +10,7 @@ import { toTime } from "./Time.js"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { TimeLike, TimeRange, TimeRangeLike, TimeRangeOptions } from "src/index.js"
+ * @import { TimeLike, TimeRange, TimeRangeLike, TimeRangeOptions } from "../index.js"
  */
 
 /**

@@ -29,7 +29,7 @@ import {
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { AssetClass, AssetClassLike, MintingPolicyHash } from "src/index.js"
+ * @import { AssetClass, AssetClassLike, MintingPolicyHash } from "../index.js"
  */
 
 /**

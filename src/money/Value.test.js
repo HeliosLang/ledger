@@ -8,7 +8,7 @@ import { makeDummyTxOutputId } from "../tx/TxOutputId.js"
 import { addValues, makeValue } from "./Value.js"
 
 /**
- * @import { TxInput, TxOutput, Value } from "src/index.js"
+ * @import { TxInput, TxOutput, Value } from "../index.js"
  */
 
 const IS_MAINNET = false

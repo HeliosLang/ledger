@@ -7,11 +7,7 @@ import {
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { RegistrationDCert, StakingCredential } from "src/index.js"
- */
-
-/**
- * @typedef {"Register" | "Deregister" | "Delegate" | "RegisterPool" | "RetirePool" } DCertKind
+ * @import { RegistrationDCert, StakingCredential } from "../index.js"
  */
 
 /**

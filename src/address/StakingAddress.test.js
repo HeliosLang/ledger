@@ -11,7 +11,7 @@ import {
 } from "./StakingAddress.js"
 
 /**
- * @import { PubKeyHash, StakingAddress, StakingValidatorHash } from "src/index.js"
+ * @import { PubKeyHash, StakingAddress, StakingValidatorHash } from "../index.js"
  */
 
 describe("makeDummyStakingAddress", () => {

@@ -5,7 +5,7 @@ import { hashDatum } from "../hashes/index.js"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { DatumHash, HashedTxOutputDatum } from "src/index.js"
+ * @import { DatumHash, HashedTxOutputDatum } from "../index.js"
  */
 
 /**

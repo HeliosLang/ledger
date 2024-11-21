@@ -6,7 +6,7 @@ import {
 } from "@helios-lang/cbor"
 
 /**
- * @import { SingleNamePoolRelay } from "src/index.js"
+ * @import { SingleNamePoolRelay } from "../index.js"
  */
 
 /**

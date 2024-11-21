@@ -9,7 +9,7 @@ import { makeCertifyingPurpose } from "./CertifyingPurpose.js"
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
  * @import { Cost, UplcData } from "@helios-lang/uplc"
- * @import { NetworkParams, RedeemerDetailsWithArgs, RedeemerDetailsWithoutArgs, TxCertifyingRedeemer, Tx, TxInfo } from "src/index.js"
+ * @import { NetworkParams, RedeemerDetailsWithArgs, RedeemerDetailsWithoutArgs, TxCertifyingRedeemer, Tx, TxInfo } from "../index.js"
  */
 
 /**

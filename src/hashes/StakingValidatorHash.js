@@ -11,7 +11,7 @@ import { expectByteArrayData, makeByteArrayData } from "@helios-lang/uplc"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ByteArrayData, UplcData } from "@helios-lang/uplc"
- * @import { StakingValidatorHash, StakingValidatorHashLike } from "src/index.js"
+ * @import { StakingValidatorHash, StakingValidatorHashLike } from "../index.js"
  */
 
 /**

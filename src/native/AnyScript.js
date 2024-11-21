@@ -1,7 +1,7 @@
 import { encodeDefList, encodeInt, encodeTuple } from "@helios-lang/cbor"
 
 /**
- * @import { AnyScript, AnyScriptJsonSafe, NativeContext, NativeScript } from "src/index.js"
+ * @import { AnyScript, AnyScriptJsonSafe, NativeContext, NativeScript } from "../index.js"
  */
 
 /**

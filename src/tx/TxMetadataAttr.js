@@ -15,7 +15,7 @@ import { makeByteStream } from "@helios-lang/codec-utils"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { TxMetadataAttr } from "src/index.js"
+ * @import { TxMetadataAttr } from "../index.js"
  */
 
 /**

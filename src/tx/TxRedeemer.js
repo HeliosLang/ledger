@@ -7,7 +7,7 @@ import { makeTxSpendingRedeemer } from "./TxSpendingRedeemer.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { TxRedeemer } from "src/index.js"
+ * @import { TxRedeemer } from "../index.js"
  */
 
 /**

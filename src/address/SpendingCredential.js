@@ -6,7 +6,7 @@ import {
 
 /**
  * @import { UplcData } from "@helios-lang/uplc"
- * @import { SpendingCredential } from "src/index.js"
+ * @import { SpendingCredential } from "../index.js"
  */
 
 /**

@@ -7,7 +7,7 @@ import { makeInlineTxOutputDatum } from "./InlineTxOutputDatum.js"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { UplcData } from "@helios-lang/uplc"
- * @import { HashedTxOutputDatum, InlineTxOutputDatum, TxOutputDatum, TxOutputDatumCastable, TxOutputDatumLike, UplcDataConverter } from "src/index.js"
+ * @import { HashedTxOutputDatum, InlineTxOutputDatum, TxOutputDatum, TxOutputDatumCastable, TxOutputDatumLike, UplcDataConverter } from "../index.js"
  */
 
 /**

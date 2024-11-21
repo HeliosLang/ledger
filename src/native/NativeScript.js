@@ -13,7 +13,7 @@ import { blake2b } from "@helios-lang/crypto"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { JsonSafe } from "@helios-lang/type-utils"
- * @import { NativeScript } from "src/index.js"
+ * @import { NativeScript } from "../index.js"
  */
 
 /**

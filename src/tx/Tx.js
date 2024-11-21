@@ -26,7 +26,7 @@ import { decodeTxWitnesses } from "./TxWitnesses.js"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { UplcData, UplcLogger, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
- * @import { NetworkParams, NetworkParamsHelper, Signature, Tx, TxBody, TxId, TxInput, TxOutputId, TxMetadata, TxRedeemer, TxWitnesses, Value } from "src/index.js"
+ * @import { NetworkParams, NetworkParamsHelper, Signature, Tx, TxBody, TxId, TxInput, TxOutputId, TxMetadata, TxRedeemer, TxWitnesses, Value } from "../index.js"
  */
 
 /**

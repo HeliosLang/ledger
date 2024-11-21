@@ -11,7 +11,7 @@ import { expectByteArrayData, makeByteArrayData } from "@helios-lang/uplc"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ByteArrayData, UplcData } from "@helios-lang/uplc"
- * @import { DatumHash, DatumHashLike } from "src/index.js"
+ * @import { DatumHash, DatumHashLike } from "../index.js"
  */
 
 /**

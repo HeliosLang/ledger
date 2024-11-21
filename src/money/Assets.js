@@ -35,7 +35,7 @@ const CIP68_PREFIXES = ["000643b0", "000de140", "0014df10", "001BC280"]
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
  * @import { JsonSafe } from "@helios-lang/type-utils"
  * @import { MapData } from "@helios-lang/uplc"
- * @import { AssetClass, AssetClassLike, Assets, AssetsLike, MintingPolicyHash, MintingPolicyHashLike, TokensLike } from "src/index.js"
+ * @import { AssetClass, AssetClassLike, Assets, AssetsLike, MintingPolicyHash, MintingPolicyHashLike, TokensLike } from "../index.js"
  */
 
 /**

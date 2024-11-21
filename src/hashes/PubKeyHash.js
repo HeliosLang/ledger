@@ -12,7 +12,7 @@ import { expectByteArrayData } from "@helios-lang/uplc"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ByteArrayData, UplcData } from "@helios-lang/uplc"
- * @import { PubKeyHash, PubKeyHashLike } from "src/index.js"
+ * @import { PubKeyHash, PubKeyHashLike } from "../index.js"
  */
 
 /**

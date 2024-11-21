@@ -11,8 +11,14 @@ export { makeRetirePoolDCert } from "./RetirePoolDCert.js"
 export { makeRewardingPurpose } from "./RewardingPurpose.js"
 export { makeScriptContextV2 } from "./ScriptContextV2.js"
 export { makeSpendingPurpose } from "./SpendingPurpose.js"
-export { decodeTx, makeTx } from "./Tx.js"
+export {
+    calcRefScriptsSize,
+    calcScriptDataHash,
+    decodeTx,
+    makeTx
+} from "./Tx.js"
 export { makeTxBody, decodeTxBody } from "./TxBody.js"
+export { makeTxCertifyingRedeemer } from "./TxCertifyingRedeemer.js"
 export {
     appendTxInput,
     compareTxInputs,
@@ -21,8 +27,9 @@ export {
     isValidTxInputCbor,
     makeTxInput
 } from "./TxInput.js"
-export { decodeTxMetadata } from "./TxMetadata.js"
+export { decodeTxMetadata, makeTxMetadata } from "./TxMetadata.js"
 export { decodeTxMetadataAttr, encodeTxMetadataAttr } from "./TxMetadataAttr.js"
+export { makeTxMintingRedeemer } from "./TxMintingRedeemer.js"
 export {
     DEFAULT_TX_OUTPUT_ENCODING_CONFIG,
     convertUplcDataToTxOutput,
@@ -45,4 +52,6 @@ export {
     parseTxOutputId
 } from "./TxOutputId.js"
 export { decodeTxRedeemer } from "./TxRedeemer.js"
+export { makeTxRewardingRedeemer } from "./TxRewardingRedeemer.js"
+export { makeTxSpendingRedeemer } from "./TxSpendingRedeemer.js"
 export { decodeTxWitnesses, makeTxWitnesses } from "./TxWitnesses.js"

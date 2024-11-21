@@ -19,7 +19,7 @@ import { decodeTxRedeemer } from "./TxRedeemer.js"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { UplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
- * @import { MintingPolicyHash, NativeScript, NetworkParams, Signature, StakingValidatorHash, TxRedeemer, TxWitnesses, ValidatorHash } from "src/index.js"
+ * @import { MintingPolicyHash, NativeScript, NetworkParams, Signature, StakingValidatorHash, TxRedeemer, TxWitnesses, ValidatorHash } from "../index.js"
  */
 
 /**

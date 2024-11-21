@@ -11,7 +11,7 @@ import { blake2b } from "@helios-lang/crypto"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { PoolMetadata } from "src/index.js"
+ * @import { PoolMetadata } from "../index.js"
  *
  */
 

@@ -10,7 +10,7 @@ import { hashDatum } from "../hashes/index.js"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { DatumHash, InlineTxOutputDatum } from "src/index.js"
+ * @import { DatumHash, InlineTxOutputDatum } from "../index.js"
  */
 
 /**

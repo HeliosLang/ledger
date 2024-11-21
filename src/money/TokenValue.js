@@ -3,7 +3,7 @@ import { makeValue } from "./Value.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
- * @import { AssetClass, TokenValue, Value } from "src/index.js"
+ * @import { AssetClass, TokenValue, Value } from "../index.js"
  */
 
 /**

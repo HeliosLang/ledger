@@ -79,6 +79,7 @@ export {
 } from "./money/index.js"
 export {
     decodeNativeScript,
+    hashNativeScript,
     makeAfterScript,
     makeAllScript,
     makeAnyScript,
@@ -106,6 +107,8 @@ export { toTime } from "./time/index.js"
 export {
     DEFAULT_TX_OUTPUT_ENCODING_CONFIG,
     appendTxInput,
+    calcRefScriptsSize,
+    calcScriptDataHash,
     compareTxInputs,
     compareTxOutputIds,
     convertUplcDataToTxInput,
@@ -142,10 +145,15 @@ export {
     makeSpendingPurpose,
     makeTx,
     makeTxBody,
+    makeTxCertifyingRedeemer,
     makeTxInput,
+    makeTxMetadata,
+    makeTxMintingRedeemer,
     makeTxOutput,
     makeTxOutputDatum,
     makeTxOutputId,
+    makeTxRewardingRedeemer,
+    makeTxSpendingRedeemer,
     makeTxWitnesses,
     parseTxOutputId
 } from "./tx/index.js"
@@ -1133,7 +1141,7 @@ export {
  * @prop {() => number[]} toCbor
  * @prop {() => ConstrData} toUplcData
  * @prop {(params: NetworkParams) => bigint} calcDeposit}
- * @prop {(params: NetworkParams, updater: (output: TxOutput<SC>) => void) => void} correctLovelace
+ * @prop {(params: NetworkParams, updater?: (output: TxOutput<SC>) => void) => void} correctLovelace
  */
 
 /**

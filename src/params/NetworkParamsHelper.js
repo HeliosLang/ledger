@@ -4,7 +4,7 @@ import { DEFAULT_NETWORK_PARAMS } from "./NetworkParams.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
- * @import { NetworkParams, NetworkParamsHelper } from "src/index.js"
+ * @import { NetworkParams, NetworkParamsHelper } from "../index.js"
  */
 
 /**

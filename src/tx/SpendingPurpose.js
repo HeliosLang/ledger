@@ -2,7 +2,7 @@ import { makeConstrData } from "@helios-lang/uplc"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { SpendingPurpose, TxOutputId } from "src/index.js"
+ * @import { SpendingPurpose, TxOutputId } from "../index.js"
  */
 
 /**

@@ -7,7 +7,7 @@ import {
 } from "./costmodel.js"
 
 /**
- * @import { NetworkParams } from "src/index.js"
+ * @import { NetworkParams } from "../index.js"
  */
 
 /**

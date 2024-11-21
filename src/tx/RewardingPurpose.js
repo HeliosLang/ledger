@@ -3,7 +3,7 @@ import { convertStakingCredentialToUplcData } from "../address/index.js"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { RewardingPurpose, StakingCredential } from "src/index.js"
+ * @import { RewardingPurpose, StakingCredential } from "../index.js"
  */
 
 /**

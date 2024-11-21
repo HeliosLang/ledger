@@ -18,7 +18,7 @@ import {
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ConstrData, UplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
- * @import { Address, SpendingCredential, TxInput, TxOutput, TxOutputDatum, TxOutputId, TxOutputIdLike, Value } from "src/index.js"
+ * @import { Address, SpendingCredential, TxInput, TxOutput, TxOutputDatum, TxOutputId, TxOutputIdLike, Value } from "../index.js"
  */
 
 /**

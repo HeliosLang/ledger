@@ -15,7 +15,7 @@ import { ALWAYS } from "../time/index.js"
 
 /**
  * @import { UplcData } from "@helios-lang/uplc"
- * @import { ScriptContextV2, ScriptPurpose, TxInfo } from "src/index.js"
+ * @import { ScriptContextV2, ScriptPurpose, TxInfo } from "../index.js"
  */
 
 /**

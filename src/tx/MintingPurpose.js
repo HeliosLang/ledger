@@ -2,7 +2,7 @@ import { makeConstrData } from "@helios-lang/uplc"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { MintingPolicyHash, MintingPurpose } from "src/index.js"
+ * @import { MintingPolicyHash, MintingPurpose } from "../index.js"
  */
 
 /**

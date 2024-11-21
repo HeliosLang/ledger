@@ -42,7 +42,7 @@ import {
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ConstrData, UplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
- * @import { Address, NetworkParams, ShelleyAddressLike, SpendingCredential, TxOutput, TxOutputDatum, TxOutputEncodingConfig, Value, ValueLike } from "src/index.js"
+ * @import { Address, NetworkParams, ShelleyAddressLike, SpendingCredential, TxOutput, TxOutputDatum, TxOutputEncodingConfig, Value, ValueLike } from "../index.js"
  */
 
 /**
@@ -377,7 +377,7 @@ class TxOutputImpl {
      *
      * Optionally an update function can be specified that allows mutating the datum of the `TxOutput` to account for an increase of the lovelace quantity contained in the value.
      * @param {NetworkParams} params
-     * @param {((output: TxOutput) => void) | undefined} updater
+     * @param {((output: TxOutput<SC>) => void) | undefined} updater
      */
     correctLovelace(params, updater = undefined) {
         let minLovelace = this.calcDeposit(params)

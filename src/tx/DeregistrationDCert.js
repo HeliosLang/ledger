@@ -7,7 +7,7 @@ import {
 
 /**
  * @import { ConstrData } from "@helios-lang/uplc"
- * @import { DeregistrationDCert, StakingCredential } from "src/index.js"
+ * @import { DeregistrationDCert, StakingCredential } from "../index.js"
  */
 
 /**

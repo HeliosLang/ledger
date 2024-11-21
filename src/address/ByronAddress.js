@@ -19,7 +19,7 @@ import {
 
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
- * @import { Address, ByronAddress } from "src/index.js"
+ * @import { Address, ByronAddress } from "../index.js"
  */
 
 /**

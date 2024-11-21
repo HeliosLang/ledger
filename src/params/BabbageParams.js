@@ -4,7 +4,7 @@ import {
 } from "./costmodel.js"
 
 /**
- * @import { BabbageParams } from "src/index.js"
+ * @import { BabbageParams } from "../index.js"
  */
 
 /**

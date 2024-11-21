@@ -6,19 +6,7 @@ import {
 } from "@helios-lang/cbor"
 
 /**
- * @import { SingleAddrPoolRelay } from "src/index.js"
- */
-
-/**
- * @typedef {"SingleAddr" | "SingleName" | "MultiName"} PoolRelayKind
- */
-
-/**
- * @typedef {{
- *   port?: number
- *   ipv4?: number[]
- *   ipv6?: number[]
- * }} SingleAddrProps
+ * @import { SingleAddrPoolRelay } from "../index.js"
  */
 
 /**

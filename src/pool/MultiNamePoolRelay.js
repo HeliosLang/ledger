@@ -1,7 +1,7 @@
 import { encodeInt, encodeString, encodeTuple } from "@helios-lang/cbor"
 
 /**
- * @import { MultiNamePoolRelay } from "src/index.js"
+ * @import { MultiNamePoolRelay } from "../index.js"
  */
 
 /**

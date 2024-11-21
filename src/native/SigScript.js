@@ -8,7 +8,7 @@ import { makePubKeyHash } from "../hashes/index.js"
  *   PubKeyHashLike,
  *   SigScript,
  *   SigScriptJsonSafe
- * } from "src/index.js"
+ * } from "../index.js"
  */
 
 /**

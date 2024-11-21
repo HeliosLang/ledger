@@ -12,7 +12,7 @@ import { makeMultiNamePoolRelay } from "./MultiNamePoolRelay.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { PoolRelay } from "src/index.js"
+ * @import { PoolRelay } from "../index.js"
  */
 
 /**

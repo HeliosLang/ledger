@@ -12,7 +12,7 @@ import { expectByteArrayData, makeByteArrayData } from "@helios-lang/uplc"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ByteArrayData, UplcData } from "@helios-lang/uplc"
- * @import { MintingPolicyHash, MintingPolicyHashLike } from "src/index.js"
+ * @import { MintingPolicyHash, MintingPolicyHashLike } from "../index.js"
  */
 
 /**

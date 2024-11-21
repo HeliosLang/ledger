@@ -9,7 +9,7 @@ import { makeSpendingPurpose } from "./SpendingPurpose.js"
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
  * @import { Cost, UplcData } from "@helios-lang/uplc"
- * @import { NetworkParams, RedeemerDetailsWithoutArgs, RedeemerDetailsWithArgs, Tx, TxInfo, TxSpendingRedeemer } from "src/index.js"
+ * @import { NetworkParams, RedeemerDetailsWithoutArgs, RedeemerDetailsWithArgs, Tx, TxInfo, TxSpendingRedeemer } from "../index.js"
  */
 
 /**

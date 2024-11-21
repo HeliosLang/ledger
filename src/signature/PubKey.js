@@ -11,7 +11,7 @@ import { makePubKeyHash } from "../hashes/index.js"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ByteArrayData } from "@helios-lang/uplc"
- * @import { PubKey, PubKeyHash, PubKeyLike } from "src/index.js"
+ * @import { PubKey, PubKeyHash, PubKeyLike } from "../index.js"
  */
 /**
  * @typedef {import("@helios-lang/uplc").UplcData} UplcData

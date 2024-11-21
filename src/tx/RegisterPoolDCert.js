@@ -3,7 +3,7 @@ import { makeConstrData } from "@helios-lang/uplc"
 
 /**
  * @import { ConstrData } from "@helios-lang/uplc"
- * @import { PoolParameters, RegisterPoolDCert } from "src/index.js"
+ * @import { PoolParameters, RegisterPoolDCert } from "../index.js"
  */
 
 /**

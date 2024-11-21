@@ -10,7 +10,7 @@ import { makeAssetClass, makeDummyAssetClass } from "./AssetClass.js"
 
 /**
  * @import { UplcProgramV2 } from "@helios-lang/uplc"
- * @import { AssetClass } from "src/index.js"
+ * @import { AssetClass } from "../index.js"
  */
 
 describe("AssetClass", () => {

@@ -4,7 +4,7 @@ import { decodeTxMetadataAttr, encodeTxMetadataAttr } from "./TxMetadataAttr.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { TxMetadata, TxMetadataAttr } from "src/index.js"
+ * @import { TxMetadata, TxMetadataAttr } from "../index.js"
  */
 
 /**
@@ -16,6 +16,14 @@ export function decodeTxMetadata(bytes) {
     const attributes = Object.fromEntries(
         decodeMap(bytes, (s) => Number(decodeInt(s)), decodeTxMetadataAttr)
     )
+    return new TxMetadataImpl(attributes)
+}
+
+/**
+ * @param {{[key: number]: TxMetadataAttr}} attributes
+ * @returns {TxMetadata}
+ */
+export function makeTxMetadata(attributes) {
     return new TxMetadataImpl(attributes)
 }
 

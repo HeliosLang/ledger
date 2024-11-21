@@ -15,7 +15,7 @@ import { decodePubKey, makeDummyPubKey, makePubKey } from "./PubKey.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { PubKey, PubKeyHash, PubKeyLike, Signature } from "src/index.js"
+ * @import { PubKey, PubKeyHash, PubKeyLike, Signature } from "../index.js"
  */
 
 /**

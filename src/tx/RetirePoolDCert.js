@@ -5,7 +5,7 @@ import { makeConstrData, makeIntData } from "@helios-lang/uplc"
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
  * @import { ConstrData } from "@helios-lang/uplc"
- * @import { PubKeyHash, RetirePoolDCert } from "src/index.js"
+ * @import { PubKeyHash, RetirePoolDCert } from "../index.js"
  */
 
 /**

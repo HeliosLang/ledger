@@ -12,7 +12,7 @@ import {
 
 /**
  * @import { UplcProgramV2 } from "@helios-lang/uplc"
- * @import { StakingValidatorHash } from "src/index.js"
+ * @import { StakingValidatorHash } from "../index.js"
  */
 
 describe("StakingValidatorHash", () => {

@@ -18,7 +18,7 @@ import { decodePoolRelay } from "./PoolRelay.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { PoolMetadata, PoolParameters, PoolRelay, PubKeyHash, StakingAddress } from "src/index.js"
+ * @import { PoolMetadata, PoolParameters, PoolRelay, PubKeyHash, StakingAddress } from "../index.js"
  */
 
 /**

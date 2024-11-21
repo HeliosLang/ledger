@@ -8,7 +8,7 @@ import {
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { Address } from "src/index.js"
+ * @import { Address } from "../index.js"
  */
 
 /**

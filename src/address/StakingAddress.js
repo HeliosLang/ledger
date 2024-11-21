@@ -19,7 +19,7 @@ import {
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { PubKeyHash, StakingAddress, StakingCredential } from "src/index.js"
+ * @import { PubKeyHash, StakingAddress, StakingCredential } from "../index.js"
  */
 
 /**

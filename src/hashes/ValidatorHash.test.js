@@ -9,7 +9,7 @@ import { makeDummyValidatorHash, makeValidatorHash } from "./ValidatorHash.js"
 
 /**
  * @import { UplcProgramV2 } from "@helios-lang/uplc"
- * @import { ValidatorHash } from "src/index.js"
+ * @import { ValidatorHash } from "../index.js"
  */
 
 describe("ValidatorHash", () => {

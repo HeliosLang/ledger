@@ -1,5 +1,5 @@
 /**
- * @import { ConwayGenesisParams } from "src/index.js"
+ * @import { ConwayGenesisParams } from "../index.js"
  */
 
 /**

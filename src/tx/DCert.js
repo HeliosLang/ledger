@@ -11,7 +11,7 @@ import { makeRegisterPoolDCert } from "./RegisterPoolDCert.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { DCert } from "src/index.js"
+ * @import { DCert } from "../index.js"
  */
 
 /**

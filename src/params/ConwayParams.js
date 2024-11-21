@@ -5,7 +5,7 @@ import {
 } from "@helios-lang/uplc"
 
 /**
- * @import { ConwayParams } from "src/index.js"
+ * @import { ConwayParams } from "../index.js"
  */
 
 /**

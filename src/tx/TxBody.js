@@ -25,7 +25,7 @@ import { decodeTxOutput } from "./TxOutput.js"
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
  * @import { UplcData } from "@helios-lang/uplc"
- * @import { Assets, DCert, NetworkParams, PubKeyHash, ScriptHash, StakingAddress, TimeRange, TxBody, TxId, TxInfo, TxInput, TxOutput, TxOutputId, TxRedeemer, Value } from "src/index.js"
+ * @import { Assets, DCert, NetworkParams, PubKeyHash, ScriptHash, StakingAddress, TimeRange, TxBody, TxId, TxInfo, TxInput, TxOutput, TxOutputId, TxRedeemer, Value } from "../index.js"
  */
 
 /**
@@ -49,10 +49,27 @@ import { decodeTxOutput } from "./TxOutput.js"
  */
 
 /**
- *
- * @param {*} props
+ * @param {object} props
+ * @param {TxInput[]} props.inputs
+ * @param {TxOutput[]} props.outputs
+ * @param {bigint} props.fee
+ * @param {number} [props.firstValidSlot]
+ * @param {number} [props.lastValidSlot]
+ * @param {DCert[]} props.dcerts
+ * @param {[StakingAddress, bigint][]} props.withdrawals
+ * @param {Assets} props.minted
+ * @param {number[]} [props.scriptDataHash]
+ * @param {TxInput[]} [props.collateral]
+ * @param {PubKeyHash[]} props.signers
+ * @param {TxOutput} [props.collateralReturn]
+ * @param {bigint} [props.totalCollateral]
+ * @param {TxInput[]} props.refInputs
+ * @param {number[]} [props.metadataHash]
+ * @returns {TxBody}
  */
-export function makeTxBody(props) {}
+export function makeTxBody(props) {
+    return new TxBodyImpl(props)
+}
 
 /**
  * @param {BytesLike} bytes

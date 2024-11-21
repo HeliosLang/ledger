@@ -12,7 +12,7 @@ import {
 
 /**
  * @import { UplcProgramV2 } from "@helios-lang/uplc"
- * @import { MintingPolicyHash } from "src/index.js"
+ * @import { MintingPolicyHash } from "../index.js"
  */
 
 describe("MintingPolicyHash", () => {

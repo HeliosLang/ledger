@@ -2,7 +2,7 @@ import { makeConstrData } from "@helios-lang/uplc"
 
 /**
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { CertifyingPurpose, DCert } from "src/index.js"
+ * @import { CertifyingPurpose, DCert } from "../index.js"
  */
 
 /**

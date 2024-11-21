@@ -3,7 +3,7 @@ import { toInt } from "@helios-lang/codec-utils"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
- * @import { BeforeScript, BeforeScriptJsonSafe, NativeContext } from "src/index.js"
+ * @import { BeforeScript, BeforeScriptJsonSafe, NativeContext } from "../index.js"
  */
 
 /**

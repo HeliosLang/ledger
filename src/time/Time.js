@@ -1,5 +1,5 @@
 /**
- * @import { TimeLike } from "src/index.js"
+ * @import { TimeLike } from "../index.js"
  */
 
 /**

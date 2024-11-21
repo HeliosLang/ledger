@@ -21,7 +21,7 @@ import { decodeAssets, makeAssets } from "./Assets.js"
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
  * @import { MapData, UplcData } from "@helios-lang/uplc"
- * @import { AssetClass, AssetClassLike, Assets, AssetsLike, MintingPolicyHashLike, Value, ValueLike } from "src/index.js"
+ * @import { AssetClass, AssetClassLike, Assets, AssetsLike, MintingPolicyHashLike, Value, ValueLike } from "../index.js"
  */
 
 /**

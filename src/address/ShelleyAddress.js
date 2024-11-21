@@ -22,7 +22,7 @@ import {
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { ConstrData, UplcData } from "@helios-lang/uplc"
- * @import { Address, PubKeyHash, ShelleyAddress, ShelleyAddressLike, SpendingCredential, StakingCredential } from "src/index.js"
+ * @import { Address, PubKeyHash, ShelleyAddress, ShelleyAddressLike, SpendingCredential, StakingCredential } from "../index.js"
  */
 
 /**

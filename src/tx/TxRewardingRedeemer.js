@@ -14,7 +14,7 @@ import { makeRewardingPurpose } from "./RewardingPurpose.js"
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
  * @import { Cost, UplcData } from "@helios-lang/uplc"
- * @import { NetworkParams, RedeemerDetailsWithoutArgs, RedeemerDetailsWithArgs, Tx, TxInfo, TxRewardingRedeemer } from "src/index.js"
+ * @import { NetworkParams, RedeemerDetailsWithoutArgs, RedeemerDetailsWithArgs, Tx, TxInfo, TxRewardingRedeemer } from "../index.js"
  */
 
 /**
