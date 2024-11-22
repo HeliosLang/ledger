@@ -402,6 +402,13 @@ class ShelleyAddressImpl {
     }
 
     /**
+     * @returns {string}
+     */
+    toString() {
+        return this.toBech32()
+    }
+
+    /**
      * @returns {UplcData}
      */
     toUplcData() {
