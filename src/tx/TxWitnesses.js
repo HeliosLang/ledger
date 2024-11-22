@@ -169,6 +169,17 @@ class TxWitnessesImpl {
     }
 
     /**
+     * Returns all the non-native scripts (includes the reference scripts)
+     * @type {(UplcProgramV1 | UplcProgramV2)[]}
+     */
+    get allNonNativeScripts() {
+        return /** @type {(UplcProgramV1 | UplcProgramV2)[]} */ ([])
+            .concat(this.v1Scripts)
+            .concat(this.v2Scripts)
+            .concat(this.v2RefScripts)
+    }
+
+    /**
      * Used to calculate the correct min fee
      * @param {number} n - number of dummy signatures to add
      */
@@ -276,10 +287,11 @@ class TxWitnessesImpl {
     }
 
     /**
+     * Used to determine of Tx needs collateral
      * @returns {boolean}
      */
     isSmart() {
-        return this.allScripts.length > 0
+        return this.allNonNativeScripts.length > 0
     }
 
     /**
