@@ -74,7 +74,7 @@ export function makeShelleyAddress(...args) {
     if (args.length == 1) {
         const arg = args[0]
 
-        if (typeof arg == "string") {
+        if (typeof arg == "string" && arg.startsWith("addr")) {
             // ignore the prefix (encoded in the bytes anyway)
             let [prefix, bytes] = decodeBech32(arg)
 

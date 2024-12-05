@@ -1,9 +1,8 @@
 /**
  * For compatibility with older eras
  * @type {string[]}
- * @__PURE__
  */
-export const COST_MODEL_PARAM_NAMES_V1 = [
+export const COST_MODEL_PARAM_NAMES_V1 = /* @__PURE__ */ [
     "addInteger-cpu-arguments-intercept",
     "addInteger-cpu-arguments-slope",
     "addInteger-memory-arguments-intercept",
@@ -175,32 +174,31 @@ export const COST_MODEL_PARAM_NAMES_V1 = [
 /**
  * For compatibility with older eras
  * @type {string[]}
- * @__PURE__
  */
-export const COST_MODEL_PARAM_NAMES_V2 = COST_MODEL_PARAM_NAMES_V1.slice(0, 133)
-    .concat([
-        "serialiseData-cpu-arguments-intercept",
-        "serialiseData-cpu-arguments-slope",
-        "serialiseData-memory-arguments-intercept",
-        "serialiseData-memory-arguments-slope"
-    ])
-    .concat(COST_MODEL_PARAM_NAMES_V1.slice(137, 167))
-    .concat([
-        "verifyEcdsaSecp256k1Signature-cpu-arguments",
-        "verifyEcdsaSecp256k1Signature-memory-arguments",
-        "verifyEd25519Signature-cpu-arguments-intercept",
-        "verifyEd25519Signature-cpu-arguments-slope",
-        "verifyEd25519Signature-memory-arguments",
-        "verifySchnorrSecp256k1Signature-cpu-arguments-intercept",
-        "verifySchnorrSecp256k1Signature-cpu-arguments-slope",
-        "verifySchnorrSecp256k1Signature-memory-arguments "
-    ])
+export const COST_MODEL_PARAM_NAMES_V2 =
+    /* @__PURE__ */ COST_MODEL_PARAM_NAMES_V1.slice(0, 133)
+        .concat([
+            "serialiseData-cpu-arguments-intercept",
+            "serialiseData-cpu-arguments-slope",
+            "serialiseData-memory-arguments-intercept",
+            "serialiseData-memory-arguments-slope"
+        ])
+        .concat(COST_MODEL_PARAM_NAMES_V1.slice(137, 167))
+        .concat([
+            "verifyEcdsaSecp256k1Signature-cpu-arguments",
+            "verifyEcdsaSecp256k1Signature-memory-arguments",
+            "verifyEd25519Signature-cpu-arguments-intercept",
+            "verifyEd25519Signature-cpu-arguments-slope",
+            "verifyEd25519Signature-memory-arguments",
+            "verifySchnorrSecp256k1Signature-cpu-arguments-intercept",
+            "verifySchnorrSecp256k1Signature-cpu-arguments-slope",
+            "verifySchnorrSecp256k1Signature-memory-arguments "
+        ])
 
 /**
  * @type {number[]}
- * @__PURE__
  */
-export const BABBAGE_COST_MODEL_PARAMS_V1 = [
+export const BABBAGE_COST_MODEL_PARAMS_V1 = /* @__PURE__ */ [
     197209, // addInteger-cpu-arguments-intercept
     0, // addInteger-cpu-arguments-slope
     1, // addInteger-memory-arguments-intercept

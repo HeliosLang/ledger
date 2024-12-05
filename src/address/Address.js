@@ -41,7 +41,7 @@ export function decodeAddress(arg) {
             return makeByronAddress(arg)
         }
     } else {
-        const bytes = makeByteStream({ bytes: arg })
+        const bytes = makeByteStream(arg)
 
         const isByron = (bytes.peekOne() & 0b11110000) == 0b10000000
 
