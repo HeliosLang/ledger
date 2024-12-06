@@ -64,15 +64,19 @@ export function makeStakingAddress(...args) {
  * @returns {StakingAddress}
  */
 export function parseStakingAddress(str) {
-    const [prefix, bytes] = decodeBech32(str)
+    if (str.startsWith("stake")) {
+        const [prefix, bytes] = decodeBech32(str)
 
-    const result = decodeStakingAddress(bytes)
+        const result = decodeStakingAddress(bytes)
 
-    if (prefix != result.bech32Prefix) {
-        throw new Error("invalid StakingAddress prefix")
+        if (prefix != result.bech32Prefix) {
+            throw new Error("invalid StakingAddress prefix")
+        }
+
+        return result
+    } else {
+        return decodeStakingAddress(str)
     }
-
-    return result
 }
 
 /**

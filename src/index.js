@@ -191,6 +191,9 @@ export {
  * @prop {() => string} toBase58
  * @prop {() => number[]} toCbor
  *
+ * @prop {() => UplcData} toUplcData
+ * Throws an error. Simplifies type-compatibility with ShelleyAddress, so you can simply call `Address.toUplcData()`
+ *
  * @prop {() => string} toString
  * Alias for toBase58()
  */
@@ -1138,6 +1141,7 @@ export {
  * @typedef {object} TxOutput
  * Represents a transaction output that is used when building a transaction.
  *
+ * @prop {"TxOutput"} kind
  * @prop {Address<SC>} address
  * @prop {Value} value
  * @prop {TxOutputDatum | undefined} datum

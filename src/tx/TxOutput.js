@@ -246,6 +246,13 @@ class TxOutputImpl {
     }
 
     /**
+     * @type {"TxOutput"}
+     */
+    get kind() {
+        return "TxOutput"
+    }
+
+    /**
      * Deep copy of the TxInput so that Network interfaces don't allow accidental mutation of the underlying data
      * @returns {TxOutput<SC>}
      */

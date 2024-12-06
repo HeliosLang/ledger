@@ -19,6 +19,7 @@ import {
 
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
+ * @import { UplcData } from "@helios-lang/uplc"
  * @import { Address, ByronAddress } from "../index.js"
  */
 
@@ -146,5 +147,12 @@ class ByronAddressImpl {
      */
     toString() {
         return this.toBase58()
+    }
+
+    /**
+     * @returns {UplcData}
+     */
+    toUplcData() {
+        throw new Error("a Byron-era address can't be convert to UplcData")
     }
 }

@@ -59,4 +59,10 @@ describe(makeStakingAddress.name, () => {
             )
         )
     })
+
+    it("handles hex encoded staking address", () => {
+        makeStakingAddress(
+            "e096f91da5bdb192de2415d3e6d064aec54acee648c2c6879fad1ffda1"
+        )
+    })
 })
