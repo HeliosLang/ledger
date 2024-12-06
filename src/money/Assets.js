@@ -101,7 +101,7 @@ export function makeAssets(arg = []) {
  * @returns {Assets}
  */
 export function decodeAssets(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     return new AssetsImpl(
         decodeMap(stream, decodeMintingPolicyHash, (innerBytes) =>

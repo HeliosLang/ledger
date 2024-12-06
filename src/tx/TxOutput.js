@@ -76,7 +76,7 @@ export function makeTxOutput(
  * @returns {TxOutput}
  */
 export function decodeTxOutput(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     if (isObject(bytes)) {
         const {
@@ -152,7 +152,7 @@ export function decodeTxOutput(bytes) {
  * @returns {boolean}
  */
 export function isValidTxOutputCbor(bytes) {
-    const stream = makeByteStream({ bytes }).copy()
+    const stream = makeByteStream(bytes).copy()
 
     try {
         decodeTxOutput(stream)

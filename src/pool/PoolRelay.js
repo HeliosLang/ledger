@@ -20,7 +20,7 @@ import { makeMultiNamePoolRelay } from "./MultiNamePoolRelay.js"
  * @returns {PoolRelay}
  */
 export function decodePoolRelay(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [tag, decodeItem] = decodeTagged(stream)
 

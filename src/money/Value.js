@@ -100,7 +100,7 @@ export function makeValue(...args) {
  * @returns {Value}
  */
 export function decodeValue(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     if (isTuple(bytes)) {
         const [lovelace, assets] = decodeTuple(stream, [

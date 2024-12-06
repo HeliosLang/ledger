@@ -21,7 +21,7 @@ import { blake2b } from "@helios-lang/crypto"
  * @returns {NativeScript}
  */
 export function decodeNativeScript(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     if (stream.peekOne() == 0) {
         stream.shiftOne()

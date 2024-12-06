@@ -150,7 +150,7 @@ export function convertUplcDataToAssetClass(data) {
  * @returns {AssetClass}
  */
 export function decodeAssetClass(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [tag, [mph, tokenName]] = decodeConstr(stream, [
         decodeMintingPolicyHash,

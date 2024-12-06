@@ -37,7 +37,7 @@ export function makeTxInput(outputId, output = undefined) {
  * @returns {TxInput}
  */
 export function decodeTxInput(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     if (decodeTupleLazy(stream.copy())(isBytes)) {
         // first element in tuple is a bytearray -> ledger representation (i.e. just a reference)
@@ -111,7 +111,7 @@ export function isValidTxInputCbor(...args) {
     } else {
         const [bytes, expectFull] = args
 
-        const stream = makeByteStream({ bytes }).copy()
+        const stream = makeByteStream(bytes).copy()
 
         try {
             const input = decodeTxInput(stream)

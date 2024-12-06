@@ -91,7 +91,7 @@ export function makeDummyTxOutputId(seed = -1, index = 0) {
  * @returns {TxOutputId}
  */
 export function decodeTxOutputId(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [txId, index] = decodeTuple(stream, [decodeTxId, decodeInt])
 

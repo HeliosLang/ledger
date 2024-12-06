@@ -54,7 +54,7 @@ export function makeByronAddress(...args) {
  * @returns {ByronAddress}
  */
 export function decodeByronAddress(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [bs, checksum] = decodeTuple(stream, [
         (s) => {

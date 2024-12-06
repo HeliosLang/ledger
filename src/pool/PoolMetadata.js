@@ -20,7 +20,7 @@ import { blake2b } from "@helios-lang/crypto"
  * @returns {PoolMetadata}
  */
 export function decodePoolMetadata(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [url, _hash] = decodeTuple(stream, [decodeString, decodeBytes])
 

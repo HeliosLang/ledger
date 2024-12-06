@@ -40,7 +40,7 @@ export function makeDummySignature(seed = 0) {
  * @returns {Signature}
  */
 export function decodeSignature(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [pubKey, signatureBytes] = decodeTuple(stream, [
         decodePubKey,

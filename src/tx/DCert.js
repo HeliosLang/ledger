@@ -19,7 +19,7 @@ import { makeRegisterPoolDCert } from "./RegisterPoolDCert.js"
  * @returns {DCert}
  */
 export function decodeDCert(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [tag, decodeItem] = decodeTagged(stream)
 

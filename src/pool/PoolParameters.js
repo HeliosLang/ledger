@@ -56,7 +56,7 @@ export function makePoolParameters(props) {
  * @param {BytesLike} bytes
  */
 export function decodePoolParameters(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [
         id,

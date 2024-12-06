@@ -23,7 +23,7 @@ import { makeByteStream } from "@helios-lang/codec-utils"
  * @returns {TxMetadataAttr}
  */
 export function decodeTxMetadataAttr(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     if (isString(stream)) {
         return decodeString(stream)

@@ -60,7 +60,7 @@ export function convertStakingCredentialToUplcData(hash) {
  * @returns {StakingCredential}
  */
 export function decodeStakingCredential(bytes) {
-    const stream = makeByteStream({ bytes })
+    const stream = makeByteStream(bytes)
 
     const [tag, decodeItem] = decodeTagged(stream)
 
