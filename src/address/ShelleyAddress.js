@@ -13,7 +13,10 @@ import {
     makeStakingValidatorHash,
     makeValidatorHash
 } from "../hashes/index.js"
-import { convertUplcDataToSpendingCredential } from "./SpendingCredential.js"
+import {
+    convertSpendingCredentialToUplcData,
+    convertUplcDataToSpendingCredential
+} from "./SpendingCredential.js"
 import {
     convertStakingCredentialToUplcData,
     convertUplcDataToStakingCredential
@@ -413,7 +416,7 @@ class ShelleyAddressImpl {
      */
     toUplcData() {
         return makeConstrData(0, [
-            this.spendingCredential.toUplcData(),
+            convertSpendingCredentialToUplcData(this.spendingCredential),
             wrapUplcDataOption(
                 this.stakingCredential
                     ? convertStakingCredentialToUplcData(this.stakingCredential)
