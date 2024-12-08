@@ -810,10 +810,6 @@ class TxImpl {
                     )
                 }
                 if (!scriptContext) throw new Error(`script context is missing`)
-                console.log(
-                    "failure in script context;\n",
-                    bytesToHex(scriptContext.toCbor())
-                )
 
                 throw new UplcRuntimeError(
                     `script validation error in ${summary}: ${errMsg}` +
