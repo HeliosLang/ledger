@@ -448,10 +448,10 @@ class TxImpl {
             } else {
                 throw e
             }
-            console.error(
-                "Error validating transaction: ",
-                this.validationError
-            )
+            // console.error(
+            //     "Error validating transaction: ",
+            //     this.validationError
+            // )
         }
         return this
     }
