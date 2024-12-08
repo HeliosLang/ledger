@@ -91,7 +91,7 @@ class TxImpl {
     /**
      * Access this through `hasValidationError()`
      * @private
-     * @type {string | false | undefined}
+     * @type {string | UplcRuntimeError | false | undefined}
      */
     validationError
 
@@ -284,7 +284,8 @@ class TxImpl {
      * - `null` if the transaction hasn't been validated yet
      * - `false` when the transaction is valid
      * - a `string` with the error message if any validation check failed
-     * @returns {string | false | undefined}
+     * - a `UplcRuntimeError` object in case of UPLC script failure
+     * @returns {string | UplcRuntimeError | false | undefined}
      */
     get hasValidationError() {
         return this.validationError
@@ -436,11 +437,21 @@ class TxImpl {
             this.validate(params, options)
             this.validationError = false
         } catch (e) {
-            this.validationError = e.message
-            console.error(
-                "Error validating transaction: ",
-                this.validationError
-            )
+            // ANYTHING could be thrown, but in practice, we know to expect
+            // two types of error; anything else should be a bona fide exception
+
+            // heuristic for UplcRuntimeError check without `instanceof`:
+            if ("scriptContext" in e) {
+                this.validationError = e
+            } else if (e instanceof Error) {
+                this.validationError = e.message
+            } else {
+                throw e
+            }
+            // console.error(
+            //     "Error validating transaction: ",
+            //     this.validationError
+            // )
         }
         return this
     }
@@ -752,18 +763,23 @@ class TxImpl {
             if (cost.mem > redeemer.cost.mem) {
                 throw new Error(
                     `actual mem cost for ${summary} too high, expected at most ${redeemer.cost.mem}, got ${cost.mem}` +
-                        `\n ... in ${description}` // @reviewers: WDYT?
+                        `\n ... in ${description}`
                 )
             }
 
             if (cost.cpu > redeemer.cost.cpu) {
                 throw new Error(
                     `actual cpu cost for ${summary} too high, expected at most ${redeemer.cost.cpu}, got ${cost.cpu}` +
-                        `\n ... in ${description}` // @reviewers: WDYT?
+                        `\n ... in ${description}`
                 )
             }
 
             if (isLeft(result)) {
+                const err =
+                    altResult && isLeft(altResult.result)
+                        ? altResult.result.left.error
+                        : result.left.error
+
                 if (altResult && !isLeft(altResult.result)) {
                     console.warn(
                         ` - WARNING: optimized script for ${summary} failed, but unoptimized succeeded`
@@ -777,7 +793,7 @@ class TxImpl {
                     debugger
                 }
                 const errMsg =
-                    result.left.error ||
+                    err ||
                     logOptions?.lastMessage ||
                     (script.alt
                         ? `‹no alt= script for ${summary}, no logged errors›`
@@ -787,10 +803,19 @@ class TxImpl {
                     result.left.callSites.slice().pop()?.site
                 ) // XXX: it might be weird to log this error message AND throw an error containing the same
 
+                const scriptContext = args.at(-1)?.value
+                if (scriptContext?.dataPath != "[ScriptContext]") {
+                    throw new Error(
+                        "expected script context in the last script arg"
+                    )
+                }
+                if (!scriptContext) throw new Error(`script context is missing`)
+
                 throw new UplcRuntimeError(
                     `script validation error in ${summary}: ${errMsg}` +
                         `\n ... error in ${description}`, // TODO: should description and summary also be part of the UplcRuntimeError stack trace?
-                    result.left.callSites
+                    result.left.callSites,
+                    scriptContext
                 )
             }
             logOptions?.flush?.()

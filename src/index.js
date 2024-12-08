@@ -1,3 +1,5 @@
+import { UplcRuntimeError } from "@helios-lang/uplc"
+
 export {
     compareStakingAddresses,
     compareStakingCredentials,
@@ -1640,11 +1642,12 @@ export {
  * @prop {() => boolean} isValid
  * Indicates if the necessary signatures are present and valid
  *
- * @prop {string | false | undefined} hasValidationError
+ * @prop {string | UplcRuntimeError | false | undefined} hasValidationError
  * Indicates if a built transaction has passed all consistency checks.
  *   - `null` if the transaction hasn't been validated yet
  *   - `false` when the transaction is valid
  *   - a `string` with the error message if any validation check failed
+ *   - a UplcRuntimeError in case of any UPLC script failure
  *
  * @prop {(slot: bigint) => boolean} isValidSlot
  * Used by emulator to check if tx is valid.
