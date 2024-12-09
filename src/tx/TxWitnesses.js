@@ -52,6 +52,7 @@ export function makeTxWitnesses(props) {
 /**
  * Eternl seems to add a tag to some of the returned signatures
  * TODO: should this function be moved to the cbor repo?
+ * TODO: use decodeSet instead
  * @param {ByteStream} s
  */
 function absorbOptionalTag(s) {
