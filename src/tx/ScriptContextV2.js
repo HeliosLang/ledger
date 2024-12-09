@@ -129,6 +129,10 @@ class ScriptContextV2Impl {
             makeConstrData(0, [makeByteArrayData(txId.bytes)])
         ])
 
-        return makeConstrData(0, [txData, this.purpose.toUplcData()])
+        return makeConstrData({
+            tag: 0,
+            fields: [txData, this.purpose.toUplcData()],
+            dataPath: "[ScriptContext]"
+        })
     }
 }
