@@ -1,9 +1,11 @@
 import {
     decodeList,
     decodeObjectIKey,
+    decodeSet,
     encodeDefList,
     encodeIndefList,
-    encodeObjectIKey
+    encodeObjectIKey,
+    encodeSet
 } from "@helios-lang/cbor"
 import { bytesToHex, equalsBytes } from "@helios-lang/codec-utils"
 import { blake2b } from "@helios-lang/crypto"
@@ -17,7 +19,7 @@ import { decodeSignature, makeDummySignature } from "../signature/index.js"
 import { decodeTxRedeemer } from "./TxRedeemer.js"
 
 /**
- * @import { BytesLike, ByteStream } from "@helios-lang/codec-utils"
+ * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { UplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
  * @import { MintingPolicyHash, NativeScript, NetworkParams, Signature, StakingValidatorHash, TxRedeemer, TxWitnesses, ValidatorHash } from "../index.js"
  */
@@ -50,30 +52,6 @@ export function makeTxWitnesses(props) {
 }
 
 /**
- * Eternl seems to add a tag to some of the returned signatures
- * TODO: should this function be moved to the cbor repo?
- * TODO: use decodeSet instead
- * @param {ByteStream} s
- */
-function absorbOptionalTag(s) {
-    if (s.isAtEnd()) {
-        return
-    }
-
-    const h = s.peekOne()
-
-    if (h == 0xd8) {
-        s.shiftMany(2)
-    } else if (h == 0xd9) {
-        s.shiftMany(3)
-    } else if (h == 0xda) {
-        s.shiftMany(5)
-    } else if (h == 0xdb) {
-        s.shiftMany(9)
-    }
-}
-
-/**
  * @param {BytesLike} bytes
  * @returns {TxWitnesses}
  */
@@ -86,10 +64,7 @@ export function decodeTxWitnesses(bytes) {
         5: redeemers,
         6: v2Scripts
     } = decodeObjectIKey(bytes, {
-        0: (s) => {
-            absorbOptionalTag(s)
-            return decodeList(s, decodeSignature)
-        },
+        0: (s) => decodeSet(s, decodeSignature),
         1: (s) => decodeList(s, decodeNativeScript),
         3: (s) => decodeList(s, (bytes) => decodeUplcProgramV1FromCbor(bytes)),
         4: (s) => decodeList(s, decodeUplcData),
@@ -384,7 +359,7 @@ class TxWitnessesImpl {
         const m = new Map()
 
         if (this.signatures.length > 0) {
-            m.set(0, encodeDefList(this.signatures))
+            m.set(0, encodeSet(this.signatures))
         }
 
         if (this.nativeScripts.length > 0) {
