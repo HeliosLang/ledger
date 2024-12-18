@@ -1,7 +1,9 @@
 import { deepEqual, strictEqual, throws } from "node:assert"
 import { describe, it } from "node:test"
+import { bytesToHex } from "@helios-lang/codec-utils"
 import {
     convertUplcDataToShelleyAddress,
+    decodeShelleyAddress,
     makeDummyShelleyAddress,
     makeShelleyAddress
 } from "./ShelleyAddress.js"
@@ -30,6 +32,32 @@ describe("makeDummyShelleyAddress", () => {
 describe("makeShelleyAddress", () => {
     it("can decode hex encoded address bytes", () => {
         makeShelleyAddress(testAddressBytes)
+    })
+})
+
+describe("decodeShelleyAddress", () => {
+    it("decodes 30195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66 as addr_test1xqv4hh3aat9kzwm7n6mzszc5md8r20j8t6tdr8el0f0z6eset00rm6ktvyaha84k9q93fk6wx5lywh5k6x0n77j794nqp4vpze", () => {
+        const actual = decodeShelleyAddress(
+            "30195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66"
+        )
+        const expected = makeShelleyAddress(
+            "addr_test1xqv4hh3aat9kzwm7n6mzszc5md8r20j8t6tdr8el0f0z6eset00rm6ktvyaha84k9q93fk6wx5lywh5k6x0n77j794nqp4vpze"
+        )
+
+        strictEqual(actual.toString(), expected.toString())
+        strictEqual(bytesToHex(actual.bytes), bytesToHex(expected.bytes))
+    })
+
+    it("decodes 10195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66 as addr_test1zqv4hh3aat9kzwm7n6mzszc5md8r20j8t6tdr8el0f0z6eset00rm6ktvyaha84k9q93fk6wx5lywh5k6x0n77j794nqlth7hc", () => {
+        const actual = decodeShelleyAddress(
+            "10195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66195bde3deacb613b7e9eb6280b14db4e353e475e96d19f3f7a5e2d66"
+        )
+        const expected = makeShelleyAddress(
+            "addr_test1zqv4hh3aat9kzwm7n6mzszc5md8r20j8t6tdr8el0f0z6eset00rm6ktvyaha84k9q93fk6wx5lywh5k6x0n77j794nqlth7hc"
+        )
+
+        strictEqual(actual.toString(), expected.toString())
+        strictEqual(bytesToHex(actual.bytes), bytesToHex(expected.bytes))
     })
 })
 
