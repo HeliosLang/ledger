@@ -1,6 +1,7 @@
 import { deepEqual, strictEqual, throws } from "node:assert"
 import { describe, it } from "node:test"
 import { bytesToHex } from "@helios-lang/codec-utils"
+import { makeValidatorHash } from "../hashes/index.js"
 import {
     convertUplcDataToShelleyAddress,
     decodeShelleyAddress,
@@ -32,6 +33,14 @@ describe("makeDummyShelleyAddress", () => {
 describe("makeShelleyAddress", () => {
     it("can decode hex encoded address bytes", () => {
         makeShelleyAddress(testAddressBytes)
+    })
+
+    it("correctly decodes header byte addresses with pubkeyhash staking credential", () => {
+        const expectedBech32 =
+            "addr_test1xqv4hh3aat9kzwm7n6mzszc5md8r20j8t6tdr8el0f0z6eset00rm6ktvyaha84k9q93fk6wx5lywh5k6x0n77j794nqp4vpze"
+        const expected = makeShelleyAddress(expectedBech32)
+
+        strictEqual(expected.toString(), expectedBech32)
     })
 })
 

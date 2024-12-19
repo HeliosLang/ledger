@@ -191,7 +191,7 @@ export function decodeShelleyAddress(bytes) {
             return makeShelleyAddress(
                 mainnet,
                 makeValidatorHash(firstPart()),
-                makePubKeyHash(secondPart())
+                makeStakingValidatorHash(secondPart())
             )
         case 0x60:
             return makeShelleyAddress(mainnet, makePubKeyHash(firstPart()))
