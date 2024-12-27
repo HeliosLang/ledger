@@ -113,9 +113,9 @@ export function decodeTxBody(bytes) {
     })
 
     return new TxBodyImpl({
-        inputs: expectDefined(inputs),
-        outputs: expectDefined(outputs),
-        fee: expectDefined(fee),
+        inputs: expectDefined(inputs, "inputs undefined in decodeTxBody()"),
+        outputs: expectDefined(outputs, "outputs undefined in decodeTxBody()"),
+        fee: expectDefined(fee, "fee undefined in decodeTxBody()"),
         firstValidSlot:
             firstValidSlot !== undefined ? Number(firstValidSlot) : undefined,
         lastValidSlot:

@@ -116,13 +116,14 @@ class TxMintingRedeemerImpl {
      */
     getRedeemerDetailsWithoutArgs(tx) {
         const mph = expectDefined(
-            tx.body.minted.getPolicies()[this.policyIndex]
+            tx.body.minted.getPolicies()[this.policyIndex],
+            `tx.body.minted.getPolicies()[${this.policyIndex}] undefined in TxMintingRedeemer.getRedeemerDetailsWithoutArgs()`
         )
         const summary = `mint @${this.policyIndex}`
         return {
             summary,
             description: `minting policy ${this.policyIndex} (${mph.toHex()})`,
-            script: expectDefined(tx.witnesses.findUplcProgram(mph))
+            script: expectDefined(tx.witnesses.findUplcProgram(mph), `tx.witnesses.findUplcProgram(${mph.toHex()}) undefined in TxMintingRedeemer.getRedeemerDetailsWithoutArgs()`)
         }
     }
 
@@ -136,7 +137,8 @@ class TxMintingRedeemerImpl {
      */
     getRedeemerDetailsWithArgs(tx, txInfo) {
         const mph = expectDefined(
-            tx.body.minted.getPolicies()[this.policyIndex]
+            tx.body.minted.getPolicies()[this.policyIndex],
+            `tx.body.minted.getPolicies()[${this.policyIndex}] undefined in TxMintingRedeemer.getRedeemerDetailsWithArgs()`
         )
         const partialRes = this.getRedeemerDetailsWithoutArgs(tx)
 

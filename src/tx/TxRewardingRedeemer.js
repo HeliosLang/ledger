@@ -122,19 +122,20 @@ class TxRewardingRedeemerImpl {
      * @returns {RedeemerDetailsWithoutArgs}
      */
     getRedeemerDetailsWithoutArgs(tx) {
-        const credential = expectDefined(
-            tx.body.withdrawals[this.withdrawalIndex]
+        const svh = expectDefined(
+            tx.body.withdrawals[this.withdrawalIndex],
+            `tx.body.withdrawals[${this.withdrawalIndex}] undefined in TxRewardingRedeemer.getRedeemerDetailsWithoutArgs()`
         )[0].stakingCredential
 
-        if (credential.kind != "StakingValidatorHash") {
+        if (svh.kind != "StakingValidatorHash") {
             throw new Error("expected StakingValidatorHash")
         }
-        const svh = expectDefined(credential)
+
         const summary = `rewards @${this.withdrawalIndex}`
         return {
             summary,
             description: `withdrawing ${summary} (${svh.toHex()})`,
-            script: expectDefined(tx.witnesses.findUplcProgram(svh))
+            script: expectDefined(tx.witnesses.findUplcProgram(svh), `tx.witnesses.findUplcProgram(${svh.toHex()}) undefined in TxRewardingRedeemer.getRedeemerDetailsWithoutArgs()`)
         }
     }
 
@@ -148,8 +149,9 @@ class TxRewardingRedeemerImpl {
      */
     getRedeemerDetailsWithArgs(tx, txInfo) {
         const partialRes = this.getRedeemerDetailsWithoutArgs(tx)
-        const credential = expectDefined(
-            tx.body.withdrawals[this.withdrawalIndex]
+        const svh = expectDefined(
+            tx.body.withdrawals[this.withdrawalIndex],
+            `tx.body.withdrawals[${this.withdrawalIndex}] undefined in TxRewardingRedeemer.getRedeemerDetailsWithArgs()`
         )[0].stakingCredential
 
         return {
@@ -158,7 +160,7 @@ class TxRewardingRedeemerImpl {
                 this.data,
                 makeScriptContextV2(
                     txInfo,
-                    makeRewardingPurpose(credential)
+                    makeRewardingPurpose(svh)
                 ).toUplcData()
             ].map((a) => makeUplcDataValue(a))
         }
