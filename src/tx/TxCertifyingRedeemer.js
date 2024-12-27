@@ -115,7 +115,10 @@ class TxCertifyingRedeemerImpl {
      * @returns {RedeemerDetailsWithoutArgs}
      */
     getRedeemerDetailsWithoutArgs(tx) {
-        const dcert = expectDefined(tx.body.dcerts[this.dcertIndex], `tx.body.dcerts[${this.dcertIndex}] undefined in TxCertifyingRedeemer.getRedeemerDetailsWithoutArgs()`)
+        const dcert = expectDefined(
+            tx.body.dcerts[this.dcertIndex],
+            `tx.body.dcerts[${this.dcertIndex}] undefined in TxCertifyingRedeemer.getRedeemerDetailsWithoutArgs()`
+        )
 
         const summary = `${dcert.kind} @${this.dcertIndex}`
 
@@ -134,7 +137,10 @@ class TxCertifyingRedeemerImpl {
         return {
             summary,
             description: `certifying ${summary}`,
-            script: expectDefined(tx.witnesses.findUplcProgram(svh), `tx.witnesses.findUplcProgram(${svh.toHex()}) undefined in TxCertifyingRedeemer.getRedeemerDetailsWithoutArgs()`)
+            script: expectDefined(
+                tx.witnesses.findUplcProgram(svh),
+                `tx.witnesses.findUplcProgram(${svh.toHex()}) undefined in TxCertifyingRedeemer.getRedeemerDetailsWithoutArgs()`
+            )
         }
     }
 
@@ -149,7 +155,10 @@ class TxCertifyingRedeemerImpl {
     getRedeemerDetailsWithArgs(tx, txInfo) {
         const partialRes = this.getRedeemerDetailsWithoutArgs(tx)
 
-        const dcert = expectDefined(tx.body.dcerts[this.dcertIndex], `tx.body.dcerts[${this.dcertIndex}] undefined in TxCertifyingRedeemer.getRedeemerDetailsWithArgs()`)
+        const dcert = expectDefined(
+            tx.body.dcerts[this.dcertIndex],
+            `tx.body.dcerts[${this.dcertIndex}] undefined in TxCertifyingRedeemer.getRedeemerDetailsWithArgs()`
+        )
 
         return {
             ...partialRes,

@@ -123,7 +123,10 @@ class TxMintingRedeemerImpl {
         return {
             summary,
             description: `minting policy ${this.policyIndex} (${mph.toHex()})`,
-            script: expectDefined(tx.witnesses.findUplcProgram(mph), `tx.witnesses.findUplcProgram(${mph.toHex()}) undefined in TxMintingRedeemer.getRedeemerDetailsWithoutArgs()`)
+            script: expectDefined(
+                tx.witnesses.findUplcProgram(mph),
+                `tx.witnesses.findUplcProgram(${mph.toHex()}) undefined in TxMintingRedeemer.getRedeemerDetailsWithoutArgs()`
+            )
         }
     }
 

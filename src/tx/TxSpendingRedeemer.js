@@ -115,7 +115,10 @@ class TxSpendingRedeemerImpl {
      * @returns {RedeemerDetailsWithoutArgs}
      */
     getRedeemerDetailsWithoutArgs(tx) {
-        const utxo = expectDefined(tx.body.inputs[this.inputIndex], `tx.body.inputs[${this.inputIndex}] undefined in TxSpendingRedeemer.getRedeemerDetailsWithoutArgs()`)
+        const utxo = expectDefined(
+            tx.body.inputs[this.inputIndex],
+            `tx.body.inputs[${this.inputIndex}] undefined in TxSpendingRedeemer.getRedeemerDetailsWithoutArgs()`
+        )
 
         const summary = `input @${this.inputIndex}`
         const address = utxo.address
@@ -153,8 +156,14 @@ class TxSpendingRedeemerImpl {
     getRedeemerDetailsWithArgs(tx, txInfo) {
         const partialRes = this.getRedeemerDetailsWithoutArgs(tx)
 
-        const utxo = expectDefined(tx.body.inputs[this.inputIndex], `tx.body.inputs[${this.inputIndex}] undefined in TxSpendingRedeemer.getRedeemerDetailsWithArgs()`)
-        const datumData = expectDefined(utxo.datum?.data, `utxo.datum.data undefined in TxSpendingRedeemer.getRedeemerDetailsWithArgs()`)
+        const utxo = expectDefined(
+            tx.body.inputs[this.inputIndex],
+            `tx.body.inputs[${this.inputIndex}] undefined in TxSpendingRedeemer.getRedeemerDetailsWithArgs()`
+        )
+        const datumData = expectDefined(
+            utxo.datum?.data,
+            `utxo.datum.data undefined in TxSpendingRedeemer.getRedeemerDetailsWithArgs()`
+        )
 
         return {
             ...partialRes,

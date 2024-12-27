@@ -135,7 +135,10 @@ class TxRewardingRedeemerImpl {
         return {
             summary,
             description: `withdrawing ${summary} (${svh.toHex()})`,
-            script: expectDefined(tx.witnesses.findUplcProgram(svh), `tx.witnesses.findUplcProgram(${svh.toHex()}) undefined in TxRewardingRedeemer.getRedeemerDetailsWithoutArgs()`)
+            script: expectDefined(
+                tx.witnesses.findUplcProgram(svh),
+                `tx.witnesses.findUplcProgram(${svh.toHex()}) undefined in TxRewardingRedeemer.getRedeemerDetailsWithoutArgs()`
+            )
         }
     }
 
