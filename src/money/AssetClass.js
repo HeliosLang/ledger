@@ -258,4 +258,4 @@ class AssetClassImpl {
 /**
  * @type {AssetClass}
  */
-export const ADA = parseAssetClass(".")
+export const ADA = /* @__PURE__ */ parseAssetClass(".")

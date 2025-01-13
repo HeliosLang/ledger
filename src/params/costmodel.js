@@ -2,7 +2,7 @@
  * For compatibility with older eras
  * @type {string[]}
  */
-export const COST_MODEL_PARAM_NAMES_V1 = /* @__PURE__ */ [
+export const COST_MODEL_PARAM_NAMES_V1 = [
     "addInteger-cpu-arguments-intercept",
     "addInteger-cpu-arguments-slope",
     "addInteger-memory-arguments-intercept",
@@ -198,7 +198,7 @@ export const COST_MODEL_PARAM_NAMES_V2 =
 /**
  * @type {number[]}
  */
-export const BABBAGE_COST_MODEL_PARAMS_V1 = /* @__PURE__ */ [
+export const BABBAGE_COST_MODEL_PARAMS_V1 = [
     197209, // addInteger-cpu-arguments-intercept
     0, // addInteger-cpu-arguments-slope
     1, // addInteger-memory-arguments-intercept

@@ -267,15 +267,11 @@ function encodeTimeRangeTimeData(t) {
 /**
  * @type {TimeRange}
  */
-export const ALWAYS = /* @__PURE__ */ new TimeRangeImpl(
-    Number.NEGATIVE_INFINITY,
-    Number.POSITIVE_INFINITY
-)
+export const ALWAYS = /* @__PURE__ */ (() =>
+    new TimeRangeImpl(Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY))()
 
 /**
  * @type {TimeRange}
  */
-export const NEVER = /* @__PURE__ */ new TimeRangeImpl(
-    Number.POSITIVE_INFINITY,
-    Number.NEGATIVE_INFINITY
-)
+export const NEVER = /* @__PURE__ */ (() =>
+    new TimeRangeImpl(Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY))()
