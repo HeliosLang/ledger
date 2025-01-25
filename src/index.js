@@ -167,7 +167,9 @@ export {
     makeTxRewardingRedeemer,
     makeTxSpendingRedeemer,
     makeTxWitnesses,
-    parseTxOutputId
+    parseTxOutputId,
+    UtxoAlreadySpentError,
+    UtxoNotFoundError
 } from "./tx/index.js"
 
 /**

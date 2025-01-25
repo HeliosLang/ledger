@@ -14,6 +14,7 @@ import {
     decodeTxOutputId,
     makeTxOutputId
 } from "./TxOutputId.js"
+import { UtxoAlreadySpentError } from "./UtxoAlreadySpentError.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
@@ -220,9 +221,22 @@ class TxInputImpl {
      */
     async recover(network) {
         if (!this._output) {
-            this._output = /** @type {any} */ (
-                await network.getUtxo(this.id)
-            ).output
+            /**
+             * @type {TxOutput<any>}
+             */
+            let output
+
+            try {
+                output = (await network.getUtxo(this.id)).output
+            } catch (e) {
+                if (e instanceof UtxoAlreadySpentError) {
+                    output = e.utxo.output
+                } else {
+                    throw e
+                }
+            }
+
+            this._output = output
         }
     }
 
