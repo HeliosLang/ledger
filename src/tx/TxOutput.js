@@ -72,6 +72,7 @@ export function makeTxOutput(
 }
 
 /**
+ * TODO: save the fact that it is an Object or Tuple representation, so that reserializing leads to the same bytes (and thus the same tx hash)
  * @param {BytesLike} bytes
  * @returns {TxOutput}
  */
@@ -140,7 +141,11 @@ export function decodeTxOutput(bytes) {
         return new TxOutputImpl(
             address,
             value,
-            datumHash ? makeHashedTxOutputDatum(datumHash) : undefined
+            datumHash ? makeHashedTxOutputDatum(datumHash) : undefined,
+            undefined,
+            {
+                strictBabbage: false // explicitly false, to ensure we reproduce the bytes when reserializing a Tx
+            }
         )
     } else {
         throw new Error("unexpected TxOutput encoding")
@@ -224,14 +229,9 @@ class TxOutputImpl {
      * @param {ValueLike} value
      * @param {TxOutputDatum | undefined} datum
      * @param {UplcProgramV1 | UplcProgramV2 | undefined} refScript - plutus v2 script for now
+     * @param {TxOutputEncodingConfig} encodingConfig
      */
-    constructor(
-        address,
-        value,
-        datum = undefined,
-        refScript = undefined,
-        encodingConfig = DEFAULT_TX_OUTPUT_ENCODING_CONFIG
-    ) {
+    constructor(address, value, datum, refScript, encodingConfig) {
         this.address = /** @type {any} */ (
             typeof address != "string" &&
             "kind" in address &&
