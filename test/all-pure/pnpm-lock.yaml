@@ -177,6 +177,9 @@ packages:
   '@helios-lang/cbor@0.2.6':
     resolution: {integrity: sha512-u0L2+M9nxg/n6GodVloiM/LN8BqnUjqZUqNzkoh6d1NR6bXVXJ6a7Gb+U2k8IHMrmOOJ5RAQu1yB3qvWx1PsQQ==}
 
+  '@helios-lang/cbor@0.3.0':
+    resolution: {integrity: sha512-+HA54uJWIFV/EYaKTyS1EVw9GqpIYCtWDVwxDhSwWnL67KZTrieRt1/yjgj2FsmnRvZM8fUYfnkFnU/chS117A==}
+
   '@helios-lang/codec-utils@0.3.4':
     resolution: {integrity: sha512-YiYwBwkbRmu9/4tqHNGIk/haVb0+MLrwXZc+6/KMwGT5WKzypZSkDgH+aZEdHtdTmYhVyIj9ojBljAhMxi8ezg==}
 
@@ -450,6 +453,10 @@ snapshots:
     dependencies:
       '@helios-lang/codec-utils': 0.3.4
 
+  '@helios-lang/cbor@0.3.0':
+    dependencies:
+      '@helios-lang/codec-utils': 0.3.4
+
   '@helios-lang/codec-utils@0.3.4': {}
 
   '@helios-lang/compiler-utils@0.5.3':
@@ -466,7 +473,7 @@ snapshots:
 
   '@helios-lang/ledger@file:../..':
     dependencies:
-      '@helios-lang/cbor': 0.2.6
+      '@helios-lang/cbor': 0.3.0
       '@helios-lang/codec-utils': 0.3.4
       '@helios-lang/crypto': 0.2.3
       '@helios-lang/type-utils': 0.2.9

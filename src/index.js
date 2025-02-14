@@ -1496,10 +1496,17 @@ export {
  */
 
 /**
+ * @typedef {object} TxBodyEncodingConfig
+ * @prop {boolean} [inputsAsSet]
+ * Defaults to true
+ */
+
+/**
  * @typedef {object} TxBody
  * Note: inputs, minted assets, and withdrawals need to be sorted in order to form a valid transaction
  *
  * @prop {"TxBody"} kind
+ * @prop {TxBodyEncodingConfig} encodingConfig
  * @prop {TxInput[]} inputs
  * @prop {TxOutput[]} outputs
  * @prop {bigint} fee
@@ -1568,10 +1575,17 @@ export {
  */
 
 /**
+ * @typedef {object} TxWitnessesEncodingConfig
+ * @prop {boolean} [signaturesAsSet]
+ * Defaults to true
+ */
+
+/**
  * @typedef {object} TxWitnesses
  * Represents the pubkey signatures, and datums/redeemers/scripts that are witnessing a transaction.
  *
  * @prop {"TxWitnesses"} kind
+ * @prop {TxWitnessesEncodingConfig} encodingConfig
  * @prop {Signature[]} signatures
  * @prop {UplcData[]} datums
  * @prop {TxRedeemer[]} redeemers

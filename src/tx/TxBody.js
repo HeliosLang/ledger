@@ -4,11 +4,14 @@ import {
     decodeList,
     decodeMap,
     decodeObjectIKey,
+    decodeSet,
     encodeBytes,
     encodeDefList,
     encodeInt,
     encodeMap,
-    encodeObjectIKey
+    encodeObjectIKey,
+    encodeSet,
+    isSet
 } from "@helios-lang/cbor"
 import { bytesToHex, toInt } from "@helios-lang/codec-utils"
 import { blake2b } from "@helios-lang/crypto"
@@ -25,11 +28,12 @@ import { decodeTxOutput } from "./TxOutput.js"
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
  * @import { UplcData } from "@helios-lang/uplc"
- * @import { Assets, DCert, NetworkParams, PubKeyHash, ScriptHash, StakingAddress, TimeRange, TxBody, TxId, TxInfo, TxInput, TxOutput, TxOutputId, TxRedeemer, Value } from "../index.js"
+ * @import { Assets, DCert, NetworkParams, PubKeyHash, ScriptHash, StakingAddress, TimeRange, TxBody, TxBodyEncodingConfig, TxId, TxInfo, TxInput, TxOutput, TxOutputId, TxRedeemer, Value } from "../index.js"
  */
 
 /**
  * @typedef {{
+ *   encodingConfig?: TxBodyEncodingConfig
  *   inputs: TxInput[]
  *   outputs: TxOutput[]
  *   fee: bigint
@@ -50,6 +54,7 @@ import { decodeTxOutput } from "./TxOutput.js"
 
 /**
  * @param {object} props
+ * @param {TxBodyEncodingConfig} [props.encodingConfig]
  * @param {TxInput[]} props.inputs
  * @param {TxOutput[]} props.outputs
  * @param {bigint} props.fee
@@ -76,6 +81,8 @@ export function makeTxBody(props) {
  * @returns {TxBody}
  */
 export function decodeTxBody(bytes) {
+    let inputsEncodedAsSet = false
+
     const {
         0: inputs,
         1: outputs,
@@ -94,7 +101,10 @@ export function decodeTxBody(bytes) {
         17: totalCollateral,
         18: refInputs
     } = decodeObjectIKey(bytes, {
-        0: (s) => decodeList(s, decodeTxInput),
+        0: (s) => {
+            inputsEncodedAsSet = isSet(s)
+            return decodeSet(s, decodeTxInput)
+        },
         1: (s) => decodeList(s, decodeTxOutput),
         2: decodeInt,
         3: decodeInt,
@@ -113,6 +123,9 @@ export function decodeTxBody(bytes) {
     })
 
     return new TxBodyImpl({
+        encodingConfig: {
+            inputsAsSet: inputsEncodedAsSet
+        },
         inputs: expectDefined(inputs, "inputs undefined in decodeTxBody()"),
         outputs: expectDefined(outputs, "outputs undefined in decodeTxBody()"),
         fee: expectDefined(fee, "fee undefined in decodeTxBody()"),
@@ -138,6 +151,12 @@ export function decodeTxBody(bytes) {
  * @implements {TxBody}
  */
 class TxBodyImpl {
+    /**
+     * @readonly
+     * @type {TxBodyEncodingConfig}
+     */
+    encodingConfig
+
     /**
      * Inputs must be sorted before submitting (first by TxId, then by utxoIndex)
      * Spending redeemers must point to the sorted inputs
@@ -239,6 +258,7 @@ class TxBodyImpl {
      * @param {TxBodyProps} props
      */
     constructor({
+        encodingConfig,
         inputs,
         outputs,
         fee,
@@ -255,6 +275,7 @@ class TxBodyImpl {
         refInputs,
         metadataHash
     }) {
+        this.encodingConfig = encodingConfig ?? { inputsAsSet: true }
         this.inputs = inputs
         this.outputs = outputs
         this.refInputs = refInputs
@@ -525,7 +546,14 @@ class TxBodyImpl {
          */
         const m = new Map()
 
-        m.set(0, encodeDefList(this.inputs))
+        const encodeInputsAsSet = this.encodingConfig.inputsAsSet ?? true
+        m.set(
+            0,
+            encodeInputsAsSet
+                ? encodeSet(this.inputs)
+                : encodeDefList(this.inputs)
+        )
+
         m.set(1, encodeDefList(this.outputs))
         m.set(2, encodeInt(this.fee))
 

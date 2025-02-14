@@ -5,7 +5,8 @@ import {
     encodeDefList,
     encodeIndefList,
     encodeObjectIKey,
-    encodeSet
+    encodeSet,
+    isSet
 } from "@helios-lang/cbor"
 import { bytesToHex, equalsBytes } from "@helios-lang/codec-utils"
 import { blake2b } from "@helios-lang/crypto"
@@ -21,11 +22,12 @@ import { decodeTxRedeemer } from "./TxRedeemer.js"
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { UplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
- * @import { MintingPolicyHash, NativeScript, NetworkParams, Signature, StakingValidatorHash, TxRedeemer, TxWitnesses, ValidatorHash } from "../index.js"
+ * @import { MintingPolicyHash, NativeScript, NetworkParams, Signature, StakingValidatorHash, TxRedeemer, TxWitnesses, TxWitnessesEncodingConfig, ValidatorHash } from "../index.js"
  */
 
 /**
  * @typedef {{
+ *   encodingConfig?: TxWitnessesEncodingConfig
  *   signatures: Signature[]
  *   datums: UplcData[]
  *   redeemers: TxRedeemer[]
@@ -38,6 +40,7 @@ import { decodeTxRedeemer } from "./TxRedeemer.js"
 
 /**
  * @param {object} props
+ * @param {TxWitnessesEncodingConfig} [props.encodingConfig]
  * @param {Signature[]} props.signatures
  * @param {UplcData[]} props.datums
  * @param {TxRedeemer[]} props.redeemers
@@ -56,6 +59,8 @@ export function makeTxWitnesses(props) {
  * @returns {TxWitnesses}
  */
 export function decodeTxWitnesses(bytes) {
+    let signaturesEncodedAsSet = false
+
     const {
         0: signatures,
         1: nativeScripts,
@@ -64,7 +69,10 @@ export function decodeTxWitnesses(bytes) {
         5: redeemers,
         6: v2Scripts
     } = decodeObjectIKey(bytes, {
-        0: (s) => decodeSet(s, decodeSignature),
+        0: (s) => {
+            signaturesEncodedAsSet = isSet(s)
+            return decodeSet(s, decodeSignature)
+        },
         1: (s) => decodeList(s, decodeNativeScript),
         3: (s) => decodeList(s, (bytes) => decodeUplcProgramV1FromCbor(bytes)),
         4: (s) => decodeList(s, decodeUplcData),
@@ -73,6 +81,9 @@ export function decodeTxWitnesses(bytes) {
     })
 
     return new TxWitnessesImpl({
+        encodingConfig: {
+            signaturesAsSet: signaturesEncodedAsSet
+        },
         signatures: signatures ?? [],
         nativeScripts: nativeScripts ?? [],
         v1Scripts: v1Scripts ?? [],
@@ -88,6 +99,12 @@ export function decodeTxWitnesses(bytes) {
  * @implements {TxWitnesses}
  */
 class TxWitnessesImpl {
+    /**
+     * @readonly
+     * @type {TxWitnessesEncodingConfig}
+     */
+    encodingConfig
+
     /**
      * @type {Signature[]}
      */
@@ -134,6 +151,7 @@ class TxWitnessesImpl {
      * @param {TxWitnessesProps} props
      */
     constructor({
+        encodingConfig,
         signatures,
         datums,
         redeemers,
@@ -142,6 +160,7 @@ class TxWitnessesImpl {
         v2Scripts,
         v2RefScripts
     }) {
+        this.encodingConfig = encodingConfig ?? { signaturesAsSet: true }
         this.signatures = signatures
         this.datums = datums
         this.redeemers = redeemers
@@ -359,7 +378,15 @@ class TxWitnessesImpl {
         const m = new Map()
 
         if (this.signatures.length > 0) {
-            m.set(0, encodeSet(this.signatures))
+            const encodeSignaturesAsSet =
+                this.encodingConfig.signaturesAsSet ?? true
+
+            m.set(
+                0,
+                encodeSignaturesAsSet
+                    ? encodeSet(this.signatures)
+                    : encodeDefList(this.signatures)
+            )
         }
 
         if (this.nativeScripts.length > 0) {
