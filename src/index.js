@@ -13,6 +13,7 @@ export {
     decodeByronAddress,
     decodeShelleyAddress,
     decodeStakingAddress,
+    decodeStakingCredential,
     encodeStakingCredential,
     isValidBech32Address,
     isValidBech32StakingAddress,
