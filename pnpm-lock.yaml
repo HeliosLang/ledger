@@ -21,8 +21,8 @@ importers:
         specifier: ^0.2.9
         version: 0.2.9
       '@helios-lang/uplc':
-        specifier: ^0.7.11
-        version: 0.7.11
+        specifier: ^0.7.12
+        version: 0.7.12
     devDependencies:
       '@types/node':
         specifier: ^20.11.24
@@ -42,8 +42,8 @@ packages:
   '@helios-lang/codec-utils@0.3.4':
     resolution: {integrity: sha512-YiYwBwkbRmu9/4tqHNGIk/haVb0+MLrwXZc+6/KMwGT5WKzypZSkDgH+aZEdHtdTmYhVyIj9ojBljAhMxi8ezg==}
 
-  '@helios-lang/compiler-utils@0.5.3':
-    resolution: {integrity: sha512-/tDgLwYM5GEimqOvLqeQvXzfS1ej2ytXFH8f4zK0XnJlW29JpJYrPJRNUlVfU8NbyUZwi2TAFSBSDCtU6sCAyA==}
+  '@helios-lang/compiler-utils@0.5.4':
+    resolution: {integrity: sha512-AZtHtxP/tiaPfIVNmCR4vWFzdmmvAFMrHgBxRhBNItcQohBX1RZHS4hHhj48OMzvBf9l7zQaAB7WsZMlpCb/6Q==}
 
   '@helios-lang/crypto@0.2.3':
     resolution: {integrity: sha512-Vyauv8fSrev2BFVn5RrHvMtgHzClogWFnX9CPm8024NEzlEL6jrXYiF8VAoegWX46GGZQE2ZEZxZciiKClaR3A==}
@@ -54,8 +54,8 @@ packages:
   '@helios-lang/type-utils@0.2.9':
     resolution: {integrity: sha512-79/aGqD9ZXNXUypDHf+tSSg4PBacovX5Q4U2GXKVcaH5a194PVZJ+Dsz2J5vLREUeSwSM7HLTEysqasyadbtEQ==}
 
-  '@helios-lang/uplc@0.7.11':
-    resolution: {integrity: sha512-exrxM51jf1NdmT0OzcpDQL3wmcHa/aq4KqI2QuCrBaki62Fd1/wf8k4O3ZTeTpGu0vjd6agNSebVVOUIK1CenQ==}
+  '@helios-lang/uplc@0.7.12':
+    resolution: {integrity: sha512-ixMuE8fTkLhj0o6WpkwyTPeLshCb2Z3NnQ1brYPS6KvzNNnD0bWAyOrHkCCeM4GVwnLfDiyUcAvF9eW1NeowNQ==}
 
   '@types/node@20.16.5':
     resolution: {integrity: sha512-VwYCweNo3ERajwy0IUlqqcyZ8/A7Zwa9ZP3MnENWcB11AejO+tLy3pu850goUW2FC/IJMdZUfKpX/yxL1gymCA==}
@@ -81,7 +81,7 @@ snapshots:
 
   '@helios-lang/codec-utils@0.3.4': {}
 
-  '@helios-lang/compiler-utils@0.5.3':
+  '@helios-lang/compiler-utils@0.5.4':
     dependencies:
       '@helios-lang/codec-utils': 0.3.4
       '@helios-lang/type-utils': 0.2.9
@@ -95,11 +95,11 @@ snapshots:
 
   '@helios-lang/type-utils@0.2.9': {}
 
-  '@helios-lang/uplc@0.7.11':
+  '@helios-lang/uplc@0.7.12':
     dependencies:
       '@helios-lang/cbor': 0.3.0
       '@helios-lang/codec-utils': 0.3.4
-      '@helios-lang/compiler-utils': 0.5.3
+      '@helios-lang/compiler-utils': 0.5.4
       '@helios-lang/crypto': 0.2.3
       '@helios-lang/era': 0.1.4
       '@helios-lang/type-utils': 0.2.9

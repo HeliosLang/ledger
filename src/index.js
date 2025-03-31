@@ -1091,7 +1091,7 @@ export {
  *   fee?: IntLike
  *   minted?: Assets
  *   dcerts?: DCert[]
- *   withdrawals?: [StakingAddress, IntLike][]
+ *   withdrawals?: [StakingAddress, bigint][]
  *   validityTimerange?: TimeRange
  *   signers?: PubKeyHash[]
  *   redeemers?: TxRedeemer[]
