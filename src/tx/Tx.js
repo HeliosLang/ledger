@@ -198,7 +198,6 @@ class TxImpl {
         const fee = recalcMinBaseFee ? this.calcMinFee(params) : this.body.fee
 
         const helper = makeNetworkParamsHelper(params)
-
         // integer division that rounds up
         const minCollateral =
             (fee * BigInt(helper.minCollateralPct) + 100n) / 100n
@@ -743,6 +742,9 @@ class TxImpl {
 
         for (const redeemer of this.witnesses.redeemers) {
             logOptions?.reset?.("validate")
+            logOptions?.logPrint("   --- validating redeemers ex budget")
+            logOptions?.flush?.()
+
             const { description, summary, script, args } =
                 redeemer.getRedeemerDetailsWithArgs(this, txInfo)
 
@@ -751,14 +753,11 @@ class TxImpl {
             const { cost, result } = script.eval(args, {
                 logOptions: logOptions ?? undefined
             })
-            /* @type { CekResult } */
-            let altResult
-            if (script.alt) {
-                // this never happens if the main script has done logging!
-                altResult = script.alt.eval(args, {
-                    logOptions: logOptions ?? undefined
-                }) // emit logs from non-optimized version
-            }
+
+            /* @type { CekResult | undefined } */
+            const evalAlt = script.alt?.eval(args, {
+                logOptions: logOptions ?? undefined
+            }) // emits logs from non-optimized version
 
             if (cost.mem > redeemer.cost.mem) {
                 throw new Error(
@@ -775,33 +774,35 @@ class TxImpl {
             }
 
             if (isLeft(result)) {
+                let callSites = result.left.callSites
                 const err =
-                    altResult && isLeft(altResult.result)
-                        ? altResult.result.left.error
+                    evalAlt && isLeft(evalAlt.result)
+                        ? evalAlt.result.left.error
                         : result.left.error
 
-                if (altResult && !isLeft(altResult.result)) {
-                    console.warn(
-                        ` - WARNING: optimized script for ${summary} failed, but unoptimized succeeded`
-                    )
-                    debugger
+                if (evalAlt) {
+                    if (isLeft(evalAlt.result)) {
+                        callSites = evalAlt.result.left.callSites
+                    } else {
+                        console.warn(
+                            ` - WARNING: optimized script for ${summary} failed, but unoptimized succeeded`
+                        )
+                    }
                 } else {
                     console.warn(
-                        `NOTE: no alt script attached for ${summary}; no script logs available.  See \`compile\` docs to enable it`
+                        `NOTE: no alt script attached for ${summary}; script logs may be unavailable.  See \`compile\` docs to enable it`
                     )
-
-                    debugger
                 }
                 const errMsg =
                     err ||
                     logOptions?.lastMessage ||
                     (script.alt
-                        ? `‹no alt= script for ${summary}, no logged errors›`
-                        : "‹no logged errors›")
+                        ? "‹no logged errors›"
+                        : `‹no alt= script for ${summary}, no logged errors›`)
                 logOptions?.logError?.(
                     errMsg,
                     result.left.callSites.slice().pop()?.site
-                ) // XXX: it might be weird to log this error message AND throw an error containing the same
+                )
 
                 const scriptContext = args.at(-1)?.value
                 if (scriptContext?.dataPath != "[ScriptContext]") {
@@ -810,11 +811,11 @@ class TxImpl {
                     )
                 }
                 if (!scriptContext) throw new Error(`script context is missing`)
-
+                debugger // eslint-disable-line no-debugger - for downstream troubleshooting
                 throw new UplcRuntimeError(
                     `script validation error in ${summary}: ${errMsg}` +
                         `\n ... error in ${description}`, // TODO: should description and summary also be part of the UplcRuntimeError stack trace?
-                    result.left.callSites,
+                    callSites,
                     scriptContext
                 )
             }

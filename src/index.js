@@ -13,6 +13,7 @@ export {
     decodeByronAddress,
     decodeShelleyAddress,
     decodeStakingAddress,
+    decodeStakingCredential,
     encodeStakingCredential,
     isValidBech32Address,
     isValidBech32StakingAddress,
@@ -1091,7 +1092,7 @@ export {
  *   fee?: IntLike
  *   minted?: Assets
  *   dcerts?: DCert[]
- *   withdrawals?: [StakingAddress, bigint][]
+ *   withdrawals?: [StakingAddress, IntLike][]
  *   validityTimerange?: TimeRange
  *   signers?: PubKeyHash[]
  *   redeemers?: TxRedeemer[]
