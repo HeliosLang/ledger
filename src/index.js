@@ -1159,7 +1159,7 @@ export {
  * @prop {() => object} dump
  * @prop {() => number[]} toCbor
  * @prop {() => ConstrData} toUplcData
- * @prop {(params: NetworkParams) => bigint} calcDeposit}
+ * @prop {(params: NetworkParams) => bigint} calcDeposit
  * @prop {(params: NetworkParams, updater?: (output: TxOutput<SC>) => void) => void} correctLovelace
  */
 
