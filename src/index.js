@@ -626,12 +626,14 @@ export {
 /**
  * @template [C=unknown]
  * @typedef {object} MintingPolicyHash
- * Represents a blake2b-224 hash of a minting policy script
+ * Represents a blake2b-224 hash of a minting policy script.
+ *
  * **Note**: to calculate this hash the script is first encoded as a CBOR byte-array and then prepended by a script version byte.
+ *
  * `C` is some optional context:
- *   null: unwitnessed or witnessed by NativeScript
- *   unknown: witnessed or unwitnessed (default)
- *   {program: ..., redeemer: ...}: witnessed by UplcProgram
+ *   - `null`: unwitnessed or witnessed by NativeScript
+ *   - `unknown`: witnessed or unwitnessed (default)
+ *   - `{program: ..., redeemer: ...}`: witnessed by UplcProgram
  *
  * @prop {number[]} bytes
  * @prop {C} context
