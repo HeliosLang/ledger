@@ -1709,7 +1709,7 @@ export {
  *
  * @prop {(params: NetworkParams, options?: TxValidationOptions) => Tx} validateUnsafe
  * Validates the transaction without throwing an error if it isn't valid
- * If the transaction doesn't validate, the tx's ${validationError} will be set
+ * If the transaction doesn't validate, the tx's `validationError` will be set
  *
  * @prop {() => void} validateSignatures
  * Throws an error if all necessary signatures haven't yet been added

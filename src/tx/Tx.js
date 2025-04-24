@@ -423,7 +423,7 @@ class TxImpl {
 
     /**
      * Validates the transaction without throwing an error if it isn't valid
-     * If the transaction doesn't validate, the tx's ${validationError} will be set
+     * If the transaction doesn't validate, the tx's `validationError` will be set
      * @param {NetworkParams} params
      * @param {Object} [options]
      * @param {boolean} [options.strict=false] - can be left as false for inspecting general transactions. The TxBuilder always uses strict=true.
