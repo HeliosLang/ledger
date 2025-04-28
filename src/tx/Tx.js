@@ -12,7 +12,7 @@ import {
 import { bytesToHex, compareBytes } from "@helios-lang/codec-utils"
 import { blake2b } from "@helios-lang/crypto"
 import { isLeft } from "@helios-lang/type-utils"
-import { makeListData, UplcRuntimeError } from "@helios-lang/uplc"
+import { makeListData, makeUplcRuntimeError } from "@helios-lang/uplc"
 import { compareStakingAddresses } from "../address/index.js"
 import { makeTxId } from "../hashes/index.js"
 import { makeValue } from "../money/index.js"
@@ -25,7 +25,7 @@ import { decodeTxWitnesses } from "./TxWitnesses.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { UplcData, UplcLogger, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
+ * @import { UplcData, UplcLogger, UplcProgramV1, UplcProgramV2, UplcRuntimeError } from "@helios-lang/uplc"
  * @import { NetworkParams, NetworkParamsHelper, Signature, Tx, TxBody, TxId, TxInput, TxOutputId, TxMetadata, TxRedeemer, TxWitnesses, Value } from "../index.js"
  */
 
@@ -810,7 +810,7 @@ class TxImpl {
                 }
                 if (!scriptContext) throw new Error(`script context is missing`)
                 debugger // eslint-disable-line no-debugger - for downstream troubleshooting
-                throw new UplcRuntimeError(
+                throw makeUplcRuntimeError(
                     `script validation error in ${summary}: ${errMsg}` +
                         `\n ... error in ${description}`, // TODO: should description and summary also be part of the UplcRuntimeError stack trace?
                     callSites,

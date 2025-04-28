@@ -1,5 +1,3 @@
-import { UplcRuntimeError } from "@helios-lang/uplc"
-
 export {
     compareStakingAddresses,
     compareStakingCredentials,
@@ -176,7 +174,7 @@ export {
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
  * @import { JsonSafe } from "@helios-lang/type-utils"
- * @import { ByteArrayData, ConstrData, Cost, MapData, UplcData, UplcDataValue, UplcLogger, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
+ * @import { ByteArrayData, ConstrData, Cost, MapData, UplcData, UplcDataValue, UplcLogger, UplcProgramV1, UplcProgramV2, UplcRuntimeError } from "@helios-lang/uplc"
  */
 
 /**
