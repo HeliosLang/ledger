@@ -40,6 +40,7 @@ import {
  *   [TxId, IntLike]
  *   | [TxOutputIdLike]
  * )} args
+ * @returns {TxOutputId}
  */
 export function makeTxOutputId(...args) {
     if (args.length == 2) {

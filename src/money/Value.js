@@ -344,7 +344,7 @@ class ValueImpl {
      * @returns {MapData}
      */
     toUplcData(isInScriptContext = false) {
-        const map = this.assets.toUplcData()
+        const map = this.assets.toUplcData(isInScriptContext)
 
         if (this.lovelace != 0n || isInScriptContext) {
             map.items.unshift([

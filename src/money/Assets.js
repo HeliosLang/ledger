@@ -671,14 +671,18 @@ class AssetsImpl {
 
     /**
      * Used when generating script contexts for running programs
+     * @param {boolean} [isInScriptContext] if true: tokens are in strict lexicographical order
      * @returns {MapData}
      */
-    toUplcData() {
+    toUplcData(isInScriptContext = false) {
         return makeMapData(
             this.assets.map(([mph, tokens]) => [
                 mph.toUplcData(),
                 makeMapData(
-                    tokens.map(([tokenName, qty]) => [
+                    (isInScriptContext
+                        ? tokens.sort((a, b) => compareBytes(a[0], b[0], false))
+                        : tokens
+                    ).map(([tokenName, qty]) => [
                         makeByteArrayData(tokenName),
                         makeIntData(qty)
                     ])

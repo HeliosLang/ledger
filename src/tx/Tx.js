@@ -25,11 +25,30 @@ import { decodeTxWitnesses } from "./TxWitnesses.js"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { UplcData, UplcLogger, UplcProgramV1, UplcProgramV2, UplcRuntimeError } from "@helios-lang/uplc"
- * @import { NetworkParams, NetworkParamsHelper, Signature, Tx, TxBody, TxId, TxInput, TxOutputId, TxMetadata, TxRedeemer, TxWitnesses, Value } from "../index.js"
+ * @import {
+ *   UplcData,
+ *   UplcLogger,
+ *   UplcProgramV1,
+ *   UplcProgramV2,
+ *   UplcRuntimeError
+ * } from "@helios-lang/uplc"
+ * @import {
+ *   NetworkParams,
+ *   NetworkParamsHelper,
+ *   Signature,
+ *   Tx,
+ *   TxBody,
+ *   TxId,
+ *   TxInput,
+ *   TxOutputId,
+ *   TxMetadata,
+ *   TxRedeemer,
+ *   TxWitnesses,
+ *   Value
+ * } from "../index.js"
  */
 
-/*
+/**
  * Deserialize a CBOR encoded Cardano transaction (input is either an array of bytes, or a hex string).
  * @param {BytesLike} bytes
  * @returns {Tx}

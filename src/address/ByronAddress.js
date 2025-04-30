@@ -27,12 +27,14 @@ import {
  * @overload
  * @param {string} base58
  * @returns {ByronAddress}
- *
+ */
+/**
  * @overload
  * @param {number[]} bytes
  * @param {IntLike} checksum
  * @returns {ByronAddress}
- *
+ */
+/**
  * @param {(
  *   [string]
  *   | [number[], IntLike]

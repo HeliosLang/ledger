@@ -363,8 +363,16 @@ export {
  * @prop {(other: Assets) => Assets} subtract
  * @prop {() => number[]} toCbor
  *
- * @prop {() => MapData} toUplcData
- * Used when generating script contexts for running programs
+ * @prop {(isInScriptContext?: boolean) => MapData} toUplcData
+ * Used when generating redeemers, datums or script contexts for running programs.
+ *
+ * ### `isInScriptContext`
+ *
+ * If `isInScriptContext` is `true`:
+ * for each minting policy, tokens are sorted in strict lexicographical order instead of shortest-first order.
+ *
+ * The shortest-first order (also called "canonical order") is required by some hardware wallets when calculating the tx hash.
+ * But the lexicographical order (i.e. alphabetical order independent of length) is used when evaluating a validator script.
  */
 
 /**
@@ -1367,7 +1375,16 @@ export {
  * @prop {() => number[]} toCbor
  *
  * @prop {(isInScriptContext?: boolean) => MapData} toUplcData
- * Used when building script context
+ * Used when building datums, redeerms, or script contexts.
+ *
+ * ### `isInScriptContext`
+ *
+ * If `isInScriptContext` is `true`, the first entry in the returned map is always the lovelace entry.
+ * If the `Value` doesn't contain any lovelace, a `0` lovelace entry is prepended.
+ *
+ * Also, the tokens of any minting policy in [`Value.assets`](#assets), are sorted in lexicographic order instead of shortest-first order.
+ *
+ * These changes are required to ensure validator script evaluation in Helios is identical to script evaluation in the reference node (and thus the same execution budget is obtained).
  */
 
 /**

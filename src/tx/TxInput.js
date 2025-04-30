@@ -91,13 +91,15 @@ export function compareTxInputs(a, b) {
  * @overload
  * @param {boolean} expectFull
  * @returns {(bytes: BytesLike) => boolean}
- *
+ */
+/** 
  * @overload
  * @param {BytesLike} bytes
  * @param {boolean} expectFull
  * @returns {boolean}
- *
+/**
  * @param {[boolean] | [BytesLike, boolean]} args
+ * @returns {((bytes: BytesLike) => boolean) | boolean}
  */
 export function isValidTxInputCbor(...args) {
     if (args.length == 1) {
