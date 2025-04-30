@@ -29,7 +29,7 @@ import { decodeTxWitnesses } from "./TxWitnesses.js"
  * @import { NetworkParams, NetworkParamsHelper, Signature, Tx, TxBody, TxId, TxInput, TxOutputId, TxMetadata, TxRedeemer, TxWitnesses, Value } from "../index.js"
  */
 
-/*
+/**
  * Deserialize a CBOR encoded Cardano transaction (input is either an array of bytes, or a hex string).
  * @param {BytesLike} bytes
  * @returns {Tx}

@@ -25,11 +25,13 @@ export const makeDummyAddress = makeDummyShelleyAddress
  * @overload
  * @param {string} bech32OrBase58
  * @returns {Address}
- *
+ */
+/**
  * @overload
  * @param {BytesLike} cbor
  * @returns {Address}
- *
+ */
+/**
  * @param {string | BytesLike} arg
  * @returns {Address}
  */
