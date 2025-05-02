@@ -368,7 +368,7 @@ export {
  * @prop {(isInScriptContext?: boolean) => MapData} toUplcData
  * Used when generating redeemers, datums or script contexts for running programs.
  *
- * ### `isInScriptContext`
+ * **`isInScriptContext`**
  *
  * If `isInScriptContext` is `true`:
  * for each minting policy, tokens are sorted in strict lexicographical order instead of shortest-first order.
@@ -1379,7 +1379,7 @@ export {
  * @prop {(isInScriptContext?: boolean) => MapData} toUplcData
  * Used when building datums, redeerms, or script contexts.
  *
- * ### `isInScriptContext`
+ * **`isInScriptContext`**
  *
  * If `isInScriptContext` is `true`, the first entry in the returned map is always the lovelace entry.
  * If the `Value` doesn't contain any lovelace, a `0` lovelace entry is prepended.
