@@ -82,6 +82,10 @@ export function makeTxBody(props) {
  */
 export function decodeTxBody(bytes) {
     let inputsEncodedAsSet = false
+    let dcertsEncodedAsSet = false
+    let collateralInputsEncodedAsSet = false
+    let signersEncodedAsSet = false
+    let refInputsEncodedAsSet = false
 
     const {
         0: inputs,
@@ -94,7 +98,7 @@ export function decodeTxBody(bytes) {
         8: firstValidSlot,
         9: minted,
         11: scriptDataHash,
-        13: collateral,
+        13: collateralInputs,
         14: signers,
         15: _networkId,
         16: collateralReturn,
@@ -108,23 +112,39 @@ export function decodeTxBody(bytes) {
         1: (s) => decodeList(s, decodeTxOutput),
         2: decodeInt,
         3: decodeInt,
-        4: (s) => decodeList(s, decodeDCert),
+        4: (s) => {
+            dcertsEncodedAsSet = isSet(s)
+            return decodeSet(s, decodeDCert)
+        },
         5: (s) => decodeMap(s, decodeStakingAddress, decodeInt),
         7: decodeBytes,
         8: decodeInt,
         9: decodeAssets,
         11: decodeBytes,
-        13: (s) => decodeList(s, decodeTxInput),
-        14: (s) => decodeList(s, decodePubKeyHash),
+        13: (s) => {
+            collateralInputsEncodedAsSet = isSet(s)
+            return decodeSet(s, decodeTxInput)
+        },
+        14: (s) => {
+            signersEncodedAsSet = isSet(s)
+            return decodeSet(s, decodePubKeyHash)
+        },
         15: decodeInt,
         16: decodeTxOutput,
         17: decodeInt,
-        18: (s) => decodeList(s, decodeTxInput)
+        18: (s) => {
+            refInputsEncodedAsSet = isSet(s)
+            return decodeSet(s, decodeTxInput)
+        }
     })
 
     return new TxBodyImpl({
         encodingConfig: {
-            inputsAsSet: inputsEncodedAsSet
+            inputsAsSet: inputsEncodedAsSet,
+            dcertsAsSet: dcertsEncodedAsSet,
+            collateralInputsAsSet: collateralInputsEncodedAsSet,
+            signersAsSet: signersEncodedAsSet,
+            refInputsAsSet: refInputsEncodedAsSet
         },
         inputs: expectDefined(inputs, "inputs undefined in decodeTxBody()"),
         outputs: expectDefined(outputs, "outputs undefined in decodeTxBody()"),
@@ -138,7 +158,7 @@ export function decodeTxBody(bytes) {
         metadataHash,
         minted: minted ?? makeAssets(),
         scriptDataHash,
-        collateral: collateral ?? [],
+        collateral: collateralInputs ?? [],
         signers: signers ?? [],
         collateralReturn,
         totalCollateral: totalCollateral ?? 0n,
@@ -562,7 +582,13 @@ class TxBodyImpl {
         }
 
         if (this.dcerts.length != 0) {
-            m.set(4, encodeDefList(this.dcerts))
+            const encodeAsSet = this.encodingConfig.dcertsAsSet ?? true
+            m.set(
+                4,
+                encodeAsSet
+                    ? encodeSet(this.dcerts)
+                    : encodeDefList(this.dcerts)
+            )
         }
 
         if (this.withdrawals.length != 0) {
@@ -594,11 +620,24 @@ class TxBodyImpl {
         }
 
         if (this.collateral.length != 0) {
-            m.set(13, encodeDefList(this.collateral))
+            const encodeAsSet =
+                this.encodingConfig.collateralInputsAsSet ?? true
+            m.set(
+                13,
+                encodeAsSet
+                    ? encodeSet(this.collateral)
+                    : encodeDefList(this.collateral)
+            )
         }
 
         if (this.signers.length != 0) {
-            m.set(14, encodeDefList(this.signers))
+            const encodeAsSet = this.encodingConfig.signersAsSet ?? true
+            m.set(
+                14,
+                encodeAsSet
+                    ? encodeSet(this.signers)
+                    : encodeDefList(this.signers)
+            )
         }
 
         // what is NetworkId used for, seems a bit useless?
@@ -613,7 +652,13 @@ class TxBodyImpl {
         }
 
         if (this.refInputs.length != 0) {
-            m.set(18, encodeDefList(this.refInputs))
+            const encodeAsSet = this.encodingConfig.refInputsAsSet ?? true
+            m.set(
+                18,
+                encodeAsSet
+                    ? encodeSet(this.refInputs)
+                    : encodeDefList(this.refInputs)
+            )
         }
 
         return encodeObjectIKey(m)

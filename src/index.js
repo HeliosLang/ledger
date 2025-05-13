@@ -176,7 +176,19 @@ export {
 /**
  * @import { BytesLike, IntLike } from "@helios-lang/codec-utils"
  * @import { JsonSafe } from "@helios-lang/type-utils"
- * @import { ByteArrayData, ConstrData, Cost, MapData, UplcData, UplcDataValue, UplcLogger, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
+ * @import {
+ *   ByteArrayData,
+ *   ConstrData,
+ *   Cost,
+ *   MapData,
+ *   UplcData,
+ *   UplcDataValue,
+ *   UplcLogger,
+ *   UplcProgram,
+ *   UplcProgramV1,
+ *   UplcProgramV2,
+ *   UplcProgramV3
+ * } from "@helios-lang/uplc"
  */
 
 /**
@@ -1519,6 +1531,18 @@ export {
  * @typedef {object} TxBodyEncodingConfig
  * @prop {boolean} [inputsAsSet]
  * Defaults to true
+ *
+ * @prop {boolean} [dcertsAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [collateralInputsAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [signersAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [refInputsAsSet]
+ * Defaults to true
  */
 
 /**
@@ -1528,11 +1552,14 @@ export {
  * @prop {"TxBody"} kind
  * @prop {TxBodyEncodingConfig} encodingConfig
  * @prop {TxInput[]} inputs
+ * Optionally encoded as set.
+ *
  * @prop {TxOutput[]} outputs
  * @prop {bigint} fee
  * @prop {number | undefined} firstValidSlot
  * @prop {number | undefined} lastValidSlot
  * @prop {DCert[]} dcerts
+ * Optionally encoded as set.
  *
  * @prop {[StakingAddress, bigint][]} withdrawals
  * Withdrawals must be sorted by address
@@ -1544,10 +1571,19 @@ export {
  *
  * @prop {number[] | undefined} scriptDataHash
  * @prop {TxInput[]} collateral
+ * Optionally encoded as set.
+ * TODO: rename to `collateralInputs`
+ *
  * @prop {PubKeyHash[]} signers
+ * Optionally encoded as set.
+ *
  * @prop {TxOutput| undefined} collateralReturn
+ *
  * @prop {bigint} totalCollateral
+ *
  * @prop {TxInput[]} refInputs
+ * Optionally encoded as set.
+ *
  * @prop {number[] | undefined} metadataHash
  *
  * @prop {ScriptHash[]} allScriptHashes
@@ -1598,6 +1634,22 @@ export {
  * @typedef {object} TxWitnessesEncodingConfig
  * @prop {boolean} [signaturesAsSet]
  * Defaults to true
+ *
+ * @prop {boolean} [nativeScriptsAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [v1ScriptsAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [datumsAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [v2ScriptsAsSet]
+ * Defaults to true
+ *
+ * @prop {boolean} [v3ScriptsAsSet]
+ * Defaults to true
+ *
  */
 
 /**
@@ -1607,13 +1659,26 @@ export {
  * @prop {"TxWitnesses"} kind
  * @prop {TxWitnessesEncodingConfig} encodingConfig
  * @prop {Signature[]} signatures
+ * Optionally encoded as set
+ *
  * @prop {UplcData[]} datums
+ * Optionally encoded as set
+ *
  * @prop {TxRedeemer[]} redeemers
  * @prop {NativeScript[]} nativeScripts
+ * Optionally encoded as set
+ *
  * @prop {UplcProgramV1[]} v1Scripts
+ * Optionally encoded as set
+ *
  * @prop {UplcProgramV2[]} v2Scripts
+ * Optionally encoded as set
+ *
+ * @prop {UplcProgramV3[]} v3Scripts
+ * Optionally encoded as set
+ *
  * @prop {UplcProgramV2[]} v2RefScripts
- * @prop {(NativeScript | UplcProgramV1 | UplcProgramV2)[]} allScripts
+ * @prop {(NativeScript | UplcProgram)[]} allScripts
  *
  * @prop {(n: number) => void} addDummySignatures
  * Used to calculate the correct min fee
