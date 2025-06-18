@@ -629,15 +629,16 @@ class AssetsImpl {
     /**
      * Makes sure minting policies are in correct order, and for each minting policy make sure the tokens are in the correct order
      * Mutates 'this'
+     * @param {boolean} [shortestFirst] defaults to true (canonical sort)
      */
-    sort() {
+    sort(shortestFirst = true) {
         this.assets.sort(([a], [b]) => {
             return compareMintingPolicyHashes(a, b)
         })
 
         this.assets.forEach(([_mph, tokens]) => {
             tokens.sort(([a], [b]) => {
-                return compareBytes(a, b, true)
+                return compareBytes(a, b, shortestFirst)
             })
         })
     }

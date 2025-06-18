@@ -370,9 +370,17 @@ export {
  * @prop {() => void} removeZeroes
  * Mutates `this`
  *
- * @prop {() => void} sort
+ * @prop {(shortestFirst?: boolean) => void} sort
  * Makes sure minting policies are in correct order, and for each minting policy make sure the tokens are in the correct order
  * Mutates `this`
+ *
+ * **`shortestFirst`**
+ *
+ * If `shortestFirst` is `true`:
+ * tokens are sorted in shortest-first order.
+ *
+ * The shortest-first order (also called "canonical order") is required by some hardware wallets when calculating the tx hash.
+ * But the lexicographical order (i.e. alphabetical order independent of length) is used when evaluating a validator script.
  *
  * @prop {(other: Assets) => Assets} subtract
  * @prop {() => number[]} toCbor
