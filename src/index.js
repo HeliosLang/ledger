@@ -963,6 +963,11 @@ export {
  * @prop {(other: TxOutputId) => boolean} isEqual
  * @prop {() => number[]} toCbor
  * @prop {() => string} toString
+ * Encoded as `<txId>#<index>`
+ *
+ * @prop {() => string} toURLString
+ * Encoded as `<txId><index>` (without the `#` symbol)
+ *
  * @prop {() => ConstrData} toUplcData
  */
 

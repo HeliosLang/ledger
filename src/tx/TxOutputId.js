@@ -117,19 +117,34 @@ export function isValidTxOutputId(arg) {
  * @returns {TxOutputId}
  */
 export function parseTxOutputId(str) {
-    const parts = str.trim().split("#")
+    str = str.trim()
 
-    if (parts.length != 2) {
-        throw new Error(`expected <txId>#<utxoIdx>, got ${str}`)
+    if (str.includes("#")) {
+        const parts = str.trim().split("#")
+
+        if (parts.length != 2) {
+            throw new Error(`expected <txId>#<utxoIdx>, got ${str}`)
+        }
+
+        const utxoIdx = parseInt(parts[1])
+
+        if (utxoIdx.toString() != parts[1]) {
+            throw new Error(`bad utxoIdx in ${str}`)
+        }
+
+        return new TxOutputIdImpl(makeTxId(parts[0]), utxoIdx)
+    } else {
+        const part0 = str.slice(0, 64)
+        const part1 = str.slice(64)
+        const txID = makeTxId(part0)
+        const utxoIdx = parseInt(part1)
+
+        if (utxoIdx.toString() != part1) {
+            throw new Error(`bad utxoIdx in ${str}`)
+        }
+
+        return new TxOutputIdImpl(txID, utxoIdx)
     }
-
-    const utxoIdx = parseInt(parts[1])
-
-    if (utxoIdx.toString() != parts[1]) {
-        throw new Error(`bad utxoIdx in ${str}`)
-    }
-
-    return new TxOutputIdImpl(makeTxId(parts[0]), utxoIdx)
 }
 
 /**
@@ -212,6 +227,13 @@ class TxOutputIdImpl {
      */
     toString() {
         return `${this.txId.toHex()}#${this.index.toString()}`
+    }
+
+    /**
+     * @returns {string}
+     */
+    toURLString() {
+        return `${this.txId.toHex()}${this.index.toString()}`
     }
 
     /**
