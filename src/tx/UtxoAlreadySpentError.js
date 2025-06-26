@@ -23,7 +23,7 @@ export class UtxoAlreadySpentError extends Error {
         const utxoId = utxo.id
 
         super(
-            `UTxO ${utxoId.toString()} already spent${consumedBy ? `(spent by tx ${consumedBy.toString()}` : ""}`
+            `UTxO ${utxoId.toString()} already spent${consumedBy ? ` (spent by tx ${consumedBy.toString()})` : ""}`
         )
 
         this.utxo = utxo

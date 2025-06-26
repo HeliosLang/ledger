@@ -736,6 +736,9 @@ export {
  * Only include the minimum fields needed. flattened so it can be extended more easily
  *
  * NetworkParams are a summary of the Era-specific params, relevant for tx building and validation
+ *
+ * Optionally, NetworkParams returned by a private node can specify a `collateralUTXO` to use (<txID>#<outputIndex> format). Any transaction submitted through that same node will then add the signature necessary to spend the collateral UTXO.
+ * This allows the collateral UTXO managed to be done in a central place (i.e. the node).
  * @typedef {{
  *   txFeeFixed: number
  *   txFeePerByte: number
@@ -755,6 +758,7 @@ export {
  *   costModelParamsV1: number[]
  *   costModelParamsV2: number[]
  *   costModelParamsV3: number[]
+ *   collateralUTXO?: string
  * }} NetworkParams
  */
 
