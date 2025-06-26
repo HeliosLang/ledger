@@ -1,10 +1,12 @@
 import { toInt } from "@helios-lang/codec-utils"
 import { expectDefined } from "@helios-lang/type-utils"
+import { makeTxInput } from "../tx/TxInput.js"
+import { parseTxOutputId } from "../tx/TxOutputId.js"
 import { DEFAULT_NETWORK_PARAMS } from "./NetworkParams.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
- * @import { NetworkParams, NetworkParamsHelper } from "../index.js"
+ * @import { NetworkParams, NetworkParamsHelper, TxInput } from "../index.js"
  */
 
 /**
@@ -267,5 +269,14 @@ class NetworkParamsHelperImpl {
             this.latestTipSlot +
             Math.round(timeDiff / (1000 * this.secondsPerSlot))
         )
+    }
+
+    /**
+     * @type {TxInput | undefined}
+     */
+    get defaultCollateralUTXO() {
+        return this.params?.collateralUTXO
+            ? makeTxInput(parseTxOutputId(this.params.collateralUTXO))
+            : undefined
     }
 }

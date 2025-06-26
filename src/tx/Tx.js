@@ -526,6 +526,17 @@ class TxImpl {
         }
 
         if (this.isSmart()) {
+            // skip this validation if the NetworkParams.collateralUTXO is used (we can assume that such a UTXO is always clean and contains enough lovelace)
+            const defaultCollateralUTXO = helper.defaultCollateralUTXO
+            if (
+                defaultCollateralUTXO &&
+                this.body.collateral.some((col) =>
+                    col.isEqual(defaultCollateralUTXO)
+                )
+            ) {
+                return
+            }
+
             const minCollateral = this.getMinCollateral(params)
 
             let sum = makeValue(0n)

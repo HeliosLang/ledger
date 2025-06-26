@@ -922,6 +922,7 @@ export {
  * @prop {bigint} stakeAddressDeposit
  * @prop {number} latestTipSlot
  * @prop {number} latestTipTime
+ * @prop {TxInput | undefined} defaultCollateralUTXO
  * @prop {(slot: IntLike) => number} slotToTime
  * @prop {(time: IntLike) => number} timeToSlot
  * @prop {(refScriptsSize: bigint) => bigint} calcMaxConwayTxFee
