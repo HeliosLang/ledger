@@ -283,13 +283,28 @@ class TxInputImpl {
     }
 
     /**
-     * full representation (as used in ScriptContext)
+     * full representation (as used in ScriptContextV2)
      * @returns {ConstrData}
      */
     toUplcData() {
         if (this._output) {
             return makeConstrData(0, [
                 this.id.toUplcData(),
+                this._output.toUplcData()
+            ])
+        } else {
+            throw new Error("TxInput original output not synced")
+        }
+    }
+
+    /**
+     * full representation (as used in ScriptContextV3)
+     * @returns {ConstrData}
+     */
+    toUplcDataV3() {
+        if (this._output) {
+            return makeConstrData(0, [
+                this.id.toUplcDataV3(),
                 this._output.toUplcData()
             ])
         } else {

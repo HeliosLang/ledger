@@ -5,6 +5,7 @@ import { encodeCost, makeUplcDataValue } from "@helios-lang/uplc"
 import { makeNetworkParamsHelper } from "../params/index.js"
 import { makeMintingPurpose } from "./MintingPurpose.js"
 import { makeScriptContextV2 } from "./ScriptContextV2.js"
+import { makeScriptContextV3 } from "./ScriptContextV3.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
@@ -143,17 +144,37 @@ class TxMintingRedeemerImpl {
             tx.body.minted.getPolicies()[this.policyIndex],
             `tx.body.minted.getPolicies()[${this.policyIndex}] undefined in TxMintingRedeemer.getRedeemerDetailsWithArgs()`
         )
+
         const partialRes = this.getRedeemerDetailsWithoutArgs(tx)
+
+        const script = partialRes.script
+
+        const args = (() => {
+            switch (script.plutusVersion) {
+                case "PlutusScriptV1":
+                    throw new Error("PlutusScriptV1 args not supported")
+                case "PlutusScriptV2":
+                    return [
+                        this.data,
+                        makeScriptContextV2(
+                            txInfo,
+                            makeMintingPurpose(mph)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+                case "PlutusScriptV3":
+                    return [
+                        makeScriptContextV3(
+                            txInfo,
+                            this.data,
+                            makeMintingPurpose(mph)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+            }
+        })()
 
         return {
             ...partialRes,
-            args: [
-                this.data,
-                makeScriptContextV2(
-                    txInfo,
-                    makeMintingPurpose(mph)
-                ).toUplcData()
-            ].map((a) => makeUplcDataValue(a))
+            args
         }
     }
 

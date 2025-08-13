@@ -44,12 +44,4 @@ class MintingPurposeImpl {
     toUplcData() {
         return makeConstrData(0, [this.policy.toUplcData()])
     }
-
-    /**
-     * @param {UplcData} txData
-     * @returns {UplcData}
-     */
-    toScriptContextUplcData(txData) {
-        return makeConstrData(0, [txData, this.toUplcData()])
-    }
 }

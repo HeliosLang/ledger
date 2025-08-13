@@ -139,4 +139,11 @@ class TxIdImpl {
     toUplcData() {
         return makeConstrData(0, [makeByteArrayData(this.bytes)])
     }
+
+    /**
+     * @returns {UplcData}
+     */
+    toUplcDataV3() {
+        return makeByteArrayData(this.bytes)
+    }
 }

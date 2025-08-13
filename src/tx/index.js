@@ -10,6 +10,7 @@ export { makeRegistrationDCert } from "./RegistrationDCert.js"
 export { makeRetirePoolDCert } from "./RetirePoolDCert.js"
 export { makeRewardingPurpose } from "./RewardingPurpose.js"
 export { makeScriptContextV2 } from "./ScriptContextV2.js"
+export { makeScriptContextV3 } from "./ScriptContextV3.js"
 export { makeSpendingPurpose } from "./SpendingPurpose.js"
 export {
     calcRefScriptsSize,

@@ -47,12 +47,4 @@ class RewardingPurposeImpl {
             convertStakingCredentialToUplcData(this.credential)
         ])
     }
-
-    /**
-     * @param {UplcData} txData
-     * @returns {UplcData}
-     */
-    toScriptContextUplcData(txData) {
-        return makeConstrData(0, [txData, this.toUplcData()])
-    }
 }

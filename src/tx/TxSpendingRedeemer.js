@@ -4,7 +4,9 @@ import { expectDefined } from "@helios-lang/type-utils"
 import { encodeCost, makeUplcDataValue } from "@helios-lang/uplc"
 import { makeNetworkParamsHelper } from "../params/index.js"
 import { makeScriptContextV2 } from "./ScriptContextV2.js"
+import { makeScriptContextV3 } from "./ScriptContextV3.js"
 import { makeSpendingPurpose } from "./SpendingPurpose.js"
+import { makeSpendingPurposeV3 } from "./SpendingPurposeV3.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
@@ -165,16 +167,35 @@ class TxSpendingRedeemerImpl {
             `utxo.datum.data undefined in TxSpendingRedeemer.getRedeemerDetailsWithArgs()`
         )
 
+        const script = partialRes.script
+
+        const args = (() => {
+            switch (script.plutusVersion) {
+                case "PlutusScriptV1":
+                    throw new Error("PlutusScriptV1 not yet supported")
+                case "PlutusScriptV2":
+                    return [
+                        datumData,
+                        this.data,
+                        makeScriptContextV2(
+                            txInfo,
+                            makeSpendingPurpose(utxo.id)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+                case "PlutusScriptV3":
+                    return [
+                        makeScriptContextV3(
+                            txInfo,
+                            this.data,
+                            makeSpendingPurposeV3(utxo.id, datumData)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+            }
+        })()
+
         return {
             ...partialRes,
-            args: [
-                datumData,
-                this.data,
-                makeScriptContextV2(
-                    txInfo,
-                    makeSpendingPurpose(utxo.id)
-                ).toUplcData()
-            ].map((a) => makeUplcDataValue(a))
+            args
         }
     }
 

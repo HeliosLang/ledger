@@ -43,12 +43,4 @@ class CertifyingPurposeImpl {
     toUplcData() {
         return makeConstrData(3, [this.dcert.toUplcData()])
     }
-
-    /**
-     * @param {UplcData} txData
-     * @returns {UplcData}
-     */
-    toScriptContextUplcData(txData) {
-        return makeConstrData(0, [txData, this.toUplcData()])
-    }
 }

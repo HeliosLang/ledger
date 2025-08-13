@@ -3,8 +3,9 @@ import { bytesToHex, toInt } from "@helios-lang/codec-utils"
 import { expectDefined } from "@helios-lang/type-utils"
 import { encodeCost, makeUplcDataValue } from "@helios-lang/uplc"
 import { makeNetworkParamsHelper } from "../params/index.js"
-import { makeScriptContextV2 } from "./ScriptContextV2.js"
 import { makeCertifyingPurpose } from "./CertifyingPurpose.js"
+import { makeScriptContextV2 } from "./ScriptContextV2.js"
+import { makeScriptContextV3 } from "./ScriptContextV3.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
@@ -160,15 +161,34 @@ class TxCertifyingRedeemerImpl {
             `tx.body.dcerts[${this.dcertIndex}] undefined in TxCertifyingRedeemer.getRedeemerDetailsWithArgs()`
         )
 
+        const script = partialRes.script
+
+        const args = (() => {
+            switch (script.plutusVersion) {
+                case "PlutusScriptV1":
+                    throw new Error("PlutusScriptV1 args not supported")
+                case "PlutusScriptV2":
+                    return [
+                        this.data,
+                        makeScriptContextV2(
+                            txInfo,
+                            makeCertifyingPurpose(dcert)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+                case "PlutusScriptV3":
+                    return [
+                        makeScriptContextV3(
+                            txInfo,
+                            this.data,
+                            makeCertifyingPurpose(dcert)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+            }
+        })()
+
         return {
             ...partialRes,
-            args: [
-                this.data,
-                makeScriptContextV2(
-                    txInfo,
-                    makeCertifyingPurpose(dcert)
-                ).toUplcData()
-            ].map((a) => makeUplcDataValue(a))
+            args
         }
     }
 

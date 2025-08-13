@@ -15,7 +15,7 @@ import {
 import { bytesToHex, makeByteStream } from "@helios-lang/codec-utils"
 import {
     decodeUplcProgramV1FromCbor,
-    decodeUplcProgramV2FromCbor,
+    decodeUplcProgramV2OrV3FromCbor,
     decodeUplcProgramV3FromCbor,
     expectConstrData,
     makeByteArrayData,
@@ -118,10 +118,12 @@ export function decodeTxOutput(bytes) {
                             decodeUplcProgramV1FromCbor(bs)
                         )
                     case 2:
+                        // apparently tag 2 can also be used for V3 scripts
                         return decodeScript((bs) =>
-                            decodeUplcProgramV2FromCbor(bs)
+                            decodeUplcProgramV2OrV3FromCbor(bs)
                         )
                     case 3:
+                        // XXX: if tag 2 can be used for V3 scripts, is tag 3 actually used?
                         return decodeScript((bs) =>
                             decodeUplcProgramV3FromCbor(bs)
                         )

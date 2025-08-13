@@ -15,6 +15,7 @@ export function makeSpendingPurpose(utxoId) {
 
 /**
  * Doesn't include functionality to make Tx UplcData as that is done external
+ * @implements {SpendingPurpose}
  */
 class SpendingPurposeImpl {
     /**
@@ -42,13 +43,5 @@ class SpendingPurposeImpl {
      */
     toUplcData() {
         return makeConstrData(1, [this.utxoId.toUplcData()])
-    }
-
-    /**
-     * @param {UplcData} txData
-     * @returns {UplcData}
-     */
-    toScriptContextUplcData(txData) {
-        return makeConstrData(0, [txData, this.toUplcData()])
     }
 }

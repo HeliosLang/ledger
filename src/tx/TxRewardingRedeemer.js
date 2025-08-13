@@ -8,8 +8,9 @@ import { bytesToHex, toInt } from "@helios-lang/codec-utils"
 import { expectDefined } from "@helios-lang/type-utils"
 import { encodeCost, makeUplcDataValue } from "@helios-lang/uplc"
 import { makeNetworkParamsHelper } from "../params/index.js"
-import { makeScriptContextV2 } from "./ScriptContextV2.js"
 import { makeRewardingPurpose } from "./RewardingPurpose.js"
+import { makeScriptContextV2 } from "./ScriptContextV2.js"
+import { makeScriptContextV3 } from "./ScriptContextV3.js"
 
 /**
  * @import { IntLike } from "@helios-lang/codec-utils"
@@ -157,15 +158,34 @@ class TxRewardingRedeemerImpl {
             `tx.body.withdrawals[${this.withdrawalIndex}] undefined in TxRewardingRedeemer.getRedeemerDetailsWithArgs()`
         )[0].stakingCredential
 
+        const script = partialRes.script
+
+        const args = (() => {
+            switch (script.plutusVersion) {
+                case "PlutusScriptV1":
+                    throw new Error("PlutusScriptV1 args not supported")
+                case "PlutusScriptV2":
+                    return [
+                        this.data,
+                        makeScriptContextV2(
+                            txInfo,
+                            makeRewardingPurpose(svh)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+                case "PlutusScriptV3":
+                    return [
+                        makeScriptContextV3(
+                            txInfo,
+                            this.data,
+                            makeRewardingPurpose(svh)
+                        ).toUplcData()
+                    ].map((a) => makeUplcDataValue(a))
+            }
+        })()
+
         return {
             ...partialRes,
-            args: [
-                this.data,
-                makeScriptContextV2(
-                    txInfo,
-                    makeRewardingPurpose(svh)
-                ).toUplcData()
-            ].map((a) => makeUplcDataValue(a))
+            args
         }
     }
 

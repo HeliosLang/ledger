@@ -245,4 +245,14 @@ class TxOutputIdImpl {
             makeIntData(this.index)
         ])
     }
+
+    /**
+     * @returns {ConstrData}
+     */
+    toUplcDataV3() {
+        return makeConstrData(0, [
+            this.txId.toUplcDataV3(),
+            makeIntData(this.index)
+        ])
+    }
 }

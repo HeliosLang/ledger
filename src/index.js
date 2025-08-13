@@ -155,6 +155,7 @@ export {
     makeRetirePoolDCert,
     makeRewardingPurpose,
     makeScriptContextV2,
+    makeScriptContextV3,
     makeSpendingPurpose,
     makeTx,
     makeTxBody,
@@ -949,6 +950,8 @@ export {
  * Alias for toHex
  *
  * @prop {() => ConstrData} toUplcData
+ *
+ * @prop {() => UplcData} toUplcDataV3
  */
 
 /**
@@ -969,6 +972,7 @@ export {
  * Encoded as `<txId><index>` (without the `#` symbol)
  *
  * @prop {() => ConstrData} toUplcData
+ * @prop {() => ConstrData} toUplcDataV3
  */
 
 /**
@@ -1084,7 +1088,6 @@ export {
  * @prop {"MintingPurpose"} kind
  * @prop {MintingPolicyHash} policy
  * @prop {() => ConstrData} toUplcData
- * @prop {(txData: UplcData) => UplcData} toScriptContextUplcData
  */
 
 /**
@@ -1092,7 +1095,14 @@ export {
  * @prop {"SpendingPurpose"} kind
  * @prop {TxOutputId} utxoId
  * @prop {() => ConstrData} toUplcData
- * @prop {(txData: UplcData) => UplcData} toScriptContextUplcData
+ */
+
+/**
+ * @typedef {object} SpendingPurposeV3
+ * @prop {"SpendingPurposeV3"} kind
+ * @prop {TxOutputId} utxoId
+ * @prop {UplcData | undefined} datum
+ * @prop {() => ConstrData} toUplcData
  */
 
 /**
@@ -1100,7 +1110,6 @@ export {
  * @prop {"RewardingPurpose"} kind
  * @prop {StakingCredential} credential
  * @prop {() => ConstrData} toUplcData
- * @prop {(txData: UplcData) => UplcData} toScriptContextUplcData
  */
 
 /**
@@ -1108,7 +1117,6 @@ export {
  * @prop {"CertifyingPurpose"} kind
  * @prop {DCert} dcert
  * @prop {() => ConstrData} toUplcData
- * @prop {(txData: UplcData) => UplcData} toScriptContextUplcData
  */
 
 /**
@@ -1120,6 +1128,15 @@ export {
  * @prop {"ScriptContextV2"} kind
  * @prop {TxInfo} txInfo
  * @prop {ScriptPurpose} purpose
+ * @prop {() => UplcData} toUplcData
+ */
+
+/**
+ * @typedef {object} ScriptContextV3
+ * @prop {"ScriptContextV3"} kind
+ * @prop {TxInfo} txInfo
+ * @prop {UplcData} redeemerData
+ * @prop {ScriptPurpose | SpendingPurposeV3} purpose
  * @prop {() => UplcData} toUplcData
  */
 
@@ -1170,7 +1187,10 @@ export {
  * full = true is however useful for complete deserialization of the TxInput (and then eg. using it in off-chain applications)
  *
  * @prop {() => ConstrData} toUplcData
- * Full representation (as used in ScriptContext)
+ * Full representation (as used in ScriptContextV2)
+ *
+ * @prop {() => ConstrData} toUplcDataV3
+ * Full representation (as used in ScriptContextV3)
  */
 
 /**

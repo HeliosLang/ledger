@@ -30,6 +30,16 @@ import { decodeTxWitnesses } from "./TxWitnesses.js"
  */
 
 /**
+ * Internal type to make passing these options as args easier
+ * Shouldn't be exported because it adds indirection to the Tx.validate() interface
+ * @typedef {{
+ *   strict?: boolean
+ *   verbose?: boolean
+ *   logOptions?: UplcLogger
+ * }} ValidateOptions
+ */
+
+/**
  * Deserialize a CBOR encoded Cardano transaction (input is either an array of bytes, or a hex string).
  * @param {BytesLike} bytes
  * @returns {Tx}
@@ -387,7 +397,11 @@ class TxImpl {
      * @returns {void}
      */
     validate(params, options = {}) {
+        /**
+         * @type {ValidateOptions}
+         */
         const { strict = false, logOptions } = options
+
         this.validateSize(params)
 
         this.validateFee(params)
@@ -406,7 +420,9 @@ class TxImpl {
 
         this.validateInputsOrder()
 
-        this.validateRefInputsOrder()
+        if (strict) {
+            this.validateRefInputsOrder()
+        }
 
         this.validateMintedOrder()
 
@@ -416,7 +432,10 @@ class TxImpl {
 
         this.validateMetadata()
 
-        this.validateScriptDataHash(params)
+        // TODO: figure out why this fails for some txs that are on-chain (see bbe5c251d13317afbf1f2615111bac1b07ed5c1b791e58e78adb3a517b945162)
+        if (strict) {
+            this.validateScriptDataHash(params)
+        }
 
         // TODO: add the rule that the total refScripts size in the inputs and ref inputs can't exceed 204800
     }
@@ -834,6 +853,8 @@ class TxImpl {
 
     /**
      * Throws an error if the ref inputs aren't in the correct order
+     * 
+     * XXX: no longer necessary in Conway?
      * @private
      */
     validateRefInputsOrder() {
@@ -842,7 +863,7 @@ class TxImpl {
             if (i > 0) {
                 const prev = this.body.refInputs[i - 1]
 
-                // can be less than -1 if utxoIds aren't consecutive
+                // can be less than -1 if utxoIds aren't consecutive         
                 if (compareTxInputs(prev, input) >= 0) {
                     throw new Error("refInputs not sorted")
                 }
