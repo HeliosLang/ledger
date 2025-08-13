@@ -16,6 +16,7 @@ import { bytesToHex, makeByteStream } from "@helios-lang/codec-utils"
 import {
     decodeUplcProgramV1FromCbor,
     decodeUplcProgramV2FromCbor,
+    decodeUplcProgramV3FromCbor,
     expectConstrData,
     makeByteArrayData,
     makeConstrData,
@@ -119,6 +120,10 @@ export function decodeTxOutput(bytes) {
                     case 2:
                         return decodeScript((bs) =>
                             decodeUplcProgramV2FromCbor(bs)
+                        )
+                    case 3:
+                        return decodeScript((bs) =>
+                            decodeUplcProgramV3FromCbor(bs)
                         )
                     default:
                         throw new Error(`unhandled scriptType ${scriptType}`)
