@@ -24,6 +24,7 @@ import { decodeTxMetadata } from "./TxMetadata.js"
 import { decodeTxWitnesses } from "./TxWitnesses.js"
 
 /**
+ * @import { Encodeable } from "@helios-lang/cbor"
  * @import { BytesLike } from "@helios-lang/codec-utils"
  * @import { UplcData, UplcLogger, UplcProgram } from "@helios-lang/uplc"
  * @import { NetworkParams, NetworkParamsHelper, Signature, Tx, TxBody, TxId, TxInput, TxOutputId, TxMetadata, TxRedeemer, TxWitnesses, Value } from "../index.js"
@@ -432,10 +433,7 @@ class TxImpl {
 
         this.validateMetadata()
 
-        // TODO: figure out why this fails for some txs that are on-chain (see bbe5c251d13317afbf1f2615111bac1b07ed5c1b791e58e78adb3a517b945162)
-        if (strict) {
-            this.validateScriptDataHash(params)
-        }
+        this.validateScriptDataHash(params)
 
         // TODO: add the rule that the total refScripts size in the inputs and ref inputs can't exceed 204800
     }
@@ -882,7 +880,16 @@ class TxImpl {
                 const scriptDataHash = calcScriptDataHash(
                     params,
                     this.witnesses.datums,
-                    this.witnesses.redeemers
+                    this.witnesses.redeemers,
+                    {
+                        usesPlutusV1: this.witnesses.v1Scripts.length > 0,
+                        usesPlutusV2:
+                            this.witnesses.v2Scripts.length > 0 ||
+                            this.witnesses.v2RefScripts.length > 0,
+                        usesPlutusV3:
+                            this.witnesses.v3Scripts.length > 0 ||
+                            this.witnesses.v3RefScripts.length > 0
+                    }
                 )
 
                 if (
@@ -1084,9 +1091,16 @@ class TxImpl {
  * @param {NetworkParams} params
  * @param {UplcData[]} datums
  * @param {TxRedeemer[]} redeemers
+ * @param {Object} options
+ * @param {boolean} [options.usesPlutusV1]
+ * defaults to false
+ * @param {boolean} [options.usesPlutusV2]
+ * defaults to true
+ * @param {boolean} [options.usesPlutusV3]
+ * defaults to false
  * @returns {number[]}
  */
-export function calcScriptDataHash(params, datums, redeemers) {
+export function calcScriptDataHash(params, datums, redeemers, options = {}) {
     const helper = makeNetworkParamsHelper(params)
 
     if (redeemers.length == 0) {
@@ -1101,17 +1115,49 @@ export function calcScriptDataHash(params, datums, redeemers) {
         bytes = bytes.concat(makeListData(datums).toCbor())
     }
 
-    // language view encodings?
-    const costParams = helper.costModelParamsV2
+    const {
+        usesPlutusV1 = false,
+        usesPlutusV2 = true,
+        usesPlutusV3 = false
+    } = options
 
-    bytes = bytes.concat(
-        encodeMap([
-            [
-                encodeInt(1),
-                encodeDefList(costParams.map((cp) => encodeInt(BigInt(cp))))
-            ]
+    if (!usesPlutusV1 && !usesPlutusV2 && !usesPlutusV3) {
+        throw new Error("doesn't uses a script, can't calculate scriptHash")
+    }
+
+    /**
+     * @type {[Encodeable, Encodeable][]}
+     */
+    const entries = []
+
+    if (usesPlutusV1) {
+        entries.push([
+            encodeInt(0),
+            encodeDefList(
+                helper.costModelParamsV1.map((cp) => encodeInt(BigInt(cp)))
+            )
         ])
-    )
+    }
+
+    if (usesPlutusV2) {
+        entries.push([
+            encodeInt(1),
+            encodeDefList(
+                helper.costModelParamsV2.map((cp) => encodeInt(BigInt(cp)))
+            )
+        ])
+    }
+
+    if (usesPlutusV3) {
+        entries.push([
+            encodeInt(2),
+            encodeDefList(
+                helper.costModelParamsV3.map((cp) => encodeInt(BigInt(cp)))
+            )
+        ])
+    }
+
+    bytes = bytes.concat(encodeMap(entries))
 
     return blake2b(bytes)
 }

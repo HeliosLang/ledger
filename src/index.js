@@ -1716,6 +1716,8 @@ export {
  * Optionally encoded as set
  *
  * @prop {UplcProgramV2[]} v2RefScripts
+ * @prop {UplcProgramV3[]} v3RefScripts
+ *
  * @prop {(NativeScript | UplcProgram)[]} allScripts
  *
  * @prop {(n: number) => void} addDummySignatures

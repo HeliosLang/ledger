@@ -199,8 +199,6 @@ describe("decode and validate tx with UplcProgramV3 ref scripts", () => {
         )
     })
 
-    console.log(JSON.stringify(tx.dump(), undefined, 2))
-
     const utxos = {
         "3d308c0f3deb1eff764cbb765452c53d30704748681d7acd61c7775aeb8a8e46#0":
             decodeTxInput(
