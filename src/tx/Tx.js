@@ -853,7 +853,7 @@ class TxImpl {
 
     /**
      * Throws an error if the ref inputs aren't in the correct order
-     * 
+     *
      * XXX: no longer necessary in Conway?
      * @private
      */
@@ -863,7 +863,7 @@ class TxImpl {
             if (i > 0) {
                 const prev = this.body.refInputs[i - 1]
 
-                // can be less than -1 if utxoIds aren't consecutive         
+                // can be less than -1 if utxoIds aren't consecutive
                 if (compareTxInputs(prev, input) >= 0) {
                     throw new Error("refInputs not sorted")
                 }

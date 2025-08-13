@@ -1,4 +1,4 @@
-import {    
+import {
     makeConstrData,
     makeIntData,
     makeListData,
