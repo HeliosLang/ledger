@@ -41,7 +41,7 @@ import {
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { ConstrData, UplcData, UplcProgramV1, UplcProgramV2 } from "@helios-lang/uplc"
+ * @import { ConstrData, UplcData, UplcProgram } from "@helios-lang/uplc"
  * @import { Address, NetworkParams, ShelleyAddressLike, SpendingCredential, TxOutput, TxOutputDatum, TxOutputEncodingConfig, Value, ValueLike } from "../index.js"
  */
 
@@ -58,7 +58,7 @@ export const DEFAULT_TX_OUTPUT_ENCODING_CONFIG = {
  * @param {Address<SC> | ShelleyAddressLike} address
  * @param {ValueLike} value
  * @param {TxOutputDatum | undefined} datum
- * @param {UplcProgramV1 | UplcProgramV2 | undefined} refScript - plutus v2 script for now
+ * @param {UplcProgram | undefined} refScript - plutus v2 script for now
  * @returns {TxOutput<SC>}
  */
 export function makeTxOutput(
@@ -103,7 +103,7 @@ export function decodeTxOutput(bytes) {
         }
 
         /**
-         * @type {UplcProgramV1 | UplcProgramV2 | undefined}
+         * @type {UplcProgram | undefined}
          */
         const refScript = (() => {
             if (refScriptBytes) {
@@ -214,7 +214,7 @@ class TxOutputImpl {
     datum
 
     /**
-     * @type {UplcProgramV1 | UplcProgramV2 | undefined}
+     * @type {UplcProgram | undefined}
      */
     refScript
 
@@ -228,7 +228,7 @@ class TxOutputImpl {
      * @param {Address<SC> | ShelleyAddressLike} address
      * @param {ValueLike} value
      * @param {TxOutputDatum | undefined} datum
-     * @param {UplcProgramV1 | UplcProgramV2 | undefined} refScript - plutus v2 script for now
+     * @param {UplcProgram | undefined} refScript - plutus v2 script for now
      * @param {TxOutputEncodingConfig} encodingConfig
      */
     constructor(address, value, datum, refScript, encodingConfig) {

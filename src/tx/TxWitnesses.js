@@ -330,10 +330,18 @@ class TxWitnessesImpl {
     /**
      * TODO: also look for v3 scripts
      * @param {number[] | MintingPolicyHash | ValidatorHash | StakingValidatorHash} hash
-     * @returns {UplcProgramV1 | UplcProgramV2}
+     * @returns {UplcProgram}
      */
     findUplcProgram(hash) {
         const bytes = Array.isArray(hash) ? hash : hash.bytes
+
+        const v3Script = this.v3Scripts
+            .concat(this.v3RefScripts)
+            .find((s) => equalsBytes(s.hash(), bytes))
+
+        if (v3Script) {
+            return v3Script
+        }
 
         const v2Script = this.v2Scripts
             .concat(this.v2RefScripts)

@@ -1190,7 +1190,7 @@ export {
  * @prop {Address<SC>} address
  * @prop {Value} value
  * @prop {TxOutputDatum | undefined} datum
- * @prop {UplcProgramV1 | UplcProgramV2 | undefined} refScript
+ * @prop {UplcProgram | undefined} refScript
  * @prop {TxOutputEncodingConfig} encodingConfig
  *
  * @prop {() => TxOutput<SC>} copy
@@ -1265,14 +1265,14 @@ export {
  * @typedef {Object} RedeemerDetailsWithoutArgs
  * @property {string} summary - a short label indicating the part of the txn unlocked by the redeemer
  * @property {string} description - a more complete specifier of the redeemer
- * @property {UplcProgramV1 | UplcProgramV2} script - the UplcProgram validating the redeemer
+ * @property {UplcProgram} script - the UplcProgram validating the redeemer
  */
 
 /**
  * @typedef {Object} RedeemerDetailsWithArgs
  * @property {string} summary - a short label indicating the part of the txn unlocked by the redeemer
  * @property {string} description - a more complete specifier of the redeemer
- * @property {UplcProgramV1 | UplcProgramV2} script - the UplcProgram validating the redeemer
+ * @property {UplcProgram} script - the UplcProgram validating the redeemer
  * @property {UplcDataValue[]} args - the arguments to the script, included if `txInfo` is provided
  */
 
@@ -1483,7 +1483,7 @@ export {
  * @template TRedeemerStrict
  * @template TRedeemerPermissive
  * @typedef {{
- *   program: UplcProgramV1 | UplcProgramV2
+ *   program: UplcProgram
  *   redeemer: UplcDataConverter<TRedeemerStrict, TRedeemerPermissive>
  * }} MintingContext
  */
@@ -1494,7 +1494,7 @@ export {
  * @template TRedeemerStrict
  * @template TRedeemerPermissive
  * @typedef {DatumPaymentContext<TDatumPermissive> & {
- *   program: UplcProgramV1 | UplcProgramV2
+ *   program: UplcProgram
  *   datum: UplcDataConverter<TDatumStrict, TDatumPermissive>
  *   redeemer: UplcDataConverter<TRedeemerStrict, TRedeemerPermissive>
  * }} SpendingContext
@@ -1504,7 +1504,7 @@ export {
  * @template TRedeemerStrict
  * @template TRedeemerPermissive
  * @typedef {{
- *   program: UplcProgramV1 | UplcProgramV2
+ *   program: UplcProgram
  *   redeemer: UplcDataConverter<TRedeemerStrict, TRedeemerPermissive>
  * }} StakingContext
  */
@@ -1705,9 +1705,9 @@ export {
  * @prop {(params: NetworkParams) => bigint} calcExFee
  * @prop {() => number} countNonDummySignatures
  * @prop {() => object} dump
- * @prop {(hash: number[] | MintingPolicyHash | ValidatorHash | StakingValidatorHash) => (UplcProgramV1 | UplcProgramV2)} findUplcProgram
+ * @prop {(hash: number[] | MintingPolicyHash | ValidatorHash | StakingValidatorHash) => UplcProgram} findUplcProgram
  * @prop {() => boolean} isSmart
- * @prop {(refScriptsInRefInputs: (UplcProgramV1 | UplcProgramV2)[]) => void} recover
+ * @prop {(refScriptsInRefInputs: UplcProgram[]) => void} recover
  * @prop {(n: number) => void} removeDummySignatures
  * @prop {() => number[]} toCbor
  *
