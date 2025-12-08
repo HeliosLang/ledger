@@ -159,7 +159,7 @@ export function isTxMetadataAttrMap(attr) {
         !Array.isArray(attr) &&
         attr instanceof Object &&
         "map" in attr &&
-        Object.keys(attr.map).length == 1 &&
+        Object.keys(attr).length == 1 &&
         Array.isArray(attr.map)
     )
 }
