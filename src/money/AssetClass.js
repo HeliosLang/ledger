@@ -101,18 +101,28 @@ export function makeDummyAssetClass(seed = 0, tokenName = []) {
  * @returns {AssetClass}
  */
 export function parseAssetClass(s) {
-    const parts = s.split(".")
+    if (s.includes(".")) {
+        const parts = s.split(".")
 
-    if (parts.length != 2) {
-        throw new Error(
-            `expected <mph>.<tokenName> in hex encoded AssetClass, got ${s}`
+        if (parts.length != 2) {
+            throw new Error(
+                `expected <mph>.<tokenName> in hex encoded AssetClass, got ${s}`
+            )
+        }
+
+        return new AssetClassImpl(
+            makeMintingPolicyHash(parts[0]),
+            toBytes(parts[1])
+        )
+    } else {
+        const rawMph = s.slice(0, 56)
+        const rawTokenName = s.slice(56)
+
+        return new AssetClassImpl(
+            makeMintingPolicyHash(rawMph),
+            toBytes(rawTokenName)
         )
     }
-
-    return new AssetClassImpl(
-        makeMintingPolicyHash(parts[0]),
-        toBytes(parts[1])
-    )
 }
 
 /**

@@ -1,4 +1,4 @@
-import { deepEqual, throws } from "node:assert"
+import { deepEqual, strictEqual, throws } from "node:assert"
 import { describe, it } from "node:test"
 import {
     makeUplcConst,
@@ -6,7 +6,12 @@ import {
     makeUplcProgramV2
 } from "@helios-lang/uplc"
 import { makeMintingPolicyHash } from "../hashes/index.js"
-import { makeAssetClass, makeDummyAssetClass } from "./AssetClass.js"
+import {
+    makeAssetClass,
+    makeDummyAssetClass,
+    parseAssetClass
+} from "./AssetClass.js"
+import { bytesToHex } from "@helios-lang/codec-utils"
 
 /**
  * @import { UplcProgramV2 } from "@helios-lang/uplc"
@@ -63,5 +68,37 @@ describe("makeDummyAssetClass", () => {
         throws(() => {
             deepEqual(ac.mph.bytes, new Array(28).fill(0))
         })
+    })
+})
+
+describe("parseAssetClass", () => {
+    it("parses hex encoded with period", () => {
+        const ac = parseAssetClass(
+            "03b6ddacd60cc1ebd9ed4041d0c298c4c6f48ab61e04fdad4d915cfa.000de14050424720766f7563686572203136"
+        )
+
+        strictEqual(
+            ac.mph.toHex(),
+            "03b6ddacd60cc1ebd9ed4041d0c298c4c6f48ab61e04fdad4d915cfa"
+        )
+        strictEqual(
+            bytesToHex(ac.tokenName),
+            "000de14050424720766f7563686572203136"
+        )
+    })
+
+    it("parses hex encoded without period", () => {
+        const ac = parseAssetClass(
+            "03b6ddacd60cc1ebd9ed4041d0c298c4c6f48ab61e04fdad4d915cfa000de14050424720766f7563686572203136"
+        )
+
+        strictEqual(
+            ac.mph.toHex(),
+            "03b6ddacd60cc1ebd9ed4041d0c298c4c6f48ab61e04fdad4d915cfa"
+        )
+        strictEqual(
+            bytesToHex(ac.tokenName),
+            "000de14050424720766f7563686572203136"
+        )
     })
 })
