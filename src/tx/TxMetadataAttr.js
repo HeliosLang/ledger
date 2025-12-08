@@ -51,14 +51,23 @@ export function encodeTxMetadataAttr(attr) {
         }
 
         return encodeInt(attr)
-    } else if ("list" in attr) {
+    } else if (Array.isArray(attr)) {
+        return encodeDefList(attr.map((item) => encodeTxMetadataAttr(item)))
+    } else if (
+        !Array.isArray(attr) &&
+        attr instanceof Object &&
+        "list" in attr &&
+        Array.isArray(attr.list)
+    ) {
         return encodeDefList(
             attr.list.map((item) => encodeTxMetadataAttr(item))
         )
     } else if (
+        !Array.isArray(attr) &&
         attr instanceof Object &&
+        Object.keys(attr).length == 1 &&
         "map" in attr &&
-        Object.keys(attr).length == 1
+        Array.isArray(attr.map)
     ) {
         const pairs = attr["map"]
 
@@ -66,10 +75,15 @@ export function encodeTxMetadataAttr(attr) {
             return encodeMap(
                 pairs.map((pair) => {
                     if (Array.isArray(pair) && pair.length == 2) {
-                        return [
+                        /**
+                         * @type {[number[], number[]]}
+                         */
+                        const result = [
                             encodeTxMetadataAttr(pair[0]),
                             encodeTxMetadataAttr(pair[1])
                         ]
+
+                        return result
                     } else {
                         throw new Error("invalid metadata schema")
                     }
@@ -78,6 +92,13 @@ export function encodeTxMetadataAttr(attr) {
         } else {
             throw new Error("invalid metadata schema")
         }
+    } else if (attr instanceof Object) {
+        const entries = Array.from(Object.entries(attr))
+        return encodeMap(
+            entries.map(([key, value]) => {
+                return [encodeString(key), encodeTxMetadataAttr(value)]
+            })
+        )
     } else {
         throw new Error("invalid metadata schema")
     }

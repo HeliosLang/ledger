@@ -1263,11 +1263,16 @@ export {
  */
 
 /**
+ * @typedef {TxMetadataAttr[]} TxMetadataAttrArray
+ */
+/**
  * TxMetadataAttr is a simple JSON schema object
  * @typedef {string | number | {
  *   list: TxMetadataAttr[]
  * } | {
  *   map: [TxMetadataAttr, TxMetadataAttr][]
+ * } | TxMetadataAttrArray | {
+ *  [mapKey: string]: TxMetadataAttr
  * }} TxMetadataAttr
  */
 
