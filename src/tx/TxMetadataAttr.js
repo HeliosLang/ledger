@@ -15,7 +15,7 @@ import { makeByteStream } from "@helios-lang/codec-utils"
 
 /**
  * @import { BytesLike } from "@helios-lang/codec-utils"
- * @import { TxMetadataAttr } from "../index.js"
+ * @import { PermissiveTxMetadataAttr, TxMetadataAttr } from "../index.js"
  */
 
 /**
@@ -39,13 +39,13 @@ export function decodeTxMetadataAttr(bytes) {
 }
 
 /**
- * @param {TxMetadataAttr} attr
+ * @param {PermissiveTxMetadataAttr} attr
  * @returns {number[]}
  */
 export function encodeTxMetadataAttr(attr) {
-    if (typeof attr === "string") {
+    if (isTxMetadataAttrString(attr)) {
         return encodeString(attr, true)
-    } else if (typeof attr === "number") {
+    } else if (isTxMetadataAttrNumber(attr)) {
         if (attr % 1.0 != 0.0) {
             throw new Error("not a whole number")
         }
@@ -53,22 +53,11 @@ export function encodeTxMetadataAttr(attr) {
         return encodeInt(attr)
     } else if (Array.isArray(attr)) {
         return encodeDefList(attr.map((item) => encodeTxMetadataAttr(item)))
-    } else if (
-        !Array.isArray(attr) &&
-        attr instanceof Object &&
-        "list" in attr &&
-        Array.isArray(attr.list)
-    ) {
+    } else if (isTxMetadataAttrList(attr)) {
         return encodeDefList(
             attr.list.map((item) => encodeTxMetadataAttr(item))
         )
-    } else if (
-        !Array.isArray(attr) &&
-        attr instanceof Object &&
-        Object.keys(attr).length == 1 &&
-        "map" in attr &&
-        Array.isArray(attr.map)
-    ) {
+    } else if (isTxMetadataAttrMap(attr)) {
         const pairs = attr["map"]
 
         if (Array.isArray(pairs)) {
@@ -102,4 +91,75 @@ export function encodeTxMetadataAttr(attr) {
     } else {
         throw new Error("invalid metadata schema")
     }
+}
+
+/**
+ * @param {PermissiveTxMetadataAttr} attr
+ * @returns {TxMetadataAttr}
+ */
+export function makeTxMetadataAttr(attr) {
+    if (isTxMetadataAttrString(attr)) {
+        return attr
+    } else if (isTxMetadataAttrNumber(attr)) {
+        return attr
+    } else if (isTxMetadataAttrList(attr)) {
+        return attr
+    } else if (isTxMetadataAttrMap(attr)) {
+        return attr
+    } else if (Array.isArray(attr)) {
+        return { list: attr.map(makeTxMetadataAttr) }
+    } else if (attr instanceof Object) {
+        return {
+            map: Object.entries(attr).map(([key, value]) => {
+                return [key, makeTxMetadataAttr(value)]
+            })
+        }
+    } else {
+        throw new Error(
+            `unable to convert '${JSON.stringify(attr)}' to TxMetadataAttr`
+        )
+    }
+}
+
+/**
+ * @param {PermissiveTxMetadataAttr} attr
+ * @returns {attr is string}
+ */
+export function isTxMetadataAttrString(attr) {
+    return typeof attr == "string"
+}
+
+/**
+ * @param {PermissiveTxMetadataAttr} attr
+ * @returns {attr is number}
+ */
+export function isTxMetadataAttrNumber(attr) {
+    return typeof attr == "number"
+}
+
+/**
+ * @param {PermissiveTxMetadataAttr} attr
+ * @returns {attr is {list: TxMetadataAttr[]}}
+ */
+export function isTxMetadataAttrList(attr) {
+    return (
+        !Array.isArray(attr) &&
+        attr instanceof Object &&
+        "list" in attr &&
+        Array.isArray(attr.list)
+    )
+}
+
+/**
+ * @param {PermissiveTxMetadataAttr} attr
+ * @returns {attr is {map: [TxMetadataAttr, TxMetadataAttr][]}}
+ */
+export function isTxMetadataAttrMap(attr) {
+    return (
+        !Array.isArray(attr) &&
+        attr instanceof Object &&
+        "map" in attr &&
+        Object.keys(attr.map).length == 1 &&
+        Array.isArray(attr.map)
+    )
 }

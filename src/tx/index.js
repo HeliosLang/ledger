@@ -29,7 +29,15 @@ export {
     makeTxInput
 } from "./TxInput.js"
 export { decodeTxMetadata, makeTxMetadata } from "./TxMetadata.js"
-export { decodeTxMetadataAttr, encodeTxMetadataAttr } from "./TxMetadataAttr.js"
+export {
+    decodeTxMetadataAttr,
+    encodeTxMetadataAttr,
+    isTxMetadataAttrString,
+    isTxMetadataAttrNumber,
+    isTxMetadataAttrList,
+    isTxMetadataAttrMap,
+    makeTxMetadataAttr
+} from "./TxMetadataAttr.js"
 export { makeTxMintingRedeemer } from "./TxMintingRedeemer.js"
 export {
     DEFAULT_TX_OUTPUT_ENCODING_CONFIG,

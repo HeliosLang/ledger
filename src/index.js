@@ -140,6 +140,10 @@ export {
     decodeTxRedeemer,
     decodeTxWitnesses,
     encodeTxMetadataAttr,
+    isTxMetadataAttrList,
+    isTxMetadataAttrMap,
+    isTxMetadataAttrNumber,
+    isTxMetadataAttrString,
     isValidTxInputCbor,
     isValidTxOutputCbor,
     isValidTxOutputId,
@@ -162,6 +166,7 @@ export {
     makeTxCertifyingRedeemer,
     makeTxInput,
     makeTxMetadata,
+    makeTxMetadataAttr,
     makeTxMintingRedeemer,
     makeTxOutput,
     makeTxOutputDatum,
@@ -1263,17 +1268,23 @@ export {
  */
 
 /**
- * @typedef {TxMetadataAttr[]} TxMetadataAttrArray
- */
-/**
  * TxMetadataAttr is a simple JSON schema object
  * @typedef {string | number | {
  *   list: TxMetadataAttr[]
  * } | {
  *   map: [TxMetadataAttr, TxMetadataAttr][]
- * } | TxMetadataAttrArray | {
- *  [mapKey: string]: TxMetadataAttr
  * }} TxMetadataAttr
+ */
+
+/**
+ * @typedef {PermissiveTxMetadataAttr[]} PermissiveTxMetadataAttrArray
+ */
+
+/**
+ * PermissiveTxMetadataAttr is an extension of TxMetadataAttr that is compatible with Lucid
+ * @typedef {TxMetadataAttr | PermissiveTxMetadataAttrArray | {
+ *  [mapKey: string]: PermissiveTxMetadataAttr
+ * }} PermissiveTxMetadataAttr
  */
 
 /**
