@@ -1,3 +1,6 @@
+/** Version of the optional, diagnostic-only transaction evaluation observer. */
+export const TX_EVALUATION_OBSERVER_VERSION = 1
+
 import { UplcRuntimeError } from "@helios-lang/uplc"
 
 export {
@@ -1754,7 +1757,12 @@ export {
  */
 
 /**
+ * @typedef {(event: {script: import("@helios-lang/uplc").UplcProgram, args: import("@helios-lang/uplc").UplcValue[], summary: string, allocatedBudget: import("@helios-lang/uplc").Cost, profile: Pick<import("@helios-lang/uplc").CekResult, "cost" | "result">}) => void} EvaluationObserver
+ */
+
+/**
  * @typedef {object} TxValidationOptions
+ * @prop {EvaluationObserver} [onEvaluation]
  * @prop {boolean} [strict=false] can be left as false for inspecting general transactions. The TxBuilder always uses strict=true.
  * @prop {boolean} [verbose=false] provides more details of transaction-budget usage when the transaction is close to the limit
  * @prop {UplcLogger} [logOptions] hooks for script logging during transaction execution

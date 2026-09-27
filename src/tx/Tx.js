@@ -36,6 +36,7 @@ import { decodeTxWitnesses } from "./TxWitnesses.js"
  * @typedef {{
  *   strict?: boolean
  *   verbose?: boolean
+ *   onEvaluation?: import("../index.js").EvaluationObserver
  *   logOptions?: UplcLogger
  * }} ValidateOptions
  */
@@ -58,8 +59,7 @@ export function decodeTx(bytes) {
 
 /**
  * Creates a new transaction; use {@link TxBuilder} to build a transaction instead.
- * @remarks
- * Use {@link decodeTx} to deserialize a transaction.
+ * Note: use {@link decodeTx} to deserialize a transaction.
  * @param {TxBody} body
  * @param {TxWitnesses} witnesses
  * @param {boolean} valid
@@ -395,6 +395,7 @@ class TxImpl {
      * @param {boolean} [options.strict=false] - can be left as false for inspecting general transactions. The TxBuilder always uses strict=true.
      * @param {boolean} [options.verbose=false] - provides more details of transaction-budget usage when the transaction is close to the limit
      * @param {UplcLogger} [options.logOptions] - logging options for diagnostics
+     * @param {import("../index.js").EvaluationObserver} [options.onEvaluation]
      * @returns {void}
      */
     validate(params, options = {}) {
@@ -413,7 +414,7 @@ class TxImpl {
 
         this.validateScriptsPresent(strict)
 
-        this.validateRedeemersExBudget(params, logOptions)
+        this.validateRedeemersExBudget(params, logOptions, options.onEvaluation)
 
         this.validateTotalExBudget(params, options)
 
@@ -446,6 +447,7 @@ class TxImpl {
      * @param {boolean} [options.strict=false] - can be left as false for inspecting general transactions. The TxBuilder always uses strict=true.
      * @param {boolean} [options.verbose=false] - provides more details of transaction-budget usage when the transaction is close to the limit
      * @param {UplcLogger} [options.logOptions] - hooks for script logging during transaction execution
+     * @param {import("../index.js").EvaluationObserver} [options.onEvaluation]
      * @returns {Tx}
      */
     validateUnsafe(params, options = {}) {
@@ -759,8 +761,9 @@ class TxImpl {
      * @private
      * @param {NetworkParams} params
      * @param {UplcLogger | undefined} logOptions
+     * @param {import("../index.js").EvaluationObserver} [onEvaluation]
      */
-    validateRedeemersExBudget(params, logOptions) {
+    validateRedeemersExBudget(params, logOptions, onEvaluation) {
         const txInfo = this.body.toTxInfo(
             params,
             this.witnesses.redeemers,
@@ -779,6 +782,17 @@ class TxImpl {
             const { cost, result } = script.eval(args, {
                 logOptions: logOptions ?? undefined
             })
+
+            // Observers are diagnostic only and must never affect validation.
+            try {
+                onEvaluation?.({
+                    script,
+                    args,
+                    summary,
+                    profile: { cost, result },
+                    allocatedBudget: redeemer.cost
+                })
+            } catch (_) {}
 
             /* @type { CekResult | undefined } */
             const evalAlt = script.alt?.eval(args, {
